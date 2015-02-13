@@ -1,71 +1,71 @@
-%{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-This function extracts data in various forms (e.g., ICs, gfa, scalp, see below)
-from EEGLAB's .set files. The output files are then used in ResampleData.m with the
-ultimate goal of calculating percentile bootstrap statistics at every timepoint
-for single-subjects as well as the group (SubjectStatistics.m, GroupStatistics.m),
-given any design (up to 2-way).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Inputs:
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This function extracts data in various forms (e.g., ICs, gfa, scalp, see below)
+% from EEGLAB's .set files. The output files are then used in ResampleData.m with the
+% ultimate goal of calculating percentile bootstrap statistics at every timepoint
+% for single-subjects as well as the group (SubjectStatistics.m, GroupStatistics.m),
+% given any design (up to 2-way).
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Inputs:
+% 
+% 
+% condfiles - cell array of filenames for each subject and condition.
+%             Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
+%             load the appropriate subject condition files. After this is done, the
+%             file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
+%             calls instead of using [] and having to manually load.
+% 
+% condnames - cell array of condition labels. For example, {'face' 'house' 'object'}
+% 
+% varargin  - key/val pairs. See Options.
+% 
+% 
+% Options:
+% 
+% icamax    - Project selected ICs to scalp channel with maximum weight determined
+%             by the weight matrix. All ICA options must be followed with
+%             a filename of text file (csv) indicating
+%             components to retain for each subject. See demo data to
+%             understand the construction of this file.
+% 
+% icagfa    - Project selected ICs to the scalp and extract entire data array
+%             for later GFA calculations. All ICA options must be followed with
+%             a filename of text file (csv) indicating
+%             components to retain for each subject. See demo data to
+%             understand the construction of this file.
+% 
+% scalpgfa   - Extract the full scalp data array for later GFA
+%              calculations. Does not require any following input arguments.
+% 
+% scalpchan  - Extract specified channel(s). Must be followed with cell array
+%              of channel labels. E.g., {'C11' 'C15' 'C12'}. If asking for
+%              more than one channel, the channel group will be averaged
+%              together during the resampling stages (ResampleData.m) giving
+%              you a channel cluster. This function does not handle doing
+%              stats on multiple channels independently in the same call.
+% 
+% Examples:
+% [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'},[],[2 2],'ww','Occipital_Analysis','scalpchan',{'A23', 'A24' })
+% [STATS]=ExtractData({'AE' 'AH' 'SE? ?SH?}, ?condfiles_icamax_analysis.mat?, [2 2],'ww','icamax_analysis','icamax',?wwICfile.txt?)
+% 
+% 
+% Copyright (C) <2015>  <Allan Campopiano>
+% 
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
-condfiles - cell array of filenames for each subject and condition.
-            Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
-            load the appropriate subject condition files. After this is done, the
-            file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
-            calls instead of using [] and having to manually load.
-
-condnames - cell array of condition labels. For example, {'face' 'house' 'object'}
-
-varargin  - key/val pairs. See Options.
-
-
-Options:
-
-icamax    - Project selected ICs to scalp channel with maximum weight determined
-            by the weight matrix. All ICA options must be followed with
-            a filename of text file (csv) indicating
-            components to retain for each subject. See demo data to
-            understand the construction of this file.
-
-icagfa    - Project selected ICs to the scalp and extract entire data array
-            for later GFA calculations. All ICA options must be followed with
-            a filename of text file (csv) indicating
-            components to retain for each subject. See demo data to
-            understand the construction of this file.
-
-scalpgfa   - Extract the full scalp data array for later GFA
-             calculations. Does not require any following input arguments.
-
-scalpchan  - Extract specified channel(s). Must be followed with cell array
-             of channel labels. E.g., {'C11' 'C15' 'C12'}. If asking for
-             more than one channel, the channel group will be averaged
-             together during the resampling stages (ResampleData.m) giving
-             you a channel cluster. This function does not handle doing
-             stats on multiple channels independently in the same call.
-
-Examples:
-[STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'},[],[2 2],'ww','Occipital_Analysis','scalpchan',{'A23', 'A24' })
-[STATS]=ExtractData({'AE' 'AH' 'SE? ?SH?}, ?condfiles_icamax_analysis.mat?, [2 2],'ww','icamax_analysis','icamax',?wwICfile.txt?)
-
-
-Copyright (C) <2015>  <Allan Campopiano>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [STATS]=ExtractData(condnames,condfiles,levels,design,savestring,varargin)

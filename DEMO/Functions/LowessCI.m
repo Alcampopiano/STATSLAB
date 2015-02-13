@@ -1,54 +1,53 @@
 function [STATS]=LowessCI(STATS,infodisplay,Xlabel,Ylabel,msplot,nboot,span,nbins)
-%{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Plot scatter plot and parametric regression line with CIs and prediction
-band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
-the color changes (fades). Play around with the colors.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Input arguments:
-    STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
-            the filename to your STATS stucture in the current directory.
-
-    infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
-                  Xlabels, and Ylabels.
-
-    Xlabel = String that indicates the X variable (EEG data). Must be the
-             same Xlabel used when running WinBootCor.m
-
-    Ylabel = A string indicating your Y variable(s) (correlates) Must be the
-             same Ylabel used when running WinBootCor.m.
-
-    msplot = a number indicating the ms you wish to plot
-
-    nboot = number of bootstrap lowess samples
-
-    span = number in range 0 to 1, indicates size of sliding window (percent of data to use)
-
-    nbins = number of vertical bins in which to calculate kernal density
-
-Example:
-
-LowessCI('STATS_B_analysis.mat',1,'awake','RT',100, 1000, .5, 1000)
-
-
-Copyright (C) <2015>  <Allan Campopiano>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot scatter plot and parametric regression line with CIs and prediction
+% band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
+% the color changes (fades). Play around with the colors.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Input arguments:
+%     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
+%             the filename to your STATS stucture in the current directory.
+% 
+%     infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
+%                   Xlabels, and Ylabels.
+% 
+%     Xlabel = String that indicates the X variable (EEG data). Must be the
+%              same Xlabel used when running WinBootCor.m
+% 
+%     Ylabel = A string indicating your Y variable(s) (correlates) Must be the
+%              same Ylabel used when running WinBootCor.m.
+% 
+%     msplot = a number indicating the ms you wish to plot
+% 
+%     nboot = number of bootstrap lowess samples
+% 
+%     span = number in range 0 to 1, indicates size of sliding window (percent of data to use)
+% 
+%     nbins = number of vertical bins in which to calculate kernal density
+% 
+% Example:
+% 
+% LowessCI('STATS_B_analysis.mat',1,'awake','RT',100, 1000, .5, 1000)
+% 
+% 
+% Copyright (C) <2015>  <Allan Campopiano>
+% 
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if isempty(STATS)
     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');

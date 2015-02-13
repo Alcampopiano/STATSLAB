@@ -1,12 +1,12 @@
 function [datacell] = bootgrandaverage(condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,varargin)
 
-%{
-takes a resample of single subjects (their surrogate x time arrays), stacks them
-along 3rd dimension and takes the trimmed grand average. Different cases
-handle the different designs. Cases really just control how resampling
-indices change subtley with different designs.
+%
+% takes a resample of single subjects (their surrogate x time arrays), stacks them
+% along 3rd dimension and takes the trimmed grand average. Different cases
+% handle the different designs. Cases really just control how resampling
+% indices change subtley with different designs.
+% 
 
-%}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

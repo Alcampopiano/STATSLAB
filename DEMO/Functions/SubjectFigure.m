@@ -7,7 +7,8 @@ function [STATS]=SubjectFigure(STATS,infodisplay,plottype,varargin)
 % infodisplay is a flag 1 or 0 that will spit out the contrast matrices and condition lables for you to look at in the command window
 % infodisplay default is set to 0.
 
-%plottype
+%plottype ='wave', or, 'diff', or 'CI_MOE'
+% see documentation for other optional inputs
 
 
 if isempty(STATS)

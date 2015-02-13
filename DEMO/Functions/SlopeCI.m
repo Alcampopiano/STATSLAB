@@ -1,52 +1,51 @@
 function [STATS]=SlopeCI(STATS,infodisplay,Xlabel,Ylabel,msplot,CI_color,colorlimit)
-%{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Plot scatter plot and parametric regression line with CIs and prediction
-band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
-the color changes (fades). Play around with the colors.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Input arguments:
-    STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
-            the filename to your STATS stucture in the current directory.
-
-    infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
-                  Xlabels, and Ylabels.
-
-    Xlabel = String that indicates the X variable (EEG data). Must be the
-             same Xlabel used when running WinBootCor.m
-
-    Ylabel = A string indicating your Y variable(s) (correlates) Must be the
-             same Ylabel used when running WinBootCor.m.
-
-    msplot = a number indicating the ms you wish to plot
-
-    CI_color = the color of the CI and prediction band
- 
-    colorlimit = the color that the CI will fade to as it increases in width.
-
-Examples:
-
-SlopeCI('STATS_B_analysis.mat',1,'awake','RT',100,[.5 .5 .5],[1 1 1])
-SlopeCI('STATS_WW_analysis.mat',1,'interaction_wave','accuracy',170,[.7 .1 .1],[1 1 1])
-
-Copyright (C) <2015>  <Allan Campopiano>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot scatter plot and parametric regression line with CIs and prediction
+% band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
+% the color changes (fades). Play around with the colors.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Input arguments:
+%     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
+%             the filename to your STATS stucture in the current directory.
+% 
+%     infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
+%                   Xlabels, and Ylabels.
+% 
+%     Xlabel = String that indicates the X variable (EEG data). Must be the
+%              same Xlabel used when running WinBootCor.m
+% 
+%     Ylabel = A string indicating your Y variable(s) (correlates) Must be the
+%              same Ylabel used when running WinBootCor.m.
+% 
+%     msplot = a number indicating the ms you wish to plot
+% 
+%     CI_color = the color of the CI and prediction band
+%  
+%     colorlimit = the color that the CI will fade to as it increases in width.
+% 
+% Examples:
+% 
+% SlopeCI('STATS_B_analysis.mat',1,'awake','RT',100,[.5 .5 .5],[1 1 1])
+% SlopeCI('STATS_WW_analysis.mat',1,'interaction_wave','accuracy',170,[.7 .1 .1],[1 1 1])
+% 
+% Copyright (C) <2015>  <Allan Campopiano>
+% 
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if isempty(STATS)
     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');

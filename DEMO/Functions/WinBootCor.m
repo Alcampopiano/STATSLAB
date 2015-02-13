@@ -1,79 +1,79 @@
 function [STATS]=WinBootCor(STATS,infodisplay,nboot,tr,Ylabel,varargin)
-%{
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate winsorized bootstrapped pearson's r on EEG data at each timpoint with as many correlates (Y data) as you wish.
+% Expects you to load Ydata (EEG correlate). This is a MATLAB varaible (.mat) with one column for each external correlate
+% you wish to use (RTs, accuracy, personality measure etc.). The number of columns in the Y variable, must equal
+% the length of Y label (see below). Rows correspond to number of subjects.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Input arguments:
+%     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
+%             the filename to your STATS stucture in the current directory.
+% 
+%     infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
+%                   Xlabels, and Ylabels.
+% 
+%     nboot = Number of bootstrap samples to take from the paired X and Y data.
+% 
+%     tr = percentage to winsorize from the X and Y data. Keep as decimal
+%          place (e.g., .2 for 20%, .5 for 50% etc). Recommendation is usually .2
+% 
+%     Ylabel = A string, or cell array of strings, indicating your Y variable(s) (correltaes) that will each be correlated, one by one,
+%             with your EEG waveform (X variable). For example, {'RTs','accuracy', 'perfectionism_scores'}.
+% 
+%     varargin - key/val pairs, see Options for details
+% 
+% Options:
+%              String and numerical pair indicating the EEG data you would like to use in the correlation.
+%              For example,'Condition', 3, would correlate data from condition 3 with each Y variable.
+%              To use difference waves as the X variable, use 'FactorA', or 'FactorB', or 'FactorAB' and a number
+%              indicating the contrast you wish to use in the correlation. In addition, add a label to identify you contrasts,
+%              For example, 'FactorAB', 1, 'Interaction_comparison', would use the first interaction waveform as the X variable in the correlation 
+%              and name this test, 'Interaction_comparison. For 'bw' designs, if using contrasts in the correlation, you must indicate 'FactorA1', FactorA2, etc, 
+%              as the strings, as contrasts were taken seperately for each level of factor A. See documentation and examples.
+% 
+% Examples (these are just examples. For large designs, the number of possible pariwise or pooled comparisons increases exponentially,
+% and the ability to interpet anything decreases exponentially):
+% 
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RT','Condition',3)
+% 
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'Condition',1)
+% 
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'FactorAB',1, 'interaction')
+% 
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy', 'shyness_scores'},'FactorB',2,'Easy_vs_hard_SLEEPY')
+% 
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RTs','FactorA2',2,'Easy_vs_hard_SLEEPY') % for 'bw' designs
+% 
+% To plot:
+% simply use the below and after "corr_results", change to your condition/factor label (type STATS.condnames for a reminder of condition names) followed by Y label:
+% figure; plot(STATS.xtimes,STATS.corr_results.SH.RT.rw) %  r values
+% figure; plot(STATS.xtimes,STATS.corr_results.SH.RT.p) % p values
+% 
+% Or if contrasts were used in the correlation:
+% figure; plot(STATS.xtimes,STATS.corr_results.interaction.RTs.p) % p values
+% figure; plot(STATS.xtimes,STATS.corr_results.interaction.RTs.p) % p values
+% 
+% 
+% 
+% Copyright (C) <2015>  <Allan Campopiano>
+% 
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Calculate winsorized bootstrapped pearson's r on EEG data at each timpoint with as many correlates (Y data) as you wish.
-Expects you to load Ydata (EEG correlate). This is a MATLAB varaible (.mat) with one column for each external correlate
-you wish to use (RTs, accuracy, personality measure etc.). The number of columns in the Y variable, must equal
-the length of Y label (see below). Rows correspond to number of subjects.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Input arguments:
-    STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
-            the filename to your STATS stucture in the current directory.
-
-    infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
-                  Xlabels, and Ylabels.
-
-    nboot = Number of bootstrap samples to take from the paired X and Y data.
-
-    tr = percentage to winsorize from the X and Y data. Keep as decimal
-         place (e.g., .2 for 20%, .5 for 50% etc). Recommendation is usually .2
-
-    Ylabel = A string, or cell array of strings, indicating your Y variable(s) (correltaes) that will each be correlated, one by one,
-            with your EEG waveform (X variable). For example, {'RTs','accuracy', 'perfectionism_scores'}.
-
-    varargin - key/val pairs, see Options for details
-
-Options:
-             String and numerical pair indicating the EEG data you would like to use in the correlation.
-             For example,'Condition', 3, would correlate data from condition 3 with each Y variable.
-             To use difference waves as the X variable, use 'FactorA', or 'FactorB', or 'FactorAB' and a number
-             indicating the contrast you wish to use in the correlation. In addition, add a label to identify you contrasts,
-             For example, 'FactorAB', 1, 'Interaction_comparison', would use the first interaction waveform as the X variable in the correlation 
-             and name this test, 'Interaction_comparison. For 'bw' designs, if using contrasts in the correlation, you must indicate 'FactorA1', FactorA2, etc, 
-             as the strings, as contrasts were taken seperately for each level of factor A. See documentation and examples.
-
-Examples (these are just examples. For large designs, the number of possible pariwise or pooled comparisons increases exponentially,
-and the ability to interpet anything decreases exponentially):
-
-[STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RT','Condition',3)
-
-[STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'Condition',1)
-
-[STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'FactorAB',1, 'interaction')
-
-[STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy', 'shyness_scores'},'FactorB',2,'Easy_vs_hard_SLEEPY')
-
-[STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RTs','FactorA2',2,'Easy_vs_hard_SLEEPY') % for 'bw' designs
-
-To plot:
-simply use the below and after "corr_results", change to your condition/factor label (type STATS.condnames for a reminder of condition names) followed by Y label:
-figure; plot(STATS.xtimes,STATS.corr_results.SH.RT.rw) %  r values
-figure; plot(STATS.xtimes,STATS.corr_results.SH.RT.p) % p values
-
-Or if contrasts were used in the correlation:
-figure; plot(STATS.xtimes,STATS.corr_results.interaction.RTs.p) % p values
-figure; plot(STATS.xtimes,STATS.corr_results.interaction.RTs.p) % p values
-
-
-
-Copyright (C) <2015>  <Allan Campopiano>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%}
 
 if isempty(STATS)
     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');

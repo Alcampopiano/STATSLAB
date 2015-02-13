@@ -1,53 +1,52 @@
-%{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-This function bootstraps single trial EEG data for each subject. The 20% trimmed mean is taken 
-across trials (i.e., trimmed ERPS) at each timepoint. Simply load in as many NxMxP .mat files 
-as you wish when the browser comes up. Each file is saved with the original file name with
-'bootstrapped' appended to it. This function can take some time to run depending on the number 
-of bootstrapp samples as well as the size and number of files. However, your computer will 
-likely not be rendered usless while it runs as not much RAM is required, just time.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This function bootstraps single trial EEG data for each subject. The 20% trimmed mean is taken 
+% across trials (i.e., trimmed ERPS) at each timepoint. Simply load in as many NxMxP .mat files 
+% as you wish when the browser comes up. Each file is saved with the original file name with
+% 'bootstrapped' appended to it. This function can take some time to run depending on the number 
+% of bootstrapp samples as well as the size and number of files. However, your computer will 
+% likely not be rendered usless while it runs as not much RAM is required, just time.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Input arguments:
+%     STATS stucture - you will be prompted to load this
+%     nboot = number of resamples you wish to take from the single-trials
+%     
+% varargin - key/val pairs, see Options for details
+% 
+% Options:
+%       trialcap - a string paired with the number of the cap (e.g., 50).
+%       The trialcap option limits the number of trials used in each resample
+%       to the cap. This helps to equate noise levels due to unequal number of trials in
+%       different conditions. Usually this only a problem when using GFA
+%       measures IF there are highly dissproportionate numbers of trials
+%       across conditions, as one condition with more noise (less trials) 
+%       will offset the GFA waveform compared to a condition with less noise (more trials). 
+%       Typical ERPs occilate around zero, so trialcap does not likely need to be set for
+%       ERPs. Omit this option alltogether if you wish to resample from the
+%       max number of trials (default).
+% 
+% 
+% Examples:
+%     ResampleData(STATS,1000,'trialcap', 50);
+%     ResampleData(STATS,50000); % will take a while
+% 
+% 
+% Copyright (C) <2015>  <Allan Campopiano>
+% 
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-Input arguments:
-    STATS stucture - you will be prompted to load this
-    nboot = number of resamples you wish to take from the single-trials
-    
-varargin - key/val pairs, see Options for details
-
-Options:
-      trialcap - a string paired with the number of the cap (e.g., 50).
-      The trialcap option limits the number of trials used in each resample
-      to the cap. This helps to equate noise levels due to unequal number of trials in
-      different conditions. Usually this only a problem when using GFA
-      measures IF there are highly dissproportionate numbers of trials
-      across conditions, as one condition with more noise (less trials) 
-      will offset the GFA waveform compared to a condition with less noise (more trials). 
-      Typical ERPs occilate around zero, so trialcap does not likely need to be set for
-      ERPs. Omit this option alltogether if you wish to resample from the
-      max number of trials (default).
-
-
-Examples:
-    ResampleData(STATS,1000,'trialcap', 50);
-    ResampleData(STATS,50000); % will take a while
-
-
-Copyright (C) <2015>  <Allan Campopiano>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%

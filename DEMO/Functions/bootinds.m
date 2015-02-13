@@ -1,8 +1,8 @@
 function [rowfile cond_bootvect] = bootinds(condfiles_subs,nsamp,design,varargin)
-%{
-Creates bootstrap indices for given designs. Index arrays are memory mapped
-so as to not take up RAM.
-%}
+
+%Creates bootstrap indices for given designs. Index arrays are memory mapped
+%so as to not take up RAM.
+
 
 
 % check if acceptable option was given

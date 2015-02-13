@@ -1,19 +1,18 @@
 function [results] = wincor(nboot,tr,Xdata,Ydata);
 tic
-%{
 
-Winsorized and bootstrapped correlation (rw).
+ 
+% Winsorized and bootstrapped correlation (rw).
+% 
+%     Input arguments:
+%     nboot = number of bootstrap resamples (e.g., 1000)
+%     tr = percentage of winsorizing (e.g., .2 for 20%)
+% 
+% You will be prompted to load two .mat files one at a time (X and Y data). 
+% These are N X M matrices where rows = subjects, and columns = variables. 
+% Each Y column is compared to each X column. The results structure is
+% organized by Y comparisons (eg., Y1 vs X1 X2...Xn, Y2 vs X1 X2 Xn etc)
 
-    Input arguments:
-    nboot = number of bootstrap resamples (e.g., 1000)
-    tr = percentage of winsorizing (e.g., .2 for 20%)
-
-You will be prompted to load two .mat files one at a time (X and Y data). 
-These are N X M matrices where rows = subjects, and columns = variables. 
-Each Y column is compared to each X column. The results structure is
-organized by Y comparisons (eg., Y1 vs X1 X2...Xn, Y2 vs X1 X2 Xn etc)
-
-%}
 
 if isempty(Xdata) && isempty(Ydata)
 
