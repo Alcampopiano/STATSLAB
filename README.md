@@ -1,5 +1,5 @@
 # STATSLAB
-STATSLAB: A MATLAB Toolbox for Performing the Percentile Bootstrap Test on Electroencephalographic Data
+A MATLAB Toolbox for Performing the Percentile Bootstrap Test on Electroencephalographic Data
 
 Features:
 -From segmentation to publishable figures, in four commands
