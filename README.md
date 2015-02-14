@@ -7,7 +7,7 @@ Features:
 - group and single-subject statistics & figures  
 - all common categorical comparisons (within, between, mixed, 1&2 way)  
 - correlate waveforms with external measures (e.g., RTs, personality scores)  
-- automatic scatter plots and LOWESS curves at any latency
+- automatic scatterplots and LOWESS curves at any latency
 
 See the nice wiki:
 
