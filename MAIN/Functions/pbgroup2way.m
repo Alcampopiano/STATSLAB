@@ -112,7 +112,7 @@ end
 inferential_results=results;
 
 % load and arrange data
-h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 486 550 40]);
+h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 549 550 40]);
 childh1 = get(h1, 'Children');
 set(childh1, 'Position',[5 10 538 15]);
 

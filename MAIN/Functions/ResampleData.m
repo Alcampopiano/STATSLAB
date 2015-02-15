@@ -93,7 +93,7 @@ end
 [rowfile colfile]=size(fnames);
 datacell=cell(1,colfile);
 
-h2 = waitbar(0,'1','Name','Processing Files','Position',[1100 486 550 40]);
+h2 = waitbar(0,'1','Name','Processing Files','Position',[1100 549 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 

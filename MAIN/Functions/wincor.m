@@ -72,7 +72,7 @@ end
 
 %% arrange data into an nx2 array
 
-h1 = waitbar(0,'1','Name','comparing X against each Y variable','Position',[1100 486 550 40]);
+h1 = waitbar(0,'1','Name','comparing X against each Y variable','Position',[1100 549 550 40]);
 childh1 = get(h1, 'Children');
 set(childh1, 'Position',[5 10 538 15]);
 

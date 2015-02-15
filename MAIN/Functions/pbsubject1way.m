@@ -69,7 +69,7 @@ for testcurrent=1:rowconds;
 end
 
 
-h1 = waitbar(0,'1','Name','subject progress','Position',[1100 486 550 40]);
+h1 = waitbar(0,'1','Name','subject progress','Position',[1100 549 550 40]);
 childh1 = get(h1, 'Children');
 set(childh1, 'Position',[5 10 538 15]);
 
