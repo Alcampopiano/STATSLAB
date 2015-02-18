@@ -76,7 +76,7 @@ h1 = waitbar(0,'1','Name','comparing X against each Y variable','Position',[1100
 childh1 = get(h1, 'Children');
 set(childh1, 'Position',[5 10 538 15]);
 
-h2 = waitbar(0,'1','Name','winsorizing & bootstrapping','Position',[1100 545 550 40]);
+h2 = waitbar(0,'1','Name','winsorizing & bootstrapping','Position',[1100 486 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
