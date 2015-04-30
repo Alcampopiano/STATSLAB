@@ -216,8 +216,14 @@ switch isfactorial
                 
                 subplot(2,1,2)
                 h(3)=plot(STATS.xtimes,plotdiff,'k');
-                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,:);
-                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);
+                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,:);%USE_THIS
+                %CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,513:922);
+                
+               
+                
+                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);USE_THIS
+                %CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,513:922);
+                
                 h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
                 grid on

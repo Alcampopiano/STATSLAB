@@ -178,9 +178,11 @@ switch varargin{1}
                         EEGretain = eeg_checkset(EEGretain);
                         
                         % figure out which channel has max weight
-                        for i=1:size(EEGretain.icawinv,2);
-                            [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                        end
+                        %for i=1:size(EEGretain.icawinv,2);
+                        %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
+                        %end
+                    
+                        [maxweight maxind]=max(abs(EEGretain.icawinv));
                         
                         % put EEG.data into the variable data
                         data=EEGretain.data(maxind,:,:);
@@ -237,9 +239,11 @@ switch varargin{1}
                     EEGretain = eeg_checkset(EEGretain);
                     
                     % figure out which channel has max weight
-                    for i=1:size(EEGretain.icawinv,2);
-                        [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                    end
+                    %for i=1:size(EEGretain.icawinv,2);
+                    %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
+                    %end
+                    
+                    [maxweight maxind]=max(abs(EEGretain.icawinv));
                     
                     % put EEG.data into the variable data
                     data=EEGretain.data(maxind,:,:);
@@ -290,9 +294,11 @@ switch varargin{1}
                     EEGretain = eeg_checkset(EEGretain);
                     
                     % figure out which channel has max weight
-                    for i=1:size(EEGretain.icawinv,2);
-                        [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                    end
+                    %for i=1:size(EEGretain.icawinv,2);
+                    %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
+                    %end
+                    
+                    [maxweight maxind]=max(abs(EEGretain.icawinv));
                     
                     % put EEG.data into the variable data
                     data=EEGretain.data(maxind,:,:);

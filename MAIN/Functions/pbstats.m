@@ -73,6 +73,10 @@ zvec=dvec(1:connum);
 [~, pvalgen_inds]=sort(0-pvalgen);
 pcrit(pvalgen_inds)=zvec;
 
+%%%%% TEMPORARILY SHUTTING OF ROM's METHOD, make an input argument to do
+%%%%% this in the future
+dvec(:)=alpha; % remove this line after input argument has been added.
+
 %CIs around contrast differences
 CIlow=round(dvec(connum)*nboot/2)+1;
 CIup=nboot-CIlow-1;
