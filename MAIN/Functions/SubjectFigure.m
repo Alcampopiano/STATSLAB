@@ -1,4 +1,4 @@
-function [STATS]=SubjectFigure(STATS,infodisplay,plottype,varargin)
+function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
 % build figure for group results
 % varargin can be 'all' which plots all contrasts for all factors, or
 % specify what you want with name/val pairs:
@@ -7,8 +7,9 @@ function [STATS]=SubjectFigure(STATS,infodisplay,plottype,varargin)
 % infodisplay is a flag 1 or 0 that will spit out the contrast matrices and condition lables for you to look at in the command window
 % infodisplay default is set to 0.
 
-%plottype ='wave', or, 'diff', or 'CI_MOE'
-% see documentation for other optional inputs
+% varargin also specifies a plot type with key/pair terms:
+% e.g., 'plottype', ->> 'wave', 'diff', or 'CI_MOE', (default is 'CI_MOE')
+% see documentation for detailed examples
 
 
 if isempty(STATS)
@@ -58,6 +59,7 @@ if any(strcmp(varargin,'all'));
     end
     
     % set default plot options
+    options.plottype='CI_MOE';
     options.diffcol=[0 0 0];
     options.CIcol=[.5 .5 .5];
     options.yaxis='auto';
@@ -71,7 +73,6 @@ if any(strcmp(varargin,'all'));
     % get rid of 'all' option in varargin
     ind=find(strcmp('all', varargin));
     varargin(ind)=[];
-    
     
     for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
         inpName = pair{1};
@@ -128,6 +129,7 @@ else
     end
     
     % set default plot options
+    options.plottype='CI_MOE';
     options.diffcol=[0 0 0];
     options.CIcol=[.5 .5 .5];
     options.yaxis='auto';
@@ -187,7 +189,7 @@ switch STATS.design
                 lab1st=strjoin(lab1stlist,'+');
                 lab2nd=strjoin(lab2ndlist,'+');
                 
-                switch plottype
+                switch options.plottype
                     case 'wave'
                         for q=1:length(subnames);
                             
@@ -315,7 +317,7 @@ switch STATS.design
                         end
                 end
                 
-                if ~strcmp(plottype,'wave') && ~strcmp(options.caxis,'auto')
+                if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
                     colorbar('FontSize',15);
@@ -365,7 +367,7 @@ switch STATS.design
                 lab1st=strjoin(lab1stlist,'+');
                 lab2nd=strjoin(lab2ndlist,'+');
                 
-                switch plottype
+                switch options.plottype
                     case 'wave'
                         for q=1:length(subnames);
                             
@@ -489,7 +491,7 @@ switch STATS.design
                         end
                 end
                 
-                if ~strcmp(plottype,'wave') && ~strcmp(options.caxis,'auto')
+                if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
                     colorbar('FontSize',15);
@@ -534,7 +536,7 @@ switch STATS.design
                 lab1st=strjoin(lab1stlist,'+');
                 lab2nd=strjoin(lab2ndlist,'+');
                 
-                switch plottype
+                switch options.plottype
                     case 'wave'
                         for q=1:length(subnames);
                             
@@ -661,7 +663,7 @@ switch STATS.design
                         end
                 end
                 
-                if ~strcmp(plottype,'wave') && ~strcmp(options.caxis,'auto')
+                if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
                     colorbar('FontSize',15);
@@ -705,7 +707,7 @@ switch STATS.design
                 lab1st=strjoin({lab1stlist{1} lab2ndlist{1}},'-');
                 lab2nd=strjoin({lab2ndlist{2} lab1stlist{2}} ,'-');
                 
-                switch plottype
+                switch options.plottype
                     case 'wave'
                         for q=1:length(subnames);
                             
@@ -832,7 +834,7 @@ switch STATS.design
                         end
                 end
                 
-                if ~strcmp(plottype,'wave') && ~strcmp(options.caxis,'auto')
+                if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
                     colorbar('FontSize',15);
@@ -887,7 +889,7 @@ switch STATS.design
                     lab2nd=strjoin(lab2ndlist,'+');
                     titlestr=[STATS.jlabels{v},' @ ',lab1st,' - ',lab2nd];
                     
-                    switch plottype
+                    switch options.plottype
                         
                         case 'wave'
                             
@@ -1020,7 +1022,7 @@ switch STATS.design
                     
                     % add a title and colorbar to the parent figure, and control its position
                     
-                    if ~strcmp(plottype,'wave') && ~strcmp(options.caxis,'auto')
+                    if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                         ha=axes('visible', 'off');
                         set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
                         colorbar('FontSize',15);
