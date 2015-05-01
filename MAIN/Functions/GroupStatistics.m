@@ -18,20 +18,23 @@ function [STATS]=GroupStatistics(STATS,alpha,nsamp,varargin)
 %     varargin - key/val pairs, see Options for details
 % 
 % Options:
-%              Contrast matrix for Factor A comparisons. For example, [1 0 -1 0; 0 1 0 -1]'
+%              FEW control method e.g., 'FWE', 'Rom', or 'FWE, 'none',
+%              Rom's method is default
+%
+%              Contrast matrix for Factor A comparisons. For example, 'conA', [1 0 -1 0; 0 1 0 -1]'
 %              You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
 % 
-%              Contrast matrix for Factor B comparisons. For example, [1 -1 0 0; 0 0 1 -1]'
+%              Contrast matrix for Factor B comparisons. For example, 'conB', [1 -1 0 0; 0 0 1 -1]'
 %              You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
 % 
-%              Contrast matrix for interaction comparisons. For example, 
-%              [1 -1 -1 1]'. You must add the transpose operator ('), as the example says.
+%              Contrast matrix for interaction comparisons. For example,
+%              'conAB', [1 -1 -1 1]'. You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
@@ -44,13 +47,13 @@ function [STATS]=GroupStatistics(STATS,alpha,nsamp,varargin)
 % [STATS]=GroupStatistics(STATS,.05,1000, [1 -1]');
 % 
 % For a 2-way design with 4 conditions (2x2):
-% [STATS]=GroupStatistics(STATS,.05,1000, [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]');
 % 
 % For a 2-way design with 8 conditions (2x4):
-% [STATS]=GroupStatistics(STATS,.05,1000, [1 0 0 0 -1 0 0 0; 0 1 0 0 0 -1 0 0]', [1 -1 0 0 0 0 0 0; 0 0 0 0 1 -1 0 0]', [0 0 1 -1 0 0 -1 1]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 0 0 -1 0 0 0; 0 1 0 0 0 -1 0 0]', [1 -1 0 0 0 0 0 0; 0 0 0 0 1 -1 0 0]', [0 0 1 -1 0 0 -1 1]');
 % 
 % For a 1-way design with 3 conditions:
-% [STATS]=GroupStatistics(STATS,.05,1000, [1 0 -1; 0 1 -1; 1 -1 0]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 -1; 0 1 -1; 1 -1 0]');
 % 
 % Copyright (C) <2015>  <Allan Campopiano>
 % 

@@ -2,30 +2,51 @@ function [condfiles results] = pbsubject1way(condfiles, numconds, numpnts, nboot
 tic
 % bla bla bla
 
+nargs = length(varargin);
+if round(nargs/2)~=nargs/2
+   error('need propertyName/propertyValue pairs for optional inputs')
+end
 
 % Set default contrast coefficients for 1-way
 [conA] = con1way(jlvls);
 
 % put defaults into a structure;
-options=struct('conA',conA);
+% options=struct('conA',conA);
+
+% edited may1st/15
+% set default plot options
+options.conA=conA;
+options.FWE='Rom';
 
 % get field names
 optionnames = fieldnames(options);
 
-% check to see which optional args were used and deal with accordingly
-if isempty(varargin);
-    warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
-        ' e.g., [1 -1 0; 1 0 -1]'''])
-else
-    % overwrite options stucture with varargin inputs if there are any
+% % check to see which optional args were used and deal with accordingly
+% if isempty(varargin);
+%     warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
+%         ' e.g., [1 -1 0; 1 0 -1]'''])
+% else
+%     % overwrite options stucture with varargin inputs if there are any
+%     
+%     if ~isempty(varargin{1})
+%         options.(optionnames{1})=varargin{1};
+%     end
+% end
+
+for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
+    inpName = pair{1};
     
-    if ~isempty(varargin{1})
-        options.(optionnames{1})=varargin{1};
+    if any(strcmp(inpName,optionnames))
+        
+        % overwrite default options
+        options.(inpName) = pair{2};
+    else
+        error('%s is not a recognized parameter name',inpName)
     end
 end
 
 % extract from options structure
-conA=options.(optionnames{1});
+conA=options.conA;
 
 % used to create proper sizes in results structure
 [~, conAcol]=size(conA);
@@ -59,7 +80,7 @@ end
 for testcurrent=1:rowconds;
     
     results.(field_name{testcurrent})=struct('factor_A',{[]});
-    results.(field_name{testcurrent}).factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)});
+    results.(field_name{testcurrent}).factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
     
     
     for i=1:conAcol;
@@ -102,7 +123,7 @@ for filecurrent=1:rowconds;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_A.pval(:,timecurrent)=pvalgen;

@@ -1,9 +1,9 @@
-function [psihat_stat pvalgen pcrit conflow confup] = pbstats(data, con, nboot, alpha)
+function [psihat_stat pvalgen pcrit conflow confup] = pbstats(data, con, nboot, alpha, FWE)
 %bla bla bla
 
 % uses con2way (which builds appropriate linear contrasts) to do percentile
-% bootstrap tests on differences defined by the contrast coefficients. Used
-% Rom/Hoch corrections for FWE.
+% bootstrap tests on differences defined by the contrast coefficients. Uses
+% Rom/Hoch corrections for FWE if selected.
 
 
 % Expects data in the form of bootstrapped ERPs, for each subject, for each condition
@@ -33,9 +33,7 @@ psihat_stat=mean(datcon,1);
 %    psihat(:,i)=trimmean(datcon(bootinds(i,:),:),40,1);
 %end
 
-
 psihat=datcon';
-
 
 % generalized p value
 pval=zeros(1,connum);
@@ -66,69 +64,46 @@ pvalgen=2*pval;
 %    end
 %end
 
-% FWE corrections to p values
-dvec=alpha./(2*(1:connum));
-dvec=2*dvec;
-zvec=dvec(1:connum);
-[~, pvalgen_inds]=sort(0-pvalgen);
-pcrit(pvalgen_inds)=zvec;
+% this makes FWE methods easily expandable in the future
 
-%%%%% TEMPORARILY SHUTTING OF ROM's METHOD, make an input argument to do
-%%%%% this in the future
-dvec(:)=alpha; % remove this line after input argument has been added.
-
-%CIs around contrast differences
-CIlow=round(dvec(connum)*nboot/2)+1;
-CIup=nboot-CIlow-1;
-
-for i=1:connum;
-    temp=sort(psihat(i,:));
-    conflow(i,1)=temp(CIlow);
-    confup(i,1)=temp(CIup);
+switch FWE
+    
+    case 'Rom'
+        
+        % FWE corrections to p values
+        dvec=alpha./(2*(1:connum));
+        dvec=2*dvec;
+        zvec=dvec(1:connum);
+        [~, pvalgen_inds]=sort(0-pvalgen);
+        pcrit(pvalgen_inds)=zvec;
+        
+        %CIs around contrast differences
+        CIlow=round(dvec(connum)*nboot/2)+1;
+        CIup=nboot-CIlow-1;
+        
+        for i=1:connum;
+            temp=sort(psihat(i,:));
+            conflow(i,1)=temp(CIlow);
+            confup(i,1)=temp(CIup);
+        end
+        
+    case 'none'
+        
+        dvec=zeros(1:connum);
+        dvec(:)=alpha; % dvec is just alpha connum times in a row
+        
+        %CIs around contrast differences
+        CIlow=round(dvec(connum)*nboot/2)+1;
+        CIup=nboot-CIlow-1;
+        
+        for i=1:connum;
+            temp=sort(psihat(i,:));
+            conflow(i,1)=temp(CIlow);
+            confup(i,1)=temp(CIup);
+        end
 end
 
-%% Effect sizes - so far just Hedges g for independent groups
-%{
-effect_size=zeros(concol,1);
-es_CI=cell(concol,1);
 
-for i=1:concol;
-   [oneinds]=con(:,i)==1;
-   [negoneinds]=con(:,i)==-1;
-   poolone=data(:,oneinds);
-   poolnegone=data(:,negoneinds);
-   datax=sum(poolone,2);
-   datay=sum(poolnegone,2);
-   
-   [stats]=mes(datax,datay,'hedgesg');
-   effect_size(i,1)=stats.hedgesg;
-   es_CI{i,1}(1,1)=stats.hedgesgCi(1);
-   es_CI{i,1}(2,1)=stats.hedgesgCi(2);
-      
-end
-
-%}
-
-%% zscores of differences
-
-%% this stuff is garbage, zscores should be taken across ERP instead
-%{
-
-z_diff=zscore(datcon,1);
-conflow_z=zeros(connum,1);
-confup_z=zeros(connum,1);
-z_sort=z_diff';
-
-% take the mean difference (mostly to plot it later)
-z_stat=mean(z_diff,1);
-
-%CIs around zscore differences
-for i=1:connum;
-    tempz=sort(z_sort(i,:));
-    conflow_z(i,1)=tempz(CIlow);
-    confup_z(i,1)=tempz(CIup);
-end
-%}
 
 end
 

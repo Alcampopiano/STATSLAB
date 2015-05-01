@@ -18,29 +18,48 @@ pairwise differecnes, but fewer contrasts of course.
 [conA conB conAB] = con2way(jlvls, klvls);
 
 % put defaults into a structure;
-options=struct('conA',conA,'conB',conB,'conAB',conAB);
+% options=struct('conA',conA,'conB',conB,'conAB',conAB);
+
+% edited may1st/15
+% set default plot options
+options.conA=conA;
+options.conB=conB;
+options.conAB=conAB;
+options.FWE='Rom';
 
 % get field names
 optionnames = fieldnames(options);
 
-% check to see which optional args were used and deal with accordingly
-if isempty(varargin);
-    warning('MATLAB:stats',['using default contrasts matrices for factor A, B, and the interaction ' ...
-        'you must specify each one as separate optional input arguments if you want custom contrasts. ' ...
-        'You can leave certain contrasts empty if you want the default comparisons, e.g., [], [1 1 -1 -1]'' ,[]'])
-else
-    % overwrite options stucture with varargin inputs if there are any
-    for i=1:3;
-        if ~isempty(varargin{i})
-            options.(optionnames{i})=varargin{i};
-        end
+% % check to see which optional args were used and deal with accordingly
+% if isempty(varargin);
+%     warning('MATLAB:stats',['using default contrasts matrices for factor A, B, and the interaction ' ...
+%         'you must specify each one as separate optional input arguments if you want custom contrasts. ' ...
+%         'You can leave certain contrasts empty if you want the default comparisons, e.g., [], [1 1 -1 -1]'' ,[]'])
+% else
+%     % overwrite options stucture with varargin inputs if there are any
+%     for i=1:3;
+%         if ~isempty(varargin{i})
+%             options.(optionnames{i})=varargin{i};
+%         end
+%     end
+% end
+
+for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
+    inpName = pair{1};
+    
+    if any(strcmp(inpName,optionnames))
+        
+        % overwrite default options
+        options.(inpName) = pair{2};
+    else
+        error('%s is not a recognized parameter name',inpName)
     end
 end
 
 % extract from options structure
-conA=options.(optionnames{1});
-conB=options.(optionnames{2});
-conAB=options.(optionnames{3});
+conA=options.conA;
+conB=options.conB;
+conAB=options.conAB;
 
 % used to create proper sizes in results structure
 [~, conAcol]=size(conA);
@@ -68,7 +87,7 @@ end
 
 % build results structure
 results=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
-results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)});
+results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
 %results.factor_A.z_scores=struct('z_avg',{zeros(conAcol,numpnts)},'CI_z',{cell(conAcol,1)});
 
 for i=1:conAcol;
@@ -76,7 +95,7 @@ for i=1:conAcol;
     %results.factor_A.z_scores.CI_z{i,1}=zeros(2,numpnts);
 end
 
-results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)});
+results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
 %results.factor_B.z_scores=struct('z_avg',{zeros(conBcol,numpnts)},'CI_z',{cell(conBcol,1)});
 
 for i=1:conBcol;
@@ -85,7 +104,7 @@ for i=1:conBcol;
     
 end
 
-results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)});
+results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
 %results.factor_AxB.z_scores=struct('z_avg',{zeros(conABcol,numpnts)},'CI_z',{cell(conABcol,1)});
 
 for i=1:conABcol;
@@ -115,7 +134,7 @@ for timecurrent=1:numpnts;
 
     % factor A
     con=conA;
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha);
+    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_A.pval(:,timecurrent)=pvalgen;
@@ -129,7 +148,7 @@ for timecurrent=1:numpnts;
     
     % factor B
     con=conB;
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha);
+    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_B.pval(:,timecurrent)=pvalgen;
@@ -143,7 +162,7 @@ for timecurrent=1:numpnts;
     
     % factor AxB
     con=conAB;
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha);
+    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_AxB.pval(:,timecurrent)=pvalgen;

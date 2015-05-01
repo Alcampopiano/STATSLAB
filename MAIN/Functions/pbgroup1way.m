@@ -2,31 +2,54 @@ function [inferential_results sample_results condwaves condfiles_subs condwaves_
 tic
 
 
+nargs = length(varargin);
+if round(nargs/2)~=nargs/2
+   error('need propertyName/propertyValue pairs for optional inputs')
+end
+
 % Set default contrast coefficients for 2-way
 % create contrasts for 1way ANOVA (used for multi-comparisons)
 [conA] = con1way(jlvls);
 
 % put defaults into a structure;
-options=struct('conA',conA);
+% options=struct('conA',conA);
+
+% edited may1st/15
+% set default plot options
+options.conA=conA;
+options.FWE='Rom';
+
 
 % get field names
 optionnames = fieldnames(options);
 
 % check to see which optional args were used and deal with accordingly
-if isempty(varargin);
-    warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
-        ' e.g., [1 -1 0; 1 0 -1]'''])
-else
-    % overwrite options stucture with varargin inputs if there are any
+% if isempty(varargin);
+%     warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
+%         ' e.g., [1 -1 0; 1 0 -1]'''])
+% else
+%     % overwrite options stucture with varargin inputs if there are any
+%     
+%         if ~isempty(varargin{1})
+%         options.(optionnames{1})=varargin{1}{1};
+%         end
+%     
+% end
+
+for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
+    inpName = pair{1};
     
-        if ~isempty(varargin{1})
-        options.(optionnames{1})=varargin{1}{1};
-        end
-    
+    if any(strcmp(inpName,optionnames))
+        
+        % overwrite default options
+        options.(inpName) = pair{2};
+    else
+        error('%s is not a recognized parameter name',inpName)
+    end
 end
 
 % extract from options structure
-conA=options.(optionnames{1});
+conA=options.conA;
 
 % used to create proper sizes in results structure
 [~, conAcol]=size(conA);
@@ -59,11 +82,11 @@ CIlowbootA=cell(conAcol,1);
 CIupbootA=cell(conAcol,1);
 
 % this function runs the analysis without resampling from subjects
-[sample_results condwaves] = pbgroup1way_sample(numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, conA);
+[sample_results condwaves] = pbgroup1way_sample(numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA);
 
 % build results structure
 results=struct('factor_A',{[]});
-results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)});
+results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
 
 for i=1:conAcol;
     results.factor_A.CI{i,1}=zeros(2,numpnts);
