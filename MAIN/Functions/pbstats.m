@@ -1,4 +1,4 @@
-function [psihat_stat pvalgen pcrit conflow confup] = pbstats(data, con, nboot, alpha, FWE)
+function [psihat_stat, pvalgen, pcrit, conflow, confup] = pbstats(data, con, nboot, alpha, FWE)
 %bla bla bla
 
 % uses con2way (which builds appropriate linear contrasts) to do percentile
@@ -91,6 +91,7 @@ switch FWE
         
         dvec=zeros(1:connum);
         dvec(:)=alpha; % dvec is just alpha connum times in a row
+        pcrit=alpha;
         
         %CIs around contrast differences
         CIlow=round(dvec(connum)*nboot/2)+1;

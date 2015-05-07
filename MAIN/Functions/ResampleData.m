@@ -113,7 +113,7 @@ for filecurrent=1:colfile;
     % deal with trial cap if there is one
     if capflag
         if pageEEG>STATS.trialcap
-            pageEEG=STATS.trialcap;
+            pageEEG=STATS.trialcap;  
         end
     end
   

@@ -91,7 +91,7 @@ switch STATS.design
     
     case {'bw','ww','bb'};
         [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(STATS.numconds, STATS.numpnts, STATS.nboot, ...
-            STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin); 
+            STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:}); 
         
         % update STATS structure
         STATS.inferential_results=inferential_results;
@@ -108,7 +108,7 @@ switch STATS.design
         
     case {'b','w'};
         [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(STATS.numconds, STATS.numpnts, STATS.nboot, ...
-            STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin);
+            STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
         
         % update STATS structure
         STATS.inferential_results=inferential_results;

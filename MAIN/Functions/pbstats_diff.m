@@ -94,6 +94,7 @@ switch FWE
         
         dvec=zeros(1:connum);
         dvec(:)=alpha; % dvec is just alpha connum times in a row
+        pcrit=alpha;
         
         %CIs around contrast differences
         CIlow=round(dvec(connum)*nboot/2)+1;

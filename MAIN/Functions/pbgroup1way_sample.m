@@ -109,7 +109,7 @@ for timecurrent=1:numpnts;
     
     % factor A
     con=conA;
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
+    [psihat_stat, pvalgen, pcrit, conflow, confup]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_A.pval(:,timecurrent)=pvalgen;

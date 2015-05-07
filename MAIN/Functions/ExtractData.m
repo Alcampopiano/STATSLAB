@@ -6,62 +6,62 @@
 % for single-subjects as well as the group (SubjectStatistics.m, GroupStatistics.m),
 % given any design (up to 2-way).
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
 % Inputs:
-% 
-% 
+%
+%
 % condfiles - cell array of filenames for each subject and condition.
 %             Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
 %             load the appropriate subject condition files. After this is done, the
 %             file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
 %             calls instead of using [] and having to manually load.
-% 
+%
 % condnames - cell array of condition labels. For example, {'face' 'house' 'object'}
-% 
+%
 % varargin  - key/val pairs. See Options.
-% 
-% 
+%
+%
 % Options:
-% 
+%
 % icamax    - Project selected ICs to scalp channel with maximum weight determined
 %             by the weight matrix. All ICA options must be followed with
 %             a filename of text file (csv) indicating
 %             components to retain for each subject. See demo data to
 %             understand the construction of this file.
-% 
+%
 % icagfa    - Project selected ICs to the scalp and extract entire data array
 %             for later GFA calculations. All ICA options must be followed with
 %             a filename of text file (csv) indicating
 %             components to retain for each subject. See demo data to
 %             understand the construction of this file.
-% 
+%
 % scalpgfa   - Extract the full scalp data array for later GFA
 %              calculations. Does not require any following input arguments.
-% 
+%
 % scalpchan  - Extract specified channel(s). Must be followed with cell array
 %              of channel labels. E.g., {'C11' 'C15' 'C12'}. If asking for
 %              more than one channel, the channel group will be averaged
 %              together during the resampling stages (ResampleData.m) giving
 %              you a channel cluster. This function does not handle doing
 %              stats on multiple channels independently in the same call.
-% 
+%
 % Examples:
 % [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'},[],[2 2],'ww','Occipital_Analysis','scalpchan',{'A23', 'A24' })
-% [STATS]=ExtractData({'AE' 'AH' 'SE? ?SH?}, ?condfiles_icamax_analysis.mat?, [2 2],'ww','icamax_analysis','icamax',?wwICfile.txt?)
-% 
-% 
+% [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'}, 'condfiles_icamax_analysis.mat', [2 2],'ww','icamax_analysis','icamax','wwICfile.txt')
+%
+%
 % Copyright (C) <2015>  <Allan Campopiano>
-% 
+%
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation; either version 2 of the License, or
 % (at your option) any later version.
-% 
+%
 % This program is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -72,7 +72,7 @@ function [STATS]=ExtractData(condnames,condfiles,levels,design,savestring,vararg
 
 % basic error handling for varargin options
 nargs=length(varargin);
-if nargs==1 && strcmp(varargin,'scalpgfa')
+if nargs==1 && strcmp(varargin,'scalpgfa') || nargs==1 && strcmp(varargin,'bipolar')
     varargin{2}=[];
     
 elseif round(nargs/2)~=nargs/2
@@ -181,7 +181,7 @@ switch varargin{1}
                         %for i=1:size(EEGretain.icawinv,2);
                         %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
                         %end
-                    
+                        
                         [maxweight maxind]=max(abs(EEGretain.icawinv));
                         
                         % put EEG.data into the variable data
@@ -523,6 +523,109 @@ switch varargin{1}
         xtimes=EEG.times;
         disp(' ***** finished extracting the data array for later GFA calculations *****')
         
+    % likely a temporary case option for sysc14, unless 
+    % I can keep everything internally consistent without too much trouble    
+    case 'bipolar'
+        disp(' ***** extracting the data array for bipolar ***** ')
+        
+        %for k=1:numconds; % always one
+        
+            [rowcond colcond]=size(condfiles_subs{1});
+            
+            miscinfo=cell(rowcond+1,10);
+            miscinfo(1,:)={'sub', 'ind', 'chan', 'val', 'ntrials', 'sub', 'ind', 'chan', 'val', 'ntrials'};
+            miscinfo(2:end,1)=condfiles_subs{1}(:);
+            miscinfo(2:end,6)=condfiles_subs{2}(:);
+            
+            for s=1:rowcond; % scroll through subjects
+                
+                % load file from cond 1
+                EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+                EEG = eeg_checkset(EEG);
+                miscinfo{s+1,5}=EEG.trials;
+                
+                %create cond 1 chan erps
+                erps_cond1=mean(EEG.data,3);
+                
+                % load file from cond 2
+                EEG = pop_loadset('filename',condfiles_subs{2}{s},'filepath',pathtofiles{1});
+                EEG = eeg_checkset(EEG);
+                miscinfo{s+1,10}=EEG.trials;
+                
+                %create cond 2 chan erps
+                erps_cond2=mean(EEG.data,3);
+                
+                % create the difference ERP waves for each channel
+                erp_diff=erps_cond1-erps_cond2;
+                
+                clear erps_cond1 erps_cond2
+                
+                % copy EEG.data
+                tmpEEG=EEG;
+                tmpEEG.data=erp_diff;
+                
+                % set trials ==1 to trick pop_timtopo into plotting
+                tmpEEG.trials=1;
+                h=figure; pop_timtopo(tmpEEG, [-200  500], [NaN], 'ERP data and scalp maps of left_check');
+             
+                timewin=input('type in the window(ms) to calculate min and max vals\n');
+                close(h);
+                
+                if isempty(timewin)
+                    timewin=[80 120];
+                end
+                
+                MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+                MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1; 
+                
+                % for each channel get max value within a window
+                [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max),[],2);
+                
+                % then, get the index for the max channel
+                [max_val_chan max_ind_chan]=max(max_val_time);
+                
+                % for each channel get min value within a window
+                [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max),[],2);
+                
+                % then, get the index for the min channel
+                [min_val_chan min_ind_chan]=min(min_val_time);
+                
+                clear tmpEEG
+                
+                % now we have max channel index, steal it from original
+                % data, cond 2 is already loaded so take it from there.           
+                data=EEG.data(max_ind_chan,:,:);    
+                miscinfo{s+1,7}=max_ind_chan;
+                miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
+                miscinfo{s+1,9}=max_val_chan;
+                             
+                % save it with original filename but get rid of original
+                % extention (hence the 1:end-4)
+                save([condfiles_subs{2}{s}(1:end-4),'_',varargin{1},'_extracted.mat'],'data');
+                clear data
+                
+                % load cond 1 file and take the same channel BUT the
+                % MINIMUM
+                EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+                EEG = eeg_checkset(EEG);    
+                miscinfo{s+1,2}=min_ind_chan;
+                miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
+                miscinfo{s+1,4}=min_val_chan;
+                
+                % steal min channel from cond 1           
+                data=EEG.data(min_ind_chan,:,:);
+                
+                % save it with original filename but get rid of original
+                % extention (hence the 1:end-4)
+                save([condfiles_subs{1}{s}(1:end-4),'_',varargin{1},'_extracted.mat'],'data');
+                clear data
+                              
+            end
+            
+        %end
+        xtimes=EEG.times;
+        disp(' ***** finished extracting the data array for bipolar analysis *****')
+        
     case 'scalpchan'
         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
         
@@ -579,6 +682,7 @@ STATS.condnames=condnames;
 STATS.datatype=varargin{1};
 STATS.numconds=numconds;
 STATS.srate=EEG.srate;
+STATS.miscinfo=miscinfo;
 
 if strcmp('scalpchan',varargin{1})
     STATS.chanlabels=varargin{2};

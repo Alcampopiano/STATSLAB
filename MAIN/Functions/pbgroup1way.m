@@ -132,7 +132,7 @@ for bootind=1:nsamp;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.factor_A.pval(:,timecurrent)=pvalgen;
@@ -224,7 +224,7 @@ for timecurrent=1:numpnts;
         data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(:,timecurrent);
     end
     
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha);
+    [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
     
     % passing results into results structure
     inferential_results.factor_A.pval(:,timecurrent)=pvalgen;
