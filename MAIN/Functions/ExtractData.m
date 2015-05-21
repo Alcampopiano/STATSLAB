@@ -623,6 +623,7 @@ switch varargin{1}
             end
             
         %end
+        STATS.miscinfo=miscinfo;
         xtimes=EEG.times;
         disp(' ***** finished extracting the data array for bipolar analysis *****')
         
@@ -682,7 +683,7 @@ STATS.condnames=condnames;
 STATS.datatype=varargin{1};
 STATS.numconds=numconds;
 STATS.srate=EEG.srate;
-STATS.miscinfo=miscinfo;
+
 
 if strcmp('scalpchan',varargin{1})
     STATS.chanlabels=varargin{2};
