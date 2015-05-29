@@ -66,6 +66,25 @@ if isempty(condfiles);
             condfiles(:,i)=tempfname;
         end
     end
+    
+else
+    
+    % load a file name that was given that contains the filenames X condition cell array
+    condfiles_data=load(condfiles);
+    condfields=fieldnames(condfiles_data);
+    condfiles_cellcell=condfiles_data.(condfields{1});   
+    
+    %%%% there is probably a better way of doing this, but I was tired at
+    %%%% that moment
+    % fix cell within a cell
+    condfiles=cell(1,numconds);
+    for i=1:numconds
+        [rowcondcell colcondcell]=size(condfiles_cellcell{i});
+        for j=1:rowcondcell
+        condfiles{j,i}=condfiles_cellcell{i}{j};
+        end  
+    end
+    
 end
 
 
@@ -123,7 +142,7 @@ for filecurrent=1:rowconds;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_A.pval(:,timecurrent)=pvalgen;

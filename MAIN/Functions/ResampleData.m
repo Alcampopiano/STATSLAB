@@ -50,7 +50,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-function [STATS]=ResampleData(STATS,nboot,varargin)
+function [STATS]=ResampleData(STATS,condfiles,nboot,varargin)
 
 % bring in STATS stucture
 if isempty(STATS)
@@ -79,7 +79,15 @@ elseif nargs==2
 end
 
 % this is a '1 X number of files' cell array of strings (fnames)
-fnames=uigetfile('*.mat','Select all files you wish to bootstrap', 'MultiSelect','on');
+if isempty(condfiles)
+    fnames=uigetfile('*.mat','Select all files you wish to bootstrap', 'MultiSelect','on');
+    
+else
+    condfiles=load(condfiles);
+    condfields=fieldnames(condfiles);
+    fnames=condfiles.(condfields{1});
+end
+
 
 % set a function handle to whichever measure the user specified ('gfa' or 'chanclust')
 if strcmp(STATS.measure,'gfa')
@@ -108,12 +116,13 @@ for filecurrent=1:colfile;
     
     % data is set to zero and the size is taken at the start of each new file
     [jnk numpnts pageEEG]=size(datacell{filecurrent});
+    trialEEG=pageEEG;
     data=zeros(nboot,numpnts);
     
     % deal with trial cap if there is one
     if capflag
-        if pageEEG>STATS.trialcap
-            pageEEG=STATS.trialcap;  
+        if trialEEG>STATS.trialcap
+            trialEEG=STATS.trialcap;  
         end
     end
   
@@ -121,7 +130,7 @@ for filecurrent=1:colfile;
     for bootcurrent=1:nboot;
         
         % resample with replacement from datacell, creating bootcell
-        bootvect=randi(pageEEG,1,pageEEG);
+        bootvect=randi(pageEEG,1,trialEEG);
         bootcell=datacell{filecurrent}(:,:,bootvect);
         
         % trimmed channel ERPs
@@ -140,8 +149,15 @@ for filecurrent=1:colfile;
         waitbar(bootcurrent/nboot,h3,sprintf('%12s',[num2str(bootcurrent),'/',num2str(nboot)]))
     end
     
-    % the string in the sqare brackets is what it appended to the original file name
-    save([fnames{filecurrent}(1,1:end-4),'_bootstrapped.mat'],'data');
+    if capflag % this can probably be taken out after system comparison
+        
+        % the string in the sqare brackets is what it appended to the original file name
+        save([fnames{filecurrent}(1,1:end-4),'_bootstrapped_', num2str(STATS.trialcap),'.mat'],'data');
+    else
+        
+        save([fnames{filecurrent}(1,1:end-4),'_bootstrapped.mat'],'data');
+    end
+    
     
     waitbar(filecurrent/colfile,h2,sprintf('%12s',[num2str(filecurrent),'/',num2str(colfile)]))
     

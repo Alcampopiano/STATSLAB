@@ -1,4 +1,4 @@
-function [STATS]=GroupStatistics(STATS,alpha,nsamp,varargin)
+function [STATS]=GroupStatistics(STATS,condfiles,alpha,nsamp,varargin)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates group-level statistics for any number of levels, and up to
@@ -90,7 +90,7 @@ STATS.nsamp=nsamp;
 switch STATS.design
     
     case {'bw','ww','bb'};
-        [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(STATS.numconds, STATS.numpnts, STATS.nboot, ...
+        [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
             STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:}); 
         
         % update STATS structure
@@ -107,7 +107,7 @@ switch STATS.design
 
         
     case {'b','w'};
-        [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(STATS.numconds, STATS.numpnts, STATS.nboot, ...
+        [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
             STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
         
         % update STATS structure

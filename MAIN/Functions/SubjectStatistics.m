@@ -1,4 +1,4 @@
-function [STATS]=SubjectStatistics(STATS,alpha,varargin)
+function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates subject-level statistics. Keep in mind that by definition one
@@ -88,7 +88,7 @@ STATS.alpha=alpha;
 switch STATS.design
     
     case 'ww';
-        [condfiles results]=pbsubject2way(STATS.numconds, STATS.numpnts, STATS.nboot, ...
+        [condfiles results]=pbsubject2way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
             STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.condnames, varargin{:});
         
         % update STATS structure
@@ -102,7 +102,7 @@ switch STATS.design
         
         
     case 'w';
-        [condfiles results]=pbsubject1way('',STATS.numconds, STATS.numpnts, STATS.nboot, ...
+        [condfiles results]=pbsubject1way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
             STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
         
         % update STATS structure

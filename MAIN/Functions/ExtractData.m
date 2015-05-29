@@ -572,7 +572,14 @@ switch varargin{1}
                 close(h);
                 
                 if isempty(timewin)
-                    timewin=[80 120];
+                    
+                    if strcmp(condnames{1},'face')
+                        timewin=[150 180]; % for face house
+                        
+                    elseif strcmp(condnames{1},'Left')
+                        timewin=[80 120]; % for left right checker
+                    end
+                    
                 end
                 
                 MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
@@ -592,9 +599,13 @@ switch varargin{1}
                 
                 clear tmpEEG
                 
-                % now we have max channel index, steal it from original
+                % now we have max and min channel index, steal it from original
                 % data, cond 2 is already loaded so take it from there.           
-                data=EEG.data(max_ind_chan,:,:);    
+                datamax=EEG.data(max_ind_chan,:,:);    
+                datamin=EEG.data(min_ind_chan,:,:);  
+                
+                % create bipolar
+                data=datamax-datamin;
                 miscinfo{s+1,7}=max_ind_chan;
                 miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
                 miscinfo{s+1,9}=max_val_chan;
@@ -602,7 +613,7 @@ switch varargin{1}
                 % save it with original filename but get rid of original
                 % extention (hence the 1:end-4)
                 save([condfiles_subs{2}{s}(1:end-4),'_',varargin{1},'_extracted.mat'],'data');
-                clear data
+                clear data datamax datamin
                 
                 % load cond 1 file and take the same channel BUT the
                 % MINIMUM
@@ -612,13 +623,18 @@ switch varargin{1}
                 miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
                 miscinfo{s+1,4}=min_val_chan;
                 
-                % steal min channel from cond 1           
-                data=EEG.data(min_ind_chan,:,:);
+                % now we have max and min channel index, steal it from original
+                % data, from cond1.           
+                datamax=EEG.data(max_ind_chan,:,:);    
+                datamin=EEG.data(min_ind_chan,:,:);  
+                
+                % create bipolar
+                data=datamax-datamin;
                 
                 % save it with original filename but get rid of original
                 % extention (hence the 1:end-4)
                 save([condfiles_subs{1}{s}(1:end-4),'_',varargin{1},'_extracted.mat'],'data');
-                clear data
+                clear data datamax datamin
                               
             end
             
@@ -683,7 +699,6 @@ STATS.condnames=condnames;
 STATS.datatype=varargin{1};
 STATS.numconds=numconds;
 STATS.srate=EEG.srate;
-
 
 if strcmp('scalpchan',varargin{1})
     STATS.chanlabels=varargin{2};

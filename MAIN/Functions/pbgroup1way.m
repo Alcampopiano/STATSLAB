@@ -1,4 +1,4 @@
-function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup1way(numconds, numpnts, nboot, jlvls, alpha, nsamp, design, condnames, varargin)
+function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup1way(condfiles, numconds, numpnts, nboot, jlvls, alpha, nsamp, design, condnames, varargin)
 tic
 
 
@@ -55,10 +55,21 @@ conA=options.conA;
 [~, conAcol]=size(conA);
 
 % load all file names subs X conditions
-for i=1:numconds
-    tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
-    condfiles_subs{1,i}(:,1)=tempfname;
+if isempty(condfiles) % allowing an input for file names
+    for i=1:numconds
+        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        condfiles_subs{1,i}(:,1)=tempfname;
+    end
+    
+else
+    
+    % load a file name that was given that contains the filenames X condition cell array
+    condfiles_data=load(condfiles);
+    condfields=fieldnames(condfiles_data);
+    condfiles_subs=condfiles_data.(condfields{1});
+    
 end
+
 
 %load('condfiles_subs.mat') 
 
@@ -75,7 +86,7 @@ condwaves_trim=zeros(numconds,numpnts);
 
 % this function builds bootstrap inds and writes them to the drive instead
 % of holding them in RAM, which makes it scalable (e.g., for 100,000 resamples!)
-[rowfile cond_bootvect]=bootinds(condfiles_subs,nsamp,design,jlvls);
+[rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nsamp,design,jlvls);
     
 % preallocate cell arrays used to accumulate the nsamp CIs
 CIlowbootA=cell(conAcol,1);
@@ -188,9 +199,18 @@ end
 
 % map write the CI arrays, might be cool to see them at some point
 for ext=1:conAcol
-    fidm=mapwrite(CIlowbootA{ext,1},['CIlowbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(CIupbootA{ext,1},['CIupbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(diffwaveA{ext,1},['diffwaveA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+    
+    [~,tmpfname_tmp]=fileparts(tempname);
+    tmpfname_CIup{ext}=tmpfname_tmp;
+    fidm=mapwrite(CIlowbootA{ext,1},[tmpfname_CIup{ext},'.map'],'datsize',[nsamp numpnts]);
+    
+    [~,tmpfname_tmp]=fileparts(tempname);
+    tmpfname_CIlow{ext}=tmpfname_tmp;
+    fidm=mapwrite(CIupbootA{ext,1},[tmpfname_CIlow{ext},'.map'],'datsize',[nsamp numpnts]);
+    
+    [~,tmpfname_tmp]=fileparts(tempname);
+    tmpfname_diff{ext}=tmpfname_tmp;
+    fidm=mapwrite(diffwaveA{ext,1},[tmpfname_diff{ext},'.map'],'datsize',[nsamp numpnts]);
     
 end
 
@@ -207,7 +227,7 @@ data_A=zeros(nsamp,conAcol);
 
 % access the big difference wave arrays
 for i=1:conAcol
-    diffdata.(['A',num2str(i)])=mapread(['diffwaveA',num2str(i),'.map'],'dat','datsize',[nsamp numpnts]);
+    diffdata.(['A',num2str(i)])=mapread([tmpfname_diff{i},'.map'],'dat','datsize',[nsamp numpnts]);
 end
 
 % waitbar for final stages, doing inferential stats
@@ -238,6 +258,31 @@ for timecurrent=1:numpnts;
 
     waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
+
+% edit may 8th/15
+% clean temporary mapped files
+if iscell(tmpfname)
+    for i=1:length(tmpfname);
+        delete([tmpfname{i}, '.map']);
+    end
+    
+else
+    delete([tmpfname, '.map']);
+end
+
+
+%if iscell(tmpfname_CIup)
+    for i=1:length(tmpfname_CIup);
+        delete([tmpfname_CIup{i}, '.map']);
+        delete([tmpfname_CIlow{i}, '.map']);
+        delete([tmpfname_diff{i}, '.map']);
+    end
+    
+%else
+%    delete([tmpfname_CIup, '.map']);
+%    delete([tmpfname_CIlow, '.map']);
+%    delete([tmpfname_diff, '.map']);
+%end
 
 
 close(h3)

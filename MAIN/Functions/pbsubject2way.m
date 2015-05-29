@@ -1,4 +1,4 @@
-function [condfiles results] = pbsubject2way(numconds, numpnts, nboot, jlvls, klvls, alpha, condnames, varargin)
+function [condfiles results] = pbsubject2way(condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, condnames, varargin)
 tic
 % bla bla bla
 
@@ -62,15 +62,38 @@ conAB=options.conAB;
 
 % load data
 
-% load all file names subs X conditions
-for i=1:numconds
-    tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
-    if ~iscell(tempfname);
-        tempfname={tempfname};
-        condfiles(:,i)=tempfname;
-    else
-        condfiles(:,i)=tempfname; 
+if isempty(condfiles)
+    % load all file names subs X conditions
+    for i=1:numconds
+        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        if ~iscell(tempfname);
+            tempfname={tempfname};
+            condfiles(:,i)=tempfname;
+        else
+            condfiles(:,i)=tempfname;
+        end
+        
     end
+    
+else
+    
+    % load a file name that was given that contains the filenames X condition cell array
+    condfiles_data=load(condfiles);
+    condfields=fieldnames(condfiles_data);
+    condfiles=condfiles_data.(condfields{1});   
+    
+    
+    %%%% there is probably a better way of doing this, but I was tired at
+    %%%% that moment
+    % fix cell within a cell
+    condfiles=cell(1,numconds);
+    for i=1:numconds
+        [rowcondcell colcondcell]=size(condfiles_cellcell{i});
+        for j=1:rowcondcell
+        condfiles{j,i}=condfiles_cellcell{i}{j};
+        end  
+    end
+   
 end
 
 %preallocate sizes

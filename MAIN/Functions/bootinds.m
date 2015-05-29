@@ -1,4 +1,4 @@
-function [rowfile cond_bootvect] = bootinds(condfiles_subs,nsamp,design,varargin)
+function [rowfile cond_bootvect tmpfname] = bootinds(condfiles_subs,nsamp,design,varargin)
 
 %Creates bootstrap indices for given designs. Index arrays are memory mapped
 %so as to not take up RAM.
@@ -29,14 +29,21 @@ switch design
             
             [rowfile(k) colfile]=size(condfiles_subs{1,q}(:,1));
             
-            fidm=mapwrite(randi(rowfile(k),nsamp,rowfile(k)),['cond_bootvect',num2str(k),'.map'],'datsize',[nsamp rowfile(k)]);
+            %%%%%% edit on may 8th/15
+            [~,tmpfname_tmp]=fileparts(tempname);
+            tmpfname{k}=tmpfname_tmp;
+            %%%%%%
+            
+            %%%%%% edit on may 8th/15
+            %fidm=mapwrite(randi(rowfile(k),nsamp,rowfile(k)),['cond_bootvect',num2str(k),'.map'],'datsize',[nsamp rowfile(k)]);
+            fidm=mapwrite(randi(rowfile(k),nsamp,rowfile(k)),[tmpfname{k},'.map'],'datsize',[nsamp rowfile(k)]);
             
             q=q+klvls;
             k=k+1;
         end
         
         for i=1:jlvls
-            cond_bootvect.(['j',num2str(i)])=mapread(['cond_bootvect',num2str(i),'.map'],'dat','datsize',[nsamp rowfile(i)]);
+            cond_bootvect.(['j',num2str(i)])=mapread([tmpfname{k},'.map'],'dat','datsize',[nsamp rowfile(i)]);
         end
         
         
@@ -45,9 +52,12 @@ switch design
         % this assumes that for within subjects designs, the number of subjects is equal in all cells.
         [rowfile colfile]=size(condfiles_subs{1,1}(:,1));
         
-        fidm=mapwrite(randi(rowfile,nsamp,rowfile),'cond_bootvect1.map','datsize',[nsamp rowfile]);
+        [~,tmpfname]=fileparts(tempname); % unique file name
+        %fidm=mapwrite(randi(rowfile,nsamp,rowfile),'cond_bootvect1.map','datsize',[nsamp rowfile]);
+        fidm=mapwrite(randi(rowfile,nsamp,rowfile),[tmpfname, '.map'],'datsize',[nsamp rowfile]);
         
-        cond_bootvect.j1=mapread('cond_bootvect1.map','dat','datsize',[nsamp rowfile]);
+        %cond_bootvect.j1=mapread('cond_bootvect1.map','dat','datsize',[nsamp rowfile]);
+        cond_bootvect.j1=mapread([tmpfname, '.map'],'dat','datsize',[nsamp rowfile]);
         
     case {'bb','b'}
         
@@ -57,13 +67,18 @@ switch design
             
             [rowfile(j) colfile]=size(condfiles_subs{1,j}(:,1));
             
-            fidm=mapwrite(randi(rowfile(j),nsamp,rowfile(j)),['cond_bootvect',num2str(j),'.map'],'datsize',[nsamp rowfile(j)]);
+             %%%%%% edit on may 8th/15
+            [~,tmpfname_tmp]=fileparts(tempname);
+            tmpfname{j}=tmpfname_tmp;
+            %%%%%%
+            
+            fidm=mapwrite(randi(rowfile(j),nsamp,rowfile(j)),[tmpfname{j},'.map'],'datsize',[nsamp rowfile(j)]);
             
         end
         
         for i=1:length(condfiles_subs);
             %i=1:numconds
-            cond_bootvect.(['j',num2str(i)])=mapread(['cond_bootvect',num2str(i),'.map'],'dat','datsize',[nsamp rowfile(i)]);
+            cond_bootvect.(['j',num2str(i)])=mapread([tmpfname{i},'.map'],'dat','datsize',[nsamp rowfile(i)]);
         end
         
     

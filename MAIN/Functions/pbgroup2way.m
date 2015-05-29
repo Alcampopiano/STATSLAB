@@ -1,4 +1,4 @@
-function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2way(numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
+function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2way(condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
 tic
 %{
 
@@ -74,9 +74,19 @@ conAB=options.conAB;
 [~, conABcol]=size(conAB);
 
 % load all file names subs X conditions
-for i=1:numconds
-    tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
-    condfiles_subs{1,i}(:,1)=tempfname;
+if isempty(condfiles) % allowing an input for file names
+    for i=1:numconds
+        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        condfiles_subs{1,i}(:,1)=tempfname;
+    end
+    
+else
+    
+    % load a file name that was given that contains the filenames X condition cell array
+    condfiles_data=load(condfiles);
+    condfields=fieldnames(condfiles_data);
+    condfiles_subs=condfiles_data.(condfields{1});
+    
 end
 
 %preallocate sizes
@@ -87,12 +97,12 @@ condwaves_trim=zeros(numconds,numpnts);
 
 % delete from disk the .map files that might have been left over from a
 % previous analysia
- delete('*boot*.map','*wave*.map');
+ delete('.map');
  % disp(' **** deleting stray .map files ****');
 
 % this function builds bootstrap inds and writes them to the drive instead
 % of holding them in RAM, which makes it scalable (e.g., for 100,000 resamples!)
-[rowfile cond_bootvect]=bootinds(condfiles_subs,nsamp,design,jlvls,klvls);
+[rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nsamp,design,jlvls,klvls);
     
 % preallocate cell arrays used to accumulate the nsamp CIs
 CIlowbootA=cell(conAcol,1);
@@ -382,6 +392,16 @@ for timecurrent=1:numpnts;
     waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
 
+% edit may 8th/15
+% clean temporary mapped files
+if iscell(tmpfname)
+    for i=1:length(tempfname);
+        delete(tempfname{i});
+    end
+    
+else
+    delete(tempfname);
+end
 
 close(h3)
 end
