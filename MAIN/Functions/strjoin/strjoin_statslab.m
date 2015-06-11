@@ -1,28 +1,28 @@
-function output = strjoin(input, separator)
-%STRJOIN Concatenate an array into a single string.
+function output = strjoin_statslab(input, separator)
+%strjoin_statslab Concatenate an array into a single string.
 %
-%     S = strjoin(C)
-%     S = strjoin(C, separator)
+%     S = strjoin_statslab(C)
+%     S = strjoin_statslab(C, separator)
 %
 % Description
 %
-% S = strjoin(C) takes an array C and returns a string S which concatenates
+% S = strjoin_statslab(C) takes an array C and returns a string S which concatenates
 % array elements with comma. C can be a cell array of strings, a character
 % array, a numeric array, or a logical array. If C is a matrix, it is first
-% flattened to get an array and concateneted. S = strjoin(C, separator) also
+% flattened to get an array and concateneted. S = strjoin_statslab(C, separator) also
 % specifies separator for string concatenation. The default separator is comma.
 %
 % Examples
 %
-%     >> str = strjoin({'this','is','a','cell','array'})
+%     >> str = strjoin_statslab({'this','is','a','cell','array'})
 %     str =
 %     this,is,a,cell,array
 %
-%     >> str = strjoin([1,2,2],'_')
+%     >> str = strjoin_statslab([1,2,2],'_')
 %     str =
 %     1_2_2
 %
-%     >> str = strjoin({1,2,2,'string'},'\t')
+%     >> str = strjoin_statslab({1,2,2,'string'},'\t')
 %     str =
 %     1 2 2 string
 %
@@ -45,11 +45,11 @@ function output = strjoin(input, separator)
                        1, ~isscalar(input)), ...
                 sprintf('%s', input{end})];
     elseif iscell(input)
-      output = strjoin(cellfun(@(x)strjoin(x, separator), input, ...
+      output = strjoin_statslab(cellfun(@(x)strjoin_statslab(x, separator), input, ...
                                'UniformOutput', false), ...
                        separator);
     else
-      error('strjoin:invalidInput', 'Unsupported input: %s', class(input));
+      error('strjoin_statslab:invalidInput', 'Unsupported input: %s', class(input));
     end
   end
 end

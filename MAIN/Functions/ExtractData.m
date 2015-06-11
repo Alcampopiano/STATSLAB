@@ -615,8 +615,7 @@ switch varargin{1}
                 save([condfiles_subs{2}{s}(1:end-4),'_',varargin{1},'_extracted.mat'],'data');
                 clear data datamax datamin
                 
-                % load cond 1 file and take the same channel BUT the
-                % MINIMUM
+                % load cond 1 file 
                 EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
                 EEG = eeg_checkset(EEG);    
                 miscinfo{s+1,2}=min_ind_chan;

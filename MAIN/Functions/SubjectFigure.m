@@ -186,8 +186,8 @@ switch STATS.design
                 end
                 
                 % concatenate, if needed, the legend lables
-                lab1st=strjoin(lab1stlist,'+');
-                lab2nd=strjoin(lab2ndlist,'+');
+                lab1st=strjoin_statslab(lab1stlist,'+');
+                lab2nd=strjoin_statslab(lab2ndlist,'+');
                 
                 switch options.plottype
                     case 'wave'
@@ -364,8 +364,8 @@ switch STATS.design
                 end
                 
                 % concatenate, if needed, the legend lables
-                lab1st=strjoin(lab1stlist,'+');
-                lab2nd=strjoin(lab2ndlist,'+');
+                lab1st=strjoin_statslab(lab1stlist,'+');
+                lab2nd=strjoin_statslab(lab2ndlist,'+');
                 
                 switch options.plottype
                     case 'wave'
@@ -533,8 +533,8 @@ switch STATS.design
                 end
                 
                 % concatenate, if needed, the legend lables
-                lab1st=strjoin(lab1stlist,'+');
-                lab2nd=strjoin(lab2ndlist,'+');
+                lab1st=strjoin_statslab(lab1stlist,'+');
+                lab2nd=strjoin_statslab(lab2ndlist,'+');
                 
                 switch options.plottype
                     case 'wave'
@@ -704,8 +704,8 @@ switch STATS.design
                 end
                 
                 % concatenate, if needed, the legend lables
-                lab1st=strjoin({lab1stlist{1} lab2ndlist{1}},'-');
-                lab2nd=strjoin({lab2ndlist{2} lab1stlist{2}} ,'-');
+                lab1st=strjoin_statslab({lab1stlist{1} lab2ndlist{1}},'-');
+                lab2nd=strjoin_statslab({lab2ndlist{2} lab1stlist{2}} ,'-');
                 
                 switch options.plottype
                     case 'wave'
@@ -885,8 +885,8 @@ switch STATS.design
                     
                     
                     % concatenate, if needed, the legend lables
-                    lab1st=strjoin(lab1stlist,'+');
-                    lab2nd=strjoin(lab2ndlist,'+');
+                    lab1st=strjoin_statslab(lab1stlist,'+');
+                    lab2nd=strjoin_statslab(lab2ndlist,'+');
                     titlestr=[STATS.jlabels{v},' @ ',lab1st,' - ',lab2nd];
                     
                     switch options.plottype

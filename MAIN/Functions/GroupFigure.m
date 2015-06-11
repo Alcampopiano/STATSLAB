@@ -131,8 +131,8 @@ switch isfactorial
             plotdiff=STATS.inferential_results.factor_A.test_stat(options.FactorA(i),:);
             
             % concatenate, if needed, the legend lables
-            leg1st=strjoin(leg1stlist,'+');
-            leg2nd=strjoin(leg2ndlist,'+');
+            leg1st=strjoin_statslab(leg1stlist,'+');
+            leg2nd=strjoin_statslab(leg2ndlist,'+');
             
             % begin plotting
             figure(i);
@@ -197,8 +197,8 @@ switch isfactorial
                 plotdiff=STATS.inferential_results.factor_A.test_stat(options.FactorA(i),:);
                 
                 % concatenate, if needed, the legend lables
-                leg1st=strjoin(leg1stlist,'+');
-                leg2nd=strjoin(leg2ndlist,'+');
+                leg1st=strjoin_statslab(leg1stlist,'+');
+                leg2nd=strjoin_statslab(leg2ndlist,'+');
                 
                 % begin plotting
                 figure;
@@ -261,8 +261,8 @@ switch isfactorial
                 plotdiff=STATS.inferential_results.factor_B.test_stat(options.FactorB(i),:);
                 
                 % concatenate, if needed, the legend lables
-                leg1st=strjoin(leg1stlist,'+');
-                leg2nd=strjoin(leg2ndlist,'+');
+                leg1st=strjoin_statslab(leg1stlist,'+');
+                leg2nd=strjoin_statslab(leg2ndlist,'+');
                 
                 % begin plotting
                 figure;
@@ -323,8 +323,8 @@ switch isfactorial
                 plotdiff=STATS.inferential_results.factor_AxB.test_stat(options.FactorAB(i),:);
                 
                 % concatenate, if needed, the legend lables
-                leg1st=strjoin({leg1stlist{1} leg2ndlist{1}},'-');
-                leg2nd=strjoin({leg2ndlist{2} leg1stlist{2}} ,'-');
+                leg1st=strjoin_statslab({leg1stlist{1} leg2ndlist{1}},'-');
+                leg2nd=strjoin_statslab({leg2ndlist{2} leg1stlist{2}} ,'-');
                 
                 % begin plotting
                 figure;

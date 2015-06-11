@@ -63,17 +63,36 @@ end
 % add field to STATS
 STATS.nboot=nboot;
 
+% set defaults, with only one option this makes no sense, but if more get
+% added it is exandable in this for
+options.trialcap='none';
+
+% get field names
+optionnames = fieldnames(options);
 
 nargs=length(varargin);
 if round(nargs/2)~=nargs/2
     error('need NAME/VALUE pairs for optional inputs')
+end
+
+% handle varargin
+for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
+    inpName = pair{1};
     
-elseif isempty(varargin);
+    if any(strcmp(inpName,optionnames))
+        
+        % overwrite default options
+        options.(inpName) = pair{2};
+    else
+        error('%s is not a recognized parameter name',inpName)
+    end
+end
+
+if strcmp(options.trialcap,'none') || isempty(varargin);
     disp('***** not using trial cap *****');
     capflag=0;
-    
-elseif nargs==2
-    STATS.trialcap=varargin{2};
+else
+    STATS.trialcap=options.trialcap;
     disp(['***** using trial cap of ', num2str(STATS.trialcap), ' *****']);
     capflag=1;
 end
