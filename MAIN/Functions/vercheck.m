@@ -34,7 +34,6 @@ if tag==curver;
     
 elseif curver<tag;
     disp('A newer version of STATSLAB is available');
-    disp(['To upgrade from v',num2str(curver),' to v',num2str(tag),' visit <a href="https://github.com/Alcampopiano/STATSLAB">github.com/Alcampopiano/STATSLAB</a>']);  
+    disp(['To upgrade from v',num2str(curver),' to v',num2str(tag),' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);  
+
 end
-
-
