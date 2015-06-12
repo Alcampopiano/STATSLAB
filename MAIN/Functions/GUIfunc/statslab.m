@@ -1,5 +1,8 @@
 function [statslab_propgrid, okayhit, STATS]=statslab(nosplash)
 
+% version
+vercheck();
+
 % splash or no splash
 if nargin<1;
     splash_fade;
