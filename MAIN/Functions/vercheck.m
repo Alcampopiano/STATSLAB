@@ -4,10 +4,10 @@ function vercheck()
 
 % load file with version number
 if isunix
-    verfile=load('/STATSLAB/ver.mat');
+    verfile=load('/MAIN/Functions/statslabver/ver.mat');
     slashfind=@(x) strfind(x,'/');
 else ispc
-    verfile=load('\STATSLAB\ver.mat');
+    verfile=load('\MAIN\Functions\statslabver\ver.mat');
     slashfind=@(x) strfind(x,'\');
 end
 
