@@ -3,28 +3,56 @@ function vercheck()
 
 try
     % load file with version number
-    if isunix
+    if isunix && ~ismac
         verfile=load('/MAIN/Functions/statslabver/ver.mat');
-        slashfind=@(x) strfind(x,'/');
+        pathstr='Alcampopiano/STATSLAB/releases/tag/';
+        pathfind=@(x) strfind(x,pathstr);
+        evalstr='content=wget https://github.com/Alcampopiano/STATSLAB/releases -q -O -); echo $content';
+        
+    elseif ismac
+        
+        verfile=load('/MAIN/Functions/statslabver/ver.mat');
+        pathstr='Alcampopiano/STATSLAB/releases/tag/';
+        pathfind=@(x) strfind(x,pathstr); 
+        evalstr='content=$(curl -L https://github.com/Alcampopiano/STATSLAB/releases); echo $content';
+    
     else ispc
+        %disp('go here to download wget for windows, which I need to perform automatic checks for latest STATSLAB versions');
+        pathstr='Alcampopiano/STATSLAB/releases/tag/';
         verfile=load('\MAIN\Functions\statslabver\ver.mat');
-        slashfind=@(x) strfind(x,'\');
+        curver=verfile.ver;
+        disp(['You are using v',num2str(curver),' of STATSLAB. To see if newer versions exist, visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']); 
+        pathfind=@(x) strfind(x,pathstr);
     end
     
     curver=verfile.ver;
     
     % query git hub tag and compare to current ver number
-    [jnk, gitinfo]=system('git ls-remote --tags git@github.com:Alcampopiano/STATSLAB.git');
+    [jnk, gitinfo]=system(evalstr);
     
     % indentify unique tag zones
-    slashind=slashfind(gitinfo);
+    pathinds=pathfind(gitinfo);    
+    pathlength=length(pathstr);
+   
     
-    % find relavent slashes
-    slashind=slashind(2:4:end);
-    
-    
-    for i=1:length(slashind);
-        tag(i)=str2num(gitinfo(slashind(i)+1:slashind(i)+4));
+    for i=1:length(pathinds);
+        
+        temptag=gitinfo(pathinds(i)+pathlength:pathinds(i)+pathlength+3);
+        
+        % remove ending quote or character that wont be converted to number
+        if isempty(str2num(temptag));
+            
+            % couldnt be converted, trim trailing character
+            temptag=temptag(1:end-1);
+            temptag=str2num(temptag);
+            
+        else
+            temptag=str2num(temptag);                   
+        end
+        
+        % gather tags       
+        tag(i)=temptag;     
+        
     end
     
     tag=max(tag);
@@ -39,5 +67,8 @@ try
     end
     
 catch
-    disp('could not check if newer versions exist.')
+    disp('could not do automatic check for newer versions of STATSLAB.')
 end
+
+
+
