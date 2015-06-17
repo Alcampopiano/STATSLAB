@@ -7,21 +7,21 @@ try
         verfile=load('/MAIN/Functions/statslabver/ver.mat');
         pathstr='Alcampopiano/STATSLAB/releases/tag/';
         pathfind=@(x) strfind(x,pathstr);
-        evalstr='content=wget https://github.com/Alcampopiano/STATSLAB/releases -q -O -); echo $content';
+        evalstr='content=$(wget https://github.com/Alcampopiano/STATSLAB/releases -q -O -); echo $content';
         
     elseif ismac
         
         verfile=load('/MAIN/Functions/statslabver/ver.mat');
         pathstr='Alcampopiano/STATSLAB/releases/tag/';
-        pathfind=@(x) strfind(x,pathstr); 
+        pathfind=@(x) strfind(x,pathstr);
         evalstr='content=$(curl -L https://github.com/Alcampopiano/STATSLAB/releases); echo $content';
-    
+        
     else ispc
         %disp('go here to download wget for windows, which I need to perform automatic checks for latest STATSLAB versions');
         pathstr='Alcampopiano/STATSLAB/releases/tag/';
         verfile=load('\MAIN\Functions\statslabver\ver.mat');
         curver=verfile.ver;
-        disp(['You are using v',num2str(curver),' of STATSLAB. To see if newer versions exist, visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']); 
+        disp(['You are using v',num2str(curver),' of STATSLAB. To see if newer versions exist, visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
         pathfind=@(x) strfind(x,pathstr);
     end
     
@@ -31,9 +31,9 @@ try
     [jnk, gitinfo]=system(evalstr);
     
     % indentify unique tag zones
-    pathinds=pathfind(gitinfo);    
+    pathinds=pathfind(gitinfo);
     pathlength=length(pathstr);
-   
+    
     
     for i=1:length(pathinds);
         
@@ -47,11 +47,11 @@ try
             temptag=str2num(temptag);
             
         else
-            temptag=str2num(temptag);                   
+            temptag=str2num(temptag);
         end
         
-        % gather tags       
-        tag(i)=temptag;     
+        % gather tags
+        tag(i)=temptag;
         
     end
     
@@ -61,14 +61,33 @@ try
         disp(['You are using the newest version of STATSLAB -- v',num2str(curver)]);
         
     elseif curver<tag;
-        disp('A newer version of STATSLAB is available');
-        disp(['To upgrade from v',num2str(curver),' to v',num2str(tag),' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
+        
+        disp(['A newer version of STATSLAB is available. To upgrade from v', num2str(curver),' to v',num2str(tag), ',']);
+        
+        if isunix && ~ismac
+            disp('<a href="matlab: ! sudo gnome-open https://github.com/Alcampopiano/STATSLAB">https://github.com/Alcampopiano/STATSLAB</a>');
+            
+            % the below are alternatives to using gnome
+            %sudo sensible-browser http://www.google.com
+            %sudo xdg-open http://www.google.com')
+            
+            % the below might work on some linux machines
+            %disp([' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
+            
+        elseif ismac
+            disp([' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
+        else ispc
+            disp([' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
+            
+        end
         
     end
     
 catch
     disp('could not do automatic check for newer versions of STATSLAB.')
 end
+
+
 
 
 
