@@ -16,12 +16,11 @@ try
         pathfind=@(x) strfind(x,pathstr);
         evalstr='content=$(curl -L https://github.com/Alcampopiano/STATSLAB/releases); echo $content';
         
-    else ispc
-        %disp('go here to download wget for windows, which I need to perform automatic checks for latest STATSLAB versions');
+    elseif ispc
+       %disp('go here to download wget for windows, which I need to perform automatic checks for latest STATSLAB versions');
         pathstr='Alcampopiano/STATSLAB/releases/tag/';
-        verfile=load('\MAIN\Functions\statslabver\ver.mat');
-        curver=verfile.ver;
-        disp(['You are using v',num2str(curver),' of STATSLAB. To see if newer versions exist, visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
+        verfile=load('MAIN\Functions\statslabver\ver.mat');
+        evalstr='powershell $webreq = Invoke-WebRequest https://github.com/Alcampopiano/STATSLAB/releases; echo $webreq.content';
         pathfind=@(x) strfind(x,pathstr);
     end
     
@@ -29,7 +28,7 @@ try
     
     % query git hub tag and compare to current ver number
     [jnk, gitinfo]=system(evalstr);
-    
+   
     % indentify unique tag zones
     pathinds=pathfind(gitinfo);
     pathlength=length(pathstr);
@@ -76,7 +75,7 @@ try
             
         elseif ismac
             disp([' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
-        else ispc
+        elseif ispc
             disp([' visit <a href="https://github.com/Alcampopiano/STATSLAB'',''-browser', '">https://github.com/Alcampopiano/STATSLAB</a>']);
             
         end
