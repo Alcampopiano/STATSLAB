@@ -113,8 +113,8 @@ if strcmp(STATS.measure,'gfa')
     measure_han=@(x) std(x,1);
 elseif strcmp(STATS.measure,'chanclust');
     measure_han=@(x) mean(x,1);
-else
-    error('must choose either gfa or chanclust as input arguments');
+    %else
+    %    error('must choose either gfa or chanclust as input arguments');
 end
 
 [rowfile colfile]=size(fnames);
@@ -181,9 +181,30 @@ for filecurrent=1:colfile;
                 waitbar(bootcurrent/nboot,h3,sprintf('%12s',[num2str(bootcurrent),'/',num2str(nboot)]))
             end
             
+            if capflag % this can probably be taken out after system comparison
+                
+                % the string in the sqare brackets is what it appended to the original file name
+                save([fnames{filecurrent}(1,1:end-4),'_bootstrapped_', num2str(STATS.trialcap),'.mat'],'data');
+            else
+                
+                save([fnames{filecurrent}(1,1:end-4),'_bootstrapped.mat'],'data');
+            end
+            
+            waitbar(filecurrent/colfile,h2,sprintf('%12s',[num2str(filecurrent),'/',num2str(colfile)]))
+            
         case {'ersp', 'itc'}
             
-            if length(datacell{1},1)>1;
+            %%%% get freq bin length
+            %%%% probably a better way of doing this
+            %             junk=zeros(1,STATS.numpnts,1);
+            %             [ersp] = newtimef(junk, ...
+            %                 STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
+            %                 STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',1,'plotersp','off','plotitc','off');
+            %             freqbins=length(ersp);
+            
+            clear ersp
+            
+            if size(datacell{1},1)>1;
                 chanlength='multi';
             else
                 chanlength='single';
@@ -197,61 +218,72 @@ for filecurrent=1:colfile;
                 
                 switch chanlength
                     case 'multi'
-                                               
-                        for i=1:length(datacell{1},1) % num rows/channels
+                        
+                        for i=1:size(datacell{1},1) % num rows/channels
                             
-                            % compute TF info to get coeficients for all channels
-                            figure('visible','off');
-                            [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(i,:,:), ...
-                                STATS.xtimes, [STATS.xmin STATS.xmax]*1000, ...
-                                STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
-                            % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
-                            clear ersp itc powbase times freqs erspboot itcboot
+                            
+                            if bootcurrent==1
+                                % compute TF info to get coeficients for all channels
+                                figure('visible','off');
+                                [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(i,:,:), ...
+                                    STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
+                                    STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
+                                % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
+                                freqbins=size(ersp,1);
+                                clear ersp itc powbase times freqs erspboot itcboot
+                            end
+                            
                             
                             if strcmp(STATS.measure, 'ersp')
-                                clear itc powbase times freqs erspboot itcboot
+                                %clear itc powbase times freqs erspboot itcboot
                                 
-                                mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}, '_tempbootstrapped.map'],'datsize',[STATS.TF_freqs,STATS.TF_times,length(datacell{1})]);
+                                mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}(1,1:end-4), '_tempbootstrapped.map'],'datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
                                 
                             elseif strcmp(STATS.measure, 'itc')
-                                clear itc powbase times freqs erspboot itcboot
+                                %clear itc powbase times freqs erspboot itcboot
                                 
                                 % no trimmed mean?
-                                mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}, '_tempbootstrapped.map'],'datsize',[STATS.TF_freqs,STATS.TF_times,length(datacell{1})]);
+                                mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}(1,1:end-4), '_tempbootstrapped.map'],'datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
                                 
                             end
                             
                         end
                         
                         % this holds multiple channel spectral information
-                        datamap=mapread([fnames{1,filecurrent}, '_tempbootstrapped.map'],'dat','datsize',[STATS.TF_freqs,STATS.TF_times,length(datacell{1})]);
+                        datamap=mapread([fnames{1,filecurrent}(1,1:end-4), '_tempbootstrapped.map'],'dat','datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
                         
                         % this is the avreage of the multi channel spectral information, like a spectral ROI
-                        mapwrite(mean(datamap.Data.dat,3),[fnames{1,filecurrent}, '_bootstrapped.mat'],'datsize',[STATS.TF_freqs,STATS.TF_times,STATS.nboot]);
+                        mapwrite(mean(datamap.Data.dat,3),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                         
                         % get rid or gathering arrays
-                        delete([fnames{1,filecurrent}, '_tempbootstrapped.map']);
+                        delete([fnames{1,filecurrent}(1,1:end-4), '_tempbootstrapped.map']);
                         
                     case 'single'
                         
-                        % compute TF info to get coeficients
-                        figure('visible','off');
-                        [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(1,:,:), ...
-                            STATS.xtimes, [STATS.xmin STATS.xmax]*1000, ...
-                            STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
-                        % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
-                        clear ersp itc powbase times freqs erspboot itcboot
+                        if bootcurrent==1;
+                            
+                            % compute TF info to get coeficients
+                            figure('visible','off');
+                            [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(1,:,:), ...
+                                STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
+                                STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
+                            % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
+                            freqbins=size(ersp,1);
+                            clear ersp itc powbase times freqs erspboot itcboot
+                            
+                        end
+                        
                         
                         if strcmp(STATS.measure, 'ersp')
-                            clear itc powbase times freqs erspboot itcboot
+                            %clear itc powbase times freqs erspboot itcboot
                             
-                            mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}, '_bootstrapped.mat'],'datsize',[STATS.TF_freqs,STATS.TF_times,STATS.nboot]);
+                            mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                             
                         elseif strcmp(STATS.measure, 'itc')
-                            clear itc powbase times freqs erspboot itcboot
+                            %clear itc powbase times freqs erspboot itcboot
                             
                             % no trimmed mean
-                            mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}, '_bootstrapped.mat'],'datsize',[STATS.TF_freqs,STATS.TF_times,STATS.nboot]);
+                            mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                             
                         end
                         
@@ -262,14 +294,14 @@ for filecurrent=1:colfile;
     end
     
     
-    if capflag % this can probably be taken out after system comparison
-        
-        % the string in the sqare brackets is what it appended to the original file name
-        save([fnames{filecurrent}(1,1:end-4),'_bootstrapped_', num2str(STATS.trialcap),'.mat'],'data');
-    else
-        
-        save([fnames{filecurrent}(1,1:end-4),'_bootstrapped.mat'],'data');
-    end
+    %     if capflag % this can probably be taken out after system comparison
+    %
+    %         % the string in the sqare brackets is what it appended to the original file name
+    %         save([fnames{filecurrent}(1,1:end-4),'_bootstrapped_', num2str(STATS.trialcap),'.mat'],'data');
+    %     else
+    %
+    %         save([fnames{filecurrent}(1,1:end-4),'_bootstrapped.mat'],'data');
+    %     end
     
     waitbar(filecurrent/colfile,h2,sprintf('%12s',[num2str(filecurrent),'/',num2str(colfile)]))
     
