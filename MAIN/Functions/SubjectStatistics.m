@@ -102,8 +102,18 @@ switch STATS.design
         
         
     case 'w';
+        
+        if any(strcmp({'ersp' 'itc'},STATS.measure));
+            
+        [condfiles results]=pbsubject1waytf(STATS,condfiles,STATS.numconds, STATS.nboot, ...
+            STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:}); 
+        
+        elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
+            
         [condfiles results]=pbsubject1way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
             STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
+        
+        end
         
         % update STATS structure
         STATS.subject_results=results;

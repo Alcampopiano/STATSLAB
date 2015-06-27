@@ -230,6 +230,8 @@ for filecurrent=1:colfile;
                                     STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
                                 % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
                                 freqbins=size(ersp,1);
+                                STATS.TF_times=times;
+                                STATS.TF_freqs=freqs;
                                 clear ersp itc powbase times freqs erspboot itcboot
                             end
                             
@@ -269,6 +271,8 @@ for filecurrent=1:colfile;
                                 STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
                             % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
                             freqbins=size(ersp,1);
+                            STATS.TF_times=times;
+                            STATS.TF_freqs=freqs;
                             clear ersp itc powbase times freqs erspboot itcboot
                             
                         end
