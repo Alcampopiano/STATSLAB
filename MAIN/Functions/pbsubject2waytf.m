@@ -1,4 +1,4 @@
-function [condfiles results] = pbsubject1waytf(STATS, condfiles, numconds, nboot, jlvls, alpha, condnames, varargin)
+function [condfiles results] = pbsubject2waytf(STATS, condfiles, numconds, nboot, jlvls, klvls, alpha, condnames, varargin)
 tic
 % bla bla bla
 
@@ -7,29 +7,34 @@ if round(nargs/2)~=nargs/2
     error('need propertyName/propertyValue pairs for optional inputs')
 end
 
-% Set default contrast coefficients for 1-way
-[conA] = con1way(jlvls);
+% Set default contrast coefficients for 2-way
+% create contrasts for 2way ANOVA (used for multi-comparisons)
+[conA conB conAB] = con2way(jlvls, klvls);
 
 % put defaults into a structure;
-% options=struct('conA',conA);
+% options=struct('conA',conA,'conB',conB,'conAB',conAB);
 
 % edited may1st/15
 % set default plot options
 options.conA=conA;
+options.conB=conB;
+options.conAB=conAB;
 options.FWE='Rom';
 
 % get field names
 optionnames = fieldnames(options);
 
-% % check to see which optional args were used and deal with accordingly
+% check to see which optional args were used and deal with accordingly
 % if isempty(varargin);
-%     warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
-%         ' e.g., [1 -1 0; 1 0 -1]'''])
+%     warning('MATLAB:stats',['using default contrasts matrices for factor A, B, and the interaction ' ...
+%         'you must specify each one as separate optional input arguments if you want custom contrasts. ' ...
+%         'You can leave certain contrasts empty if you want the default comparisons, e.g., [], [1 1 -1 -1]'' ,[]'])
 % else
 %     % overwrite options stucture with varargin inputs if there are any
-%
-%     if ~isempty(varargin{1})
-%         options.(optionnames{1})=varargin{1};
+%     for i=1:3;
+%         if ~isempty(varargin{1}{i})
+%             options.(optionnames{i})=varargin{1}{i};
+%         end
 %     end
 % end
 
@@ -47,24 +52,27 @@ end
 
 % extract from options structure
 conA=options.conA;
+conB=options.conB;
+conAB=options.conAB;
 
 % used to create proper sizes in results structure
 [~, conAcol]=size(conA);
+[~, conBcol]=size(conB);
+[~, conABcol]=size(conAB);
 
-% if condfiles is empty, bring up browser, if not then you likely created
-% them in some parent function, perhaps to run single-subject stats in a
-% 'bw' design (multiple one-way tests...)
+% load data
 
-if isempty(condfiles);
+if isempty(condfiles)
     % load all file names subs X conditions
     for i=1:numconds
-        tempfname=uigetfile('*.map',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
         if ~iscell(tempfname);
             tempfname={tempfname};
             condfiles(:,i)=tempfname;
         else
             condfiles(:,i)=tempfname;
         end
+        
     end
     
 else
@@ -72,7 +80,8 @@ else
     % load a file name that was given that contains the filenames X condition cell array
     condfiles_data=load(condfiles);
     condfields=fieldnames(condfiles_data);
-    condfiles_cellcell=condfiles_data.(condfields{1});
+    condfiles=condfiles_data.(condfields{1});
+    
     
     %%%% there is probably a better way of doing this, but I was tired at
     %%%% that moment
@@ -87,7 +96,6 @@ else
     
 end
 
-
 %preallocate sizes
 [rowconds colconds]=size(condfiles);
 datacell=cell(1,colconds);
@@ -101,28 +109,33 @@ for i=1:STATS.freqbins;
     band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
 end
 
+
 % for testcurrent=1:rowconds;
-%     
-%     results.(field_name{testcurrent})=struct('factor_A',{[]});
+%
+%     results.(field_name{testcurrent})=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
 %     results.(field_name{testcurrent}).factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-%     
-%     
+%
+%
 %     for i=1:conAcol;
 %         results.(field_name{testcurrent}).factor_A.CI{i,1}=zeros(2,numpnts);
 %     end
-%     
+%
+%     results.(field_name{testcurrent}).factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
+%
+%
+%     for i=1:conBcol;
+%         results.(field_name{testcurrent}).factor_B.CI{i,1}=zeros(2,numpnts);
+%     end
+%
+%     results.(field_name{testcurrent}).factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
+%
+%
+%     for i=1:conABcol;
+%         results.(field_name{testcurrent}).factor_AxB.CI{i,1}=zeros(2,numpnts);
+%     end
 % end
 
-
-%%%%%%%%% finding near val for bin reduction
-% frange=[5.2 7.5];
-% 
-% freqs=[3 3.5 5 5.5 7 7.2 8 8.9 10];
-% [lowval lowind] = min(abs(freqs-frange(1)))
-% low_near = freqs(lowind) 
-% 
-% [hival hiind] = min(abs(freqs-frange(2)))
-% hi_near = freqs(hiind) 
+% load and arrange data
 
 h1 = waitbar(0,'1','Name','subject progress','Position',[1100 549 550 40]);
 childh1 = get(h1, 'Children');
@@ -136,9 +149,10 @@ for filecurrent=1:rowconds;
     
     for condcurrent=1:colconds;
         %conds=load(condfiles{filecurrent,condcurrent});
+        %datacell{1,condcurrent}=conds.data;
         
         % memory map load
-        datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);    
+        datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         datacell{1,condcurrent}=datamap;
         clear datamap
         
@@ -150,14 +164,13 @@ for filecurrent=1:rowconds;
     end
     
     %arrange the data for the calculations
-    %[rowcell ~]=size(datacell{1,1});  
+    %[rowcell ~]=size(datacell{1,1});
     
     rowcell=STATS.nboot;
     
     for bandind=1:STATS.freqbins;
         
         % stats at each timepoint
-        %for timecurrent=1:numpnts;
         for timecurrent=1:STATS.timesout;
             
             % reset data to zeros after every calculation at each timepoint
@@ -165,7 +178,7 @@ for filecurrent=1:rowconds;
             
             % arrange data into a matrix with subs (or single subject boot samples) X conditions
             for condcurrent=1:colconds;
-                % data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
+                %data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
                 data(:,condcurrent)=datacell{1,condcurrent}.Data.dat(bandind,timecurrent,:);
             end
             
@@ -178,28 +191,51 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
-          
+            
             
             for i=1:conAcol;
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
             end
             
-            %waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+            % factor B
+            con=conB;
+            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            
+            % passing results into results structure
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.contrasts=conB;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
+            
+            
+            for i=1:conBcol;
+                results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
+                results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
+            end
+            
+            % factor AxB
+            con=conAB;
+            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            
+            % passing results into results structure
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.contrasts=conAB;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
+            
+            for i=1:conABcol;
+                results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
+                results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
+            end
+            
+            waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
         end
         
-        waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
     end
     
     waitbar(filecurrent/rowconds,h1,sprintf('%12s',[num2str(filecurrent),'/',num2str(rowconds)]))
 end
 close(h1,h2);
 toc
-
-
-
-
-
-
 end
-

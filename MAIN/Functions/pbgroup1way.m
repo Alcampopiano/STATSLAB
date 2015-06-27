@@ -122,6 +122,10 @@ for bootind=1:nsamp;
     [datacell] = bootgrandaverage(condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls);
                                     
     % get condition waveforms for plotting purposes
+    %%%%%%%%%%%%%%%
+    % why bother doing this gathering? Maybe just take mean from the
+    % analyses with al subjects, or maybe its fine.
+    %%%%%%%%%%%%%%
     for i=1:numconds;
         condwaves_trim_gather{i}(bootind,:)=mean(datacell{i},1);
     end
