@@ -72,9 +72,9 @@ if isempty(condfiles_subs);
         tempfname=uigetfile('*.mat',['Select all subject condition ', num2str(i), ' files'], 'MultiSelect','on');       
         condfiles_subs{1,i}(:,1)=tempfname;  
     end   
-    [datacell] = grandaverage(nboot,numpnts,condfiles_subs);  
+    [datacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs);  
 else
-    [datacell] = grandaverage(nboot,numpnts,condfiles_subs);
+    [datacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs);
 end
 
 % get condition waveforms for plotting purposes

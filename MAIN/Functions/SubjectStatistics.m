@@ -6,66 +6,66 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % However, for a between-within (mixed) design you can use this function to
 % calculate single-subject stats, this will be done along the k levels of factor B (the "within" levels).
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
 % Input arguments:
 %     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
 %             the filename to your STATS stucture in the current directory.
-% 
+%
 %     alpha = arbitrary threshold for significance (.05 or .01 or whatever you like). Will be adjusted with
 %             Rom's method for controlling for FWE.
-% 
+%
 %     varargin - key/val pairs, see Options for details
-% 
+%
 % Options:
 %              Contrast matrix for Factor A comparisons. For example, [1 0 -1 0; 0 1 0 -1]'
 %              You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
-% 
+%
 %              Contrast matrix for Factor B comparisons. For example, [1 -1 0 0; 0 0 1 -1]'
 %              You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
-% 
-%              Contrast matrix for interaction comparisons. For example, 
+%
+%              Contrast matrix for interaction comparisons. For example,
 %              [1 -1 -1 1]'. You must add the transpose operator ('), as the example says.
 %              See Wiki (and function usage below) for many more examples. If
 %              left out, certain default contrasts will be used, but this is not
 %              recommended as you should know what you want to compare.
-% 
-% 
+%
+%
 % Examples (these are just examples. For large designs, the number of
 % possible pariwise or pooled comparisons increases exponentially):
-% 
+%
 % For a 1-way design with 2 conditions (like a t-test):
 % [STATS]=SubjectStatistics(STATS,.05,[1 -1]');
-% 
+%
 % For a 2-way, within-within design with 4 conditions (2x2):
 % [STATS]=SubjectStatistics(STATS,.05,[1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]');
-% 
+%
 % For a 2-way within-within design with 8 conditions (2x4):
 % [STATS]=SubjectStatistics(STATS,.05,[1 0 0 0 -1 0 0 0; 0 1 0 0 0 -1 0 0]', [1 -1 0 0 0 0 0 0; 0 0 0 0 1 -1 0 0]', [0 0 1 -1 0 0 -1 1]');
-% 
+%
 % For a 1-way within design with 3 conditions:
 % [STATS]=SubjectStatistics(STATS,.05,[1 0 -1; 0 1 -1; 1 -1 0]');
-% 
+%
 % For a 2-way between-within design with 4 conditions (2x2):
 % [STATS]=SubjectStatistics(STATS,.05,[1 -1]',{'A','S'},{'E','H'})
-% 
+%
 % Copyright (C) <2015>  <Allan Campopiano>
-% 
+%
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation; either version 2 of the License, or
 % (at your option) any later version.
-% 
+%
 % This program is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -88,8 +88,20 @@ STATS.alpha=alpha;
 switch STATS.design
     
     case 'ww';
-        [condfiles results]=pbsubject2way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
-            STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.condnames, varargin{:});
+        
+        
+        if any(strcmp({'ersp' 'itc'},STATS.measure));
+            
+            [condfiles results]=pbsubject2waytf(STATS,condfiles,STATS.numconds, STATS.nboot, ...
+                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.condnames, varargin{:});
+            
+        elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
+            
+            [condfiles results]=pbsubject2way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
+                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.condnames, varargin{:});
+            
+        end
+        
         
         % update STATS structure
         STATS.subject_results=results;
@@ -105,14 +117,14 @@ switch STATS.design
         
         if any(strcmp({'ersp' 'itc'},STATS.measure));
             
-        [condfiles results]=pbsubject1waytf(STATS,condfiles,STATS.numconds, STATS.nboot, ...
-            STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:}); 
-        
+            [condfiles results]=pbsubject1waytf(STATS,condfiles,STATS.numconds, STATS.nboot, ...
+                STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
+            
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
-        [condfiles results]=pbsubject1way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
-            STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
-        
+            [condfiles results]=pbsubject1way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
+                STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
+            
         end
         
         % update STATS structure
@@ -175,11 +187,11 @@ switch STATS.design
                 error('%s is not a recognized parameter name',inpName)
             end
         end
-
+        
         % move labels to STATS structure
         STATS.jlabels=options.jlabels;
         STATS.klabels=options.klabels;
-
+        
         % basically, each level of factor A is run as a one way, within
         % subjects design
         
@@ -187,7 +199,7 @@ switch STATS.design
         for i=1:STATS.levels(1);
             field_name{i,1}=['Factor_A', num2str(i)];
         end
-
+        
         % loop and gather the filenames for each level of Factor A separately
         k=1;
         for j=1:STATS.levels(1)
@@ -211,10 +223,17 @@ switch STATS.design
         
         for i=1:STATS.levels(1)
             
-            % do something in a loop for factor A
-            [~, results]=pbsubject1way(STATS.subject_bootfiles{i},STATS.levels(2), STATS.numpnts, STATS.nboot, ...
-                STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
-            
+            if any(strcmp({'ersp' 'itc'},STATS.measure));
+                
+                [jnk, results]=pbsubject1waytf(STATS,STATS.subject_bootfiles{i},STATS.levels(2),STATS.nboot, ...
+                    STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
+                
+            elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
+                
+                % do something in a loop for factor A
+                [jnk, results]=pbsubject1way(STATS.subject_bootfiles{i},STATS.levels(2), STATS.numpnts, STATS.nboot, ...
+                    STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
+            end
             % update STATS structure
             STATS.subject_results.(field_name{i})=results;
             disp('******* Working on next level of Factor A *******')

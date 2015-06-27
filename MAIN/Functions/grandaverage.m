@@ -1,4 +1,4 @@
-function [alldatacell] = grandaverage(nboot,numpnts,condfiles_subs)
+function [alldatacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs)
 
 % creates grand averages that can be used for robust group stats
 % like in Rousselet 2008, and Desjardins 2013 (percentile bootstrap tests).
@@ -18,41 +18,54 @@ function [alldatacell] = grandaverage(nboot,numpnts,condfiles_subs)
 [rowfile colfile]=size(condfiles_subs);
 alldatacell=cell(1,colfile);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-datacellind=randi(rowfile,1000,rowfile); % jun4th/15, remove after testing
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for i=1:colfile;
-    [subrow subcol]=size(condfiles_subs{i});
-    subdata=zeros(nboot,numpnts,subrow);
+if any(strcmp({'ersp' 'itc'},STATS.measure));
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %datacellind=randi(rowfile,1000,rowfile); % jun4th/15, remove after testing
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    for j=1:subrow;
-        tempload=load(condfiles_subs{1,i}{j,:});
-        subdata(:,:,j)=tempload.data;
-        clear tempload
+    for i=1:colfile;
+        [subrow subcol]=size(condfiles_subs{i});
+        subdata=zeros(nboot,numpnts,subrow);
+        
+        for j=1:subrow;
+            tempload=load(condfiles_subs{1,i}{j,:});
+            subdata(:,:,j)=tempload.data;
+            clear tempload
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % TESTING resampling procedure, remove or incorporate this after testing jun4th/15
+        % resample in a different way from Datacell, the result of
+        % GroupFigure_sample & GroupStatistics_sample will now be a resampling, NOT
+        % simply including all subjects as this function should normally do
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+        %     for q=1:1000;
+        %         alldatacell{1,i}(q,:)=trimmean(subdata(q,:,datacellind(q,:)),40,3);
+        %     end
+        
+        % this line SHOULD be here but was commented out due to testing on
+        % jun4th/15
+        % create grand avergae surrogates
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        alldatacell{1,i}=mean(subdata,3);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % TESTING resampling procedure, remove or incorporate this after testing jun4th/15
-    % resample in a different way from Datacell, the result of
-    % GroupFigure_sample & GroupStatistics_sample will now be a resampling, NOT
-    % simply including all subjects as this function should normally do
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
     
-    for q=1:1000;
-        alldatacell{1,i}(q,:)=trimmean(subdata(q,:,datacellind(q,:)),40,3);
-    end
-    % this line SHOULD be here but was commented out due to testing on
-    % jun4th/15
-    % create grand avergae surrogates
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %alldatacell{1,i}=mean(subdata,3);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % memory map load
+    datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+    datacell{1,condcurrent}=datamap;
+    clear datamap
+    
+    % write the condition waveforms for each subject to disk
+    condition=mean(datacell{1,condcurrent}.Data.dat,3);
+    save([condfiles{filecurrent,condcurrent}(1:end-4),'_TF_waves.mat'],'condition');
+    clear condition
 end
-
-
-
-
 
 
 

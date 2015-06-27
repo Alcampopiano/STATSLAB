@@ -1,4 +1,4 @@
-function [results condwaves] = pbgroup1way_sample(numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, varargin)
+function [results condwaves] = pbgroup1waytf_sample(STATS,numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, varargin)
 %{
 
 contrasts using con2way default to pooling across one factor. However, you
