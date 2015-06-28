@@ -34,11 +34,11 @@ optionnames = fieldnames(options);
 %         ' e.g., [1 -1 0; 1 0 -1]'''])
 % else
 %     % overwrite options stucture with varargin inputs if there are any
-%     
+%
 %     if ~isempty(varargin{1})
 %         options.(optionnames{1})=varargin{1};
 %     end
-%     
+%
 % end
 
 for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -62,7 +62,7 @@ conA=options.conA;
 % load data
 if isempty(condfiles_subs);
     for i=1:numconds
-        tempfname=uigetfile('*.mat',['Select all subject condition ', num2str(i), ' files'], 'MultiSelect','on');
+        tempfname=uigetfile('*.map',['Select all subject condition ', num2str(i), ' files'], 'MultiSelect','on');
         condfiles_subs{1,i}(:,1)=tempfname;
     end
     [datacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs);
@@ -71,59 +71,77 @@ else
 end
 
 % get condition waveforms for plotting purposes
+% for TF, set condition waveforms to a file name (string), rather than data, this
+% string was defined in grandaverage.m
 for i=1:length(datacell);
-    condwaves(i,:)=mean(datacell{i},1);
+    condwaves{i,:}=['group_TFwaves_', STATS.savestring,'_',STATS.condnames{i},'.,mat'];
 end
 
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
 
-% build results structure
-results=struct('factor_A',{[]});
-results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-%results.factor_A.z_scores=struct('z_avg',{zeros(conAcol,numpnts)},'CI_z',{cell(conAcol,1)});
+% % build results structure
+% results=struct('factor_A',{[]});
+% results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
+%
+% for i=1:conAcol;
+%     results.factor_A.CI{i,1}=zeros(2,numpnts);
+% end
 
-for i=1:conAcol;
-    results.factor_A.CI{i,1}=zeros(2,numpnts);
-    %results.factor_A.z_scores.CI_z{i,1}=zeros(2,numpnts);
-end
+h1 = waitbar(0,'1','Name','statistics across frequency windows','Position',[1100 549 550 40]);
+childh1 = get(h1, 'Children');
+set(childh1, 'Position',[5 10 538 15]);
 
-% load and arrange data
-h2 = waitbar(0,'1','Name','analysis using all subjects','Position',[1100 486 550 40]);
+h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
 %arrange the data for the calculations
-[rowcell ~]=size(datacell{1,1});
+rowcell=STATS.nboot;
 
-% loop for stats at each timepoint
-for timecurrent=1:numpnts;
-    
-    % reset data to zeros after every calculation at each timepoint
-    data=zeros(rowcell,numconds);
-    
-    % arrange data into a matrix with subs (or single subject boot samples) X conditions
-    for condcurrent=1:colconds;
-        data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
-    end
-    
-    % factor A
-    con=conA;
-    [psihat_stat, pvalgen, pcrit, conflow, confup]=pbstats(data, con, nboot, alpha, options.FWE);
-    
-    % passing results into results structure
-    results.factor_A.pval(:,timecurrent)=pvalgen;
-    results.factor_A.alpha(:,timecurrent)=pcrit;
-    results.factor_A.test_stat(:,timecurrent)=psihat_stat;
-    
-    for i=1:conAcol;
-        results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
-        results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
-    end
-
-    waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+% band fields
+for i=1:STATS.freqbins;
+    band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
 end
-close(h2);
+
+for bandind=1:STATS.freqbins;
+    
+    % loop for stats at each timepoint
+    for timecurrent=1:STATS.timesout;
+        
+        % reset data to zeros after every calculation at each timepoint
+        data=zeros(rowcell,numconds);
+        
+        % arrange data into a matrix with subs (or single subject boot samples) X conditions
+        for condcurrent=1:colconds;
+            % data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
+            data(:,condcurrent)=datacell{1,condcurrent}.Data.dat(bandind,timecurrent,:);
+        end
+        
+        
+        % factor A
+        con=conA;
+        [psihat_stat, pvalgen, pcrit, conflow, confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        
+        % passing results into results structure
+        results.(band_fields{bandind}).factor_A.contrasts=conA;
+        results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
+        results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
+        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+        
+        for i=1:conAcol;
+            results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
+            results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
+        end
+        
+        waitbar(timecurrent/numpnts,h1,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+    end
+    
+    waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
+      
+end
+
+close(h1,h2);
 
 %{
 % the string in the sqare brackets is what it appended to the original file name

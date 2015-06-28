@@ -55,8 +55,14 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
     
 elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     
+    
+    
+    
     for i=1:colfile;
         [subrow subcol]=size(condfiles_subs{i});
+        
+        
+        
         
         for j=1:subrow;
             
@@ -68,22 +74,51 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             save([condfiles_subs{1,i}{j,:}(1:end-4),'_TF_waves.mat'],'condition');
             clear condition
             
-            if i==1;
+            if j==1;
                 
                 dat_avg=datamap;
                 
-            elseif i>1;
-                
+                % create a temp file name to store large freq surrogates
                 [~,tmpfname]=fileparts(tempname);
                 
-                dat_avg=mapwrite((dat_avg.Data.dat+datamap.Data.dat)/2,[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout]);
+            elseif j>1;
+                
+                if j>2;
+                    oldtmpfname=tmpfname;
+                end
+                % create a temp file name to store large freq surrogates
+                [~,tmpfname]=fileparts(tempname);
+                mapwrite((dat_avg.Data.dat+datamap.Data.dat)/2,[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+                dat_avg=mapread([tmpfname,'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+                
+                try
+                    warning off
+                    delete([oldtmpfname,'.map']);
+                    warning on
+                catch
+                end
+                
                 
             end
             clear datamap
         end
         
+        % try to delete previous mapped files;
+        warning off
+        delete(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+        warning on
         
-        alldatacell{1,i}=dat_avg;
+        % save full surrogate arrays X condition
+        mapwrite(dat_avg.Data.dat,['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+        
+        % save mean TF waveforms
+        condition=mean(dat_avg.Data.dat,3);
+        save(['group_TFwaves_',STATS.savestring, '_', STATS.condnames{i},'.mat'],'condition');
+        clear condition
+        %mapwrite(mean(dat_avg.Data.dat,3),['group_TFwaves_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout]);
+        
+        % fill up datacell with the full TF surrogates to be used in statistics.
+        alldatacell{1,i}=mapread(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         delete([tmpfname,'.map']);
         clear dat_avg
         

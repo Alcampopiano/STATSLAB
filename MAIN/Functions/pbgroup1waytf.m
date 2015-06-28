@@ -57,7 +57,7 @@ conA=options.conA;
 % load all file names subs X conditions
 if isempty(condfiles) % allowing an input for file names
     for i=1:numconds
-        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        tempfname=uigetfile('*.map',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
         condfiles_subs{1,i}(:,1)=tempfname;
     end
     
@@ -93,25 +93,25 @@ CIlowbootA=cell(conAcol,1);
 CIupbootA=cell(conAcol,1);
 
 % this function runs the analysis without resampling from subjects
-[sample_results condwaves] = pbgroup1waytf_sample(STATS,numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA);
+[sample_results condwaves] = pbgroup1waytf_sample(STATS, numconds, STATS.timesout, nboot, jlvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA);
 
-% build results structure
-results=struct('factor_A',{[]});
-results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-
-for i=1:conAcol;
-    results.factor_A.CI{i,1}=zeros(2,numpnts);
-end
+% % build results structure
+% results=struct('factor_A',{[]});
+% results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
+% 
+% for i=1:conAcol;
+%     results.factor_A.CI{i,1}=zeros(2,numpnts);
+% end
 
 % make identical results stucture to eventually hold inferential stats
-inferential_results=results;
+%inferential_results=results;
 
 % load and arrange data
 h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 549 550 40]);
 childh1 = get(h1, 'Children');
 set(childh1, 'Position',[5 10 538 15]);
 
-h2 = waitbar(0,'1','Name','stats across time','Position',[1100 486 550 40]);
+h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
