@@ -154,7 +154,7 @@ set(childh2, 'Position',[5 10 538 15]);
 for bootind=1:nsamp;
     
     % this function builds datacell
-    [datacell] = bootgrandaverage(condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls,klvls);
+    [datacell] = bootgrandaverage(STATS,condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls,klvls);
     
     % get condition waveforms for plotting purposes
     for i=1:numconds;
