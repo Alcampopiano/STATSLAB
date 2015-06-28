@@ -19,7 +19,7 @@ function [alldatacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs)
 alldatacell=cell(1,colfile);
 
 
-if any(strcmp({'ersp' 'itc'},STATS.measure));
+if any(strcmp({'chanclust' 'gfa'},STATS.measure));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %datacellind=randi(rowfile,1000,rowfile); % jun4th/15, remove after testing
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,18 +53,42 @@ if any(strcmp({'ersp' 'itc'},STATS.measure));
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     
-elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
+elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     
+    for i=1:colfile;
+        [subrow subcol]=size(condfiles_subs{i});
+        
+        for j=1:subrow;
+            
+            % memory map load
+            datamap=mapread(condfiles_subs{1,i}{j,:},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+            
+            % write the condition waveforms for each subject to disk
+            condition=mean(datamap.Data.dat,3);
+            save([condfiles_subs{1,i}{j,:}(1:end-4),'_TF_waves.mat'],'condition');
+            clear condition
+            
+            if i==1;
+                
+                dat_avg=datamap;
+                
+            elseif i>1;
+                
+                [~,tmpfname]=fileparts(tempname);
+                
+                dat_avg=mapwrite((dat_avg.Data.dat+datamap.Data.dat)/2,[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout]);
+                
+            end
+            clear datamap
+        end
+        
+        
+        alldatacell{1,i}=dat_avg;
+        delete([tmpfname,'.map']);
+        clear dat_avg
+        
+    end
     
-    % memory map load
-    datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
-    datacell{1,condcurrent}=datamap;
-    clear datamap
-    
-    % write the condition waveforms for each subject to disk
-    condition=mean(datacell{1,condcurrent}.Data.dat,3);
-    save([condfiles{filecurrent,condcurrent}(1:end-4),'_TF_waves.mat'],'condition');
-    clear condition
 end
 
 
