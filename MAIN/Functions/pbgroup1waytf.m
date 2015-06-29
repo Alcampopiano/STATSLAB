@@ -4,7 +4,7 @@ tic
 
 nargs = length(varargin);
 if round(nargs/2)~=nargs/2
-   error('need propertyName/propertyValue pairs for optional inputs')
+    error('need propertyName/propertyValue pairs for optional inputs')
 end
 
 % Set default contrast coefficients for 2-way
@@ -29,11 +29,11 @@ optionnames = fieldnames(options);
 %         ' e.g., [1 -1 0; 1 0 -1]'''])
 % else
 %     % overwrite options stucture with varargin inputs if there are any
-%     
+%
 %         if ~isempty(varargin{1})
 %         options.(optionnames{1})=varargin{1}{1};
 %         end
-%     
+%
 % end
 
 for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -71,7 +71,7 @@ else
 end
 
 
-%load('condfiles_subs.mat') 
+%load('condfiles_subs.mat')
 
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
@@ -87,7 +87,7 @@ condwaves_trim=zeros(numconds,numpnts);
 % this function builds bootstrap inds and writes them to the drive instead
 % of holding them in RAM, which makes it scalable (e.g., for 100,000 resamples!)
 [rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nsamp,design,jlvls);
-    
+
 % preallocate cell arrays used to accumulate the nsamp CIs
 CIlowbootA=cell(conAcol,1);
 CIupbootA=cell(conAcol,1);
@@ -98,7 +98,7 @@ CIupbootA=cell(conAcol,1);
 % % build results structure
 % results=struct('factor_A',{[]});
 % results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-% 
+%
 % for i=1:conAcol;
 %     results.factor_A.CI{i,1}=zeros(2,numpnts);
 % end
@@ -115,51 +115,63 @@ h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 5
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+% band fields
+for i=1:STATS.freqbins;
+    band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
+end
+
 % bootstrap loop
 for bootind=1:nsamp;
-   
+    
     % this function builds datacell
     [datacell] = bootgrandaverage(condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls);
-                                    
+    
+    % write the average of each cell in datacell to a mapped file.
     % get condition waveforms for plotting purposes
-    %%%%%%%%%%%%%%%
-    % why bother doing this gathering? Maybe just take mean from the
-    % analyses with al subjects, or maybe its fine.
-    %%%%%%%%%%%%%%
     for i=1:numconds;
-        condwaves_trim_gather{i}(bootind,:)=mean(datacell{i},1);
+        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
     end
+    %%%%%%%%%%%%%%
+    %     for i=1:numconds;
+    %         condwaves_trim_gather{i}(bootind,:)=mean(datacell{i},1);
+    %     end
     
     %arrange the data for the calculations
-    [rowcell ~]=size(datacell{1,1});
+    rowcell=STATS.nboot;
     
-    
-    % loop for stats at each timepoint
-    for timecurrent=1:numpnts;
+    for bandind=1:STATS.freqbins;
         
-        % reset data to zeros after every calculation at each timepoint
-        data=zeros(rowcell,numconds);
-        
-        % arrange data into a matrix with subs (or single subject boot samples) X conditions
-        for condcurrent=1:colconds;
-            data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
+        % loop for stats at each timepoint
+        for timecurrent=1:STATS.timesout;
+            
+            % reset data to zeros after every calculation at each timepoint
+            data=zeros(rowcell,numconds);
+            
+            % arrange data into a matrix with subs (or single subject boot samples) X conditions
+            for condcurrent=1:colconds;
+                % data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
+                data(:,condcurrent)=datacell{1,condcurrent}.Data.dat(bandind,timecurrent,:);
+            end
+            
+            
+            % factor A
+            con=conA;
+            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            
+            % passing results into results structure
+            results.(band_fields{bandind}).factor_A.contrasts=conA;
+            results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
+            results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
+            results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+            
+            for i=1:conAcol;
+                results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
+                results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
+            end
+            
+            waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
         end
         
-        % factor A
-        con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
-        
-        % passing results into results structure
-        results.factor_A.pval(:,timecurrent)=pvalgen;
-        results.factor_A.alpha(:,timecurrent)=pcrit;
-        results.factor_A.test_stat(:,timecurrent)=psihat_stat;
-        
-        for i=1:conAcol;
-            results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
-            results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
-        end
-       
-        waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,13 +182,13 @@ for bootind=1:nsamp;
         CIlowbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(1,:);
         CIupbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(2,:);
     end
-
+    
     %%% diffwaves should be iteratively written to drive - mem map
     %%% stealing differnce waves in order to calculate "real" CIs
     for ext=1:conAcol
         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
     end
-   
+    
     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 end
 
@@ -221,10 +233,13 @@ end
 close(h1,h2);
 %%%%%%%%%%%%%%%%%% inferential statistics %%%%%%%%%%%%%%%%%
 
+
 % get condition waveforms to plot
 for i=1:numconds;
-    condwaves_trim(i,:)=mean(condwaves_trim_gather{i},1);
+    dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
+    condwaves_trim{i}=mean(dat_tempmont.Data.dat,3);
 end
+
 
 %preallocate samll data arrays
 data_A=zeros(nsamp,conAcol);
@@ -259,7 +274,7 @@ for timecurrent=1:numpnts;
         inferential_results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
         inferential_results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
     end
-
+    
     waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
 
@@ -276,12 +291,12 @@ end
 
 
 %if iscell(tmpfname_CIup)
-    for i=1:length(tmpfname_CIup);
-        delete([tmpfname_CIup{i}, '.map']);
-        delete([tmpfname_CIlow{i}, '.map']);
-        delete([tmpfname_diff{i}, '.map']);
-    end
-    
+for i=1:length(tmpfname_CIup);
+    delete([tmpfname_CIup{i}, '.map']);
+    delete([tmpfname_CIlow{i}, '.map']);
+    delete([tmpfname_diff{i}, '.map']);
+end
+
 %else
 %    delete([tmpfname_CIup, '.map']);
 %    delete([tmpfname_CIlow, '.map']);
