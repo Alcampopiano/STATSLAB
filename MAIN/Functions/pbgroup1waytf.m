@@ -75,8 +75,9 @@ end
 
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
-condwaves_trim_gather=cell(1,numconds);
-condwaves_trim=zeros(numconds,numpnts);
+%condwaves_trim_gather=cell(1,numconds);
+condwaves_trim_origvals=zeros(STATS.freqbins,numpnts);
+condwaves_trim=zeros(STATS.freqbins,numpnts);
 %datacell=cell(1,colconds);
 
 % delete from disk the .map files that might have been left over from a
@@ -129,13 +130,12 @@ for bootind=1:nsamp;
     % write the average of each cell in datacell to a mapped file.
     % get condition waveforms for plotting purposes
     for i=1:numconds;
-        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
+        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);      
+        
+        % also map z score effect for each monte carlo
+        mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]); 
     end
-    %%%%%%%%%%%%%%
-    %     for i=1:numconds;
-    %         condwaves_trim_gather{i}(bootind,:)=mean(datacell{i},1);
-    %     end
-    
+     
     %arrange the data for the calculations
     rowcell=STATS.nboot;
     
@@ -237,9 +237,12 @@ close(h1,h2);
 % get condition waveforms to plot
 for i=1:numconds;
     dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
-    condwaves_trim{i}=mean(dat_tempmont.Data.dat,3);
+    condwaves_trim_origvals{i}=mean(dat_tempmont.Data.dat,3);
+    
+    % also map z score effect for each monte carlo
+    dat_tempmontz=mapread(['tempmontz_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
+    condwaves_trim{i}=mean(dat_tempmontz.Data.dat,3);
 end
-
 
 %preallocate samll data arrays
 data_A=zeros(nsamp,conAcol);
