@@ -254,6 +254,11 @@ for filecurrent=1:colfile;
                         % this holds multiple channel spectral information
                         datamap=mapread([fnames{1,filecurrent}(1,1:end-4), '_tempbootstrapped.map'],'dat','datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
                         
+                        % get rid of previously mapped files
+                        warning off
+                        delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
+                        warning on
+                        
                         % this is the avreage of the multi channel spectral information, like a spectral ROI
                         mapwrite(mean(datamap.Data.dat,3),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                         
@@ -281,10 +286,20 @@ for filecurrent=1:colfile;
                         if strcmp(STATS.measure, 'ersp')
                             %clear itc powbase times freqs erspboot itcboot
                             
+                            % get rid of previously mapped files
+                            warning off
+                            delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
+                            warning on
+                            
                             mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                             
                         elseif strcmp(STATS.measure, 'itc')
                             %clear itc powbase times freqs erspboot itcboot
+                            
+                            % get rid of previously mapped files
+                            warning off
+                            delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
+                            warning on
                             
                             % no trimmed mean
                             mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);

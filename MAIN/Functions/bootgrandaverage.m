@@ -100,12 +100,12 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     switch design
         
         case 'bw'
-              
+            
             q=1;
             for j=1:jlvls;
                 for k=1:klvls;
                     [rowsubs ~]=size(condfiles_subs{1,q}(:,1));
-                    subdata_gather=zeros(rowsubs,numpnts,STATS.nboot);
+                    subdata_gather=zeros(STATS.nboot,numpnts,rowsubs);
                     
                     for freqcurrent=1:STATS.freqbins;
                         
@@ -114,15 +114,20 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                             
                             % memory map load
                             datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(j)]).Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
-                            subdata_gather(h,:,:)=datamap.Data.dat(freqcurrent,:,:);
+                            subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                             
                         end
                         
-                        mapwrite(trimmean(subdata_gather,40,1),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
-                        
+                        mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
+                        clear subdata_gather
                     end
                     
-                    datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                    % reording array so taht everything maps correctly.
+                    maptemp=mapread(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'], 'dat');
+                    mapwrite(permute(maptemp.Data.dat,[3 2 1]),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                    delete(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map']);
+                    
+                    datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat');
                     q=q+1;
                 end
             end
@@ -132,7 +137,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             
             for q=1:numconds;
                 [rowsubs ~]=size(condfiles_subs{1,q}(:,1));
-                subdata_gather=zeros(rowsubs,numpnts,STATS.nboot);
+                subdata_gather=zeros(STATS.nboot,numpnts,rowsubs);
                 
                 for freqcurrent=1:STATS.freqbins;
                     
@@ -141,15 +146,21 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                         % memory map load
                         datamap=mapread(condfiles_subs{1,q}{cond_bootvect.j1.Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
-                        subdata_gather(h,:,:)=datamap.Data.dat(freqcurrent,:,:);
+                        subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                         
                     end
                     
-                    mapwrite(trimmean(subdata_gather,40,1),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
-                    
+                    mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
+                    clear subdata_gather
                 end
                 
-                datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                % reording array so taht everything maps correctly.
+                maptemp=mapread(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'], 'dat');
+                mapwrite(permute(maptemp.Data.dat,[3 2 1]),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                delete(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map']);
+                
+                % filling data cell with objects
+                datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat');
                 
             end
             
@@ -159,7 +170,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             
             for q=1:numconds;
                 [rowsubs ~]=size(condfiles_subs{1,q}(:,1));
-                subdata_gather=zeros(rowsubs,numpnts,STATS.nboot);
+                subdata_gather=zeros(STATS.nboot,numpnts,rowsubs);
                 
                 for freqcurrent=1:STATS.freqbins;
                     
@@ -168,15 +179,19 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                         % memory map load
                         datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(q)]).Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
-                        subdata_gather(h,:,:)=datamap.Data.dat(freqcurrent,:,:);
+                        subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                         
                     end
                     
-                    mapwrite(trimmean(subdata_gather,40,1),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                    mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
                     
                 end
                 
-                datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                maptemp=mapread(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'], 'dat');
+                mapwrite(permute(maptemp.Data.dat,[3 2 1]),['mont_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                delete(['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map']);
+                
+                datacell{1,q}=mapread(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{q},'.map'], 'dat');
                 
             end
     end

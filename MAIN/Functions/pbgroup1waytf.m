@@ -71,14 +71,25 @@ else
 end
 
 
-%load('condfiles_subs.mat')
+
+% try to delete previously made mapped files
+warning off
+for i=1:length(STATS.condnames);
+    delete(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+    delete(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+    delete(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+end
+warning on
 
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
-%condwaves_trim_gather=cell(1,numconds);
-condwaves_trim_origvals=zeros(STATS.freqbins,numpnts);
-condwaves_trim=zeros(STATS.freqbins,numpnts);
-%datacell=cell(1,colconds);
+condwaves_trim_origvals=cell(1,numconds);
+condwaves_trim=cell(1,numconds);
+for i=1:numconds;
+    condwaves_trim_origvals{i}=zeros(STATS.freqbins,numpnts);
+    condwaves_trim{i}=zeros(STATS.freqbins,numpnts);
+    %datacell=cell(1,colconds);
+end
 
 % delete from disk the .map files that might have been left over from a
 % previous analysia
@@ -121,21 +132,27 @@ for i=1:STATS.freqbins;
     band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
 end
 
+% build temporary file names
+for ext=1:conAcol
+    [~,tmpfname_tmp]=fileparts(tempname);
+    tmpfname_diff{ext}=tmpfname_tmp;
+end
+
 % bootstrap loop
 for bootind=1:nsamp;
     
     % this function builds datacell
-    [datacell] = bootgrandaverage(condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls);
+    [datacell] = bootgrandaverage(STATS,condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls);
     
     % write the average of each cell in datacell to a mapped file.
     % get condition waveforms for plotting purposes
     for i=1:numconds;
-        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);      
+        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
         
         % also map z score effect for each monte carlo
-        mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]); 
+        mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,1,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
     end
-     
+    
     %arrange the data for the calculations
     rowcell=STATS.nboot;
     
@@ -156,38 +173,53 @@ for bootind=1:nsamp;
             
             % factor A
             con=conA;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(band_fields{bandind}).factor_A.contrasts=conA;
             results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
             results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
             results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+            results.(band_fields{bandind}).factor_A.test_statz(:,timecurrent)=psihat_statz;
             
             for i=1:conAcol;
                 results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
             end
             
-            waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+            %waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
         end
-        
+        waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%This is where we extract only what we need from each bootstrap%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    for ext=1:conAcol
-        CIlowbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(1,:);
-        CIupbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(2,:);
+    %     for ext=1:conAcol
+    %         CIlowbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(1,:);
+    %         CIupbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(2,:);
+    %     end
+    
+    %%% get effect sizes for each bootstrap test
+    %     for ext=1:conAcol
+    %
+    %         % avg difference
+    %         %diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
+    %
+    %         % z effect
+    %         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_statz(ext,:);
+    %     end
+    
+    for bandind=1:STATS.freqbins;
+        for ext=1:conAcol
+            %[~,tmpfname_tmp]=fileparts(tempname);
+            %tmpfname_diff{ext}=tmpfname_tmp;
+            mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+            
+        end
     end
     
-    %%% diffwaves should be iteratively written to drive - mem map
-    %%% stealing differnce waves in order to calculate "real" CIs
-    for ext=1:conAcol
-        diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
-    end
     
     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 end
@@ -198,37 +230,13 @@ end
 %CIB={CIlowbootB,CIupbootB};
 %CIAB={CIlowbootAB,CIupbootAB};
 
-
-%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%
-% Mother CIs, the way they are here, do NOT need to be cacultaed, instead,
-% just find the CIs from the bootstrapped average differecnce wave
-% (psihat_stat). You should do that here so that you dont have to keep
-% calculating them after running this function, which is getting annoying
-%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%
-% calculate the 95% "mother" CIs based on what you have accumulated
-%[CIlowA CIupA]=grand_pb_bootCI(CIA, conAcol, numpnts, nsamp, alpha);
-%[CIlowB CIupB]=grand_pb_bootCI(CIB, conBcol, numpnts, nsamp, alpha);
-%[CIlowAB CIupAB]=grand_pb_bootCI(CIAB, conABcol, numpnts, nsamp, alpha);
-
-
 % map write the CI arrays, might be cool to see them at some point
-for ext=1:conAcol
-    
-    [~,tmpfname_tmp]=fileparts(tempname);
-    tmpfname_CIup{ext}=tmpfname_tmp;
-    fidm=mapwrite(CIlowbootA{ext,1},[tmpfname_CIup{ext},'.map'],'datsize',[nsamp numpnts]);
-    
-    [~,tmpfname_tmp]=fileparts(tempname);
-    tmpfname_CIlow{ext}=tmpfname_tmp;
-    fidm=mapwrite(CIupbootA{ext,1},[tmpfname_CIlow{ext},'.map'],'datsize',[nsamp numpnts]);
-    
-    [~,tmpfname_tmp]=fileparts(tempname);
-    tmpfname_diff{ext}=tmpfname_tmp;
-    fidm=mapwrite(diffwaveA{ext,1},[tmpfname_diff{ext},'.map'],'datsize',[nsamp numpnts]);
-    
-end
+% for ext=1:conAcol
+%     [~,tmpfname_tmp]=fileparts(tempname);
+%     tmpfname_diff{ext}=tmpfname_tmp;
+%     mapwrite(diffwaveA{ext,1},[tmpfname_diff{ext},'.map'],'datsize',[nsamp numpnts]);
+%
+% end
 
 close(h1,h2);
 %%%%%%%%%%%%%%%%%% inferential statistics %%%%%%%%%%%%%%%%%
@@ -249,7 +257,7 @@ data_A=zeros(nsamp,conAcol);
 
 % access the big difference wave arrays
 for i=1:conAcol
-    diffdata.(['A',num2str(i)])=mapread([tmpfname_diff{i},'.map'],'dat','datsize',[nsamp numpnts]);
+    diffdata.(['A',num2str(i)])=mapread([tmpfname_diff{i},'.map'],'dat','datsize',[STATS.freqbins numpnts nsamp]);
 end
 
 % waitbar for final stages, doing inferential stats
@@ -257,28 +265,33 @@ h3 = waitbar(0,'1','Name','inferential statistics','Position',[1100 486 550 40])
 childh3 = get(h3, 'Children');
 set(childh3, 'Position',[5 10 538 15]);
 
-% loop for stats at each timepoint
-for timecurrent=1:numpnts;
+
+for bandind=1:STATS.freqbins;
     
-    % factor A
-    con=conA;
-    for i=1:conAcol;
-        data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(:,timecurrent);
+    % loop for stats at each timepoint
+    for timecurrent=1:numpnts;
+        
+        % factor A
+        con=conA;
+        for i=1:conAcol;
+            data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(bandind,timecurrent,:);
+        end
+        
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
+        
+        % passing results into results structure
+        inferential_results.(band_fields{bandind}).factor_A.contrasts=conA;
+        inferential_results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
+        inferential_results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
+        inferential_results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+        
+        for i=1:conAcol;
+            inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
+            inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
+        end
+        
+        waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
-    
-    [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
-    
-    % passing results into results structure
-    inferential_results.factor_A.pval(:,timecurrent)=pvalgen;
-    inferential_results.factor_A.alpha(:,timecurrent)=pcrit;
-    inferential_results.factor_A.test_stat(:,timecurrent)=psihat_stat;
-    
-    for i=1:conAcol;
-        inferential_results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
-        inferential_results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
-    end
-    
-    waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
 
 % edit may 8th/15
@@ -293,21 +306,21 @@ else
 end
 
 
-%if iscell(tmpfname_CIup)
-for i=1:length(tmpfname_CIup);
-    delete([tmpfname_CIup{i}, '.map']);
-    delete([tmpfname_CIlow{i}, '.map']);
-    delete([tmpfname_diff{i}, '.map']);
+if iscell(tmpfname_diff)
+    for i=1:length(tmpfname_diff);
+        % delete([tmpfname_CIup{i}, '.map']);
+        % delete([tmpfname_CIlow{i}, '.map']);
+        delete([tmpfname_diff{i}, '.map']);
+    end
+    
+else
+    %    delete([tmpfname_CIup, '.map']);
+    %    delete([tmpfname_CIlow, '.map']);
+    delete([tmpfname_diff, '.map']);
 end
-
-%else
-%    delete([tmpfname_CIup, '.map']);
-%    delete([tmpfname_CIlow, '.map']);
-%    delete([tmpfname_diff, '.map']);
-%end
-
 
 close(h3)
 end
+
 
 

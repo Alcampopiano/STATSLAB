@@ -1,4 +1,4 @@
-function [psihat_stat, pvalgen, pcrit, conflow, confup] = pbstats(data, con, nboot, alpha, FWE)
+function [psihat_stat, pvalgen, pcrit, conflow, confup psihat_statz] = pbstats(data, con, nboot, alpha, FWE)
 %bla bla bla
 
 % uses con2way (which builds appropriate linear contrasts) to do percentile
@@ -24,6 +24,9 @@ datcon=data*con;
 
 % take the mean difference (mostly to plot it later)
 psihat_stat=mean(datcon,1);
+
+% get z effect
+psihat_statz=(mean(datcon,1))/(std(datcon,1,1));
 
 % define random indices
 %bootinds=randi(N,nboot,N);
