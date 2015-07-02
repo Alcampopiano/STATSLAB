@@ -83,10 +83,11 @@ warning on
 
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
-condwaves_trim_origvals=cell(1,numconds);
+%condwaves_trim_origvals=cell(1,numconds);
+temparray=zeros(STATS.freqbins,numpnts);
 condwaves_trim=cell(1,numconds);
 for i=1:numconds;
-    condwaves_trim_origvals{i}=zeros(STATS.freqbins,numpnts);
+    %condwaves_trim_origvals{i}=zeros(STATS.freqbins,numpnts);
     condwaves_trim{i}=zeros(STATS.freqbins,numpnts);
     %datacell=cell(1,colconds);
 end
@@ -149,8 +150,9 @@ for bootind=1:nsamp;
     for i=1:numconds;
         mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
         
+        %%%%% dont worry about this, not necessary to have z score condition waves
         % also map z score effect for each monte carlo
-        mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,1,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
+        % mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,1,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
     end
     
     %arrange the data for the calculations
@@ -210,16 +212,18 @@ for bootind=1:nsamp;
     %         % z effect
     %         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_statz(ext,:);
     %     end
-    
-    for bandind=1:STATS.freqbins;
-        for ext=1:conAcol
+    for ext=1:conAcol
+        for bandind=1:STATS.freqbins;
+            
             %[~,tmpfname_tmp]=fileparts(tempname);
             %tmpfname_diff{ext}=tmpfname_tmp;
-            mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+            temparray(bandind,:)=results.(band_fields{bandind}).factor_A.test_statz(ext,:);
+            %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+            
             
         end
+        mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
     end
-    
     
     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 end
@@ -244,12 +248,14 @@ close(h1,h2);
 
 % get condition waveforms to plot
 for i=1:numconds;
-    dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
-    condwaves_trim_origvals{i}=mean(dat_tempmont.Data.dat,3);
     
-    % also map z score effect for each monte carlo
-    dat_tempmontz=mapread(['tempmontz_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
-    condwaves_trim{i}=mean(dat_tempmontz.Data.dat,3);
+    %     %%%%%% dont worry about this one, make var equal to the regular unit waveforms
+    %     % also map z score effect for each monte carlo
+    %     dat_tempmontz=mapread(['tempmontz_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
+    %     condwaves_trim{i}=mean(dat_tempmontz.Data.dat,3);
+    
+    dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat');
+    condwaves_trim{i}=mean(dat_tempmont.Data.dat,3);
 end
 
 %preallocate samll data arrays
@@ -261,7 +267,7 @@ for i=1:conAcol
 end
 
 % waitbar for final stages, doing inferential stats
-h3 = waitbar(0,'1','Name','inferential statistics','Position',[1100 486 550 40]);
+h3 = waitbar(0,'1','Name','inferential statistics on frequency bands','Position',[1100 486 550 40]);
 childh3 = get(h3, 'Children');
 set(childh3, 'Position',[5 10 538 15]);
 
@@ -290,8 +296,9 @@ for bandind=1:STATS.freqbins;
             inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
         end
         
-        waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+        %waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
+    waitbar(bandind/STATS.freqbins,h3,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
 end
 
 % edit may 8th/15
