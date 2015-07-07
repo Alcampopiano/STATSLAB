@@ -123,7 +123,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                             
                             
                             % memory map load
-                            datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(j)]).Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                            datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(j)]).Data.dat(bootind,h)},'dat');
                             subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                             
                         end
@@ -188,7 +188,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                         
                         % memory map load
-                        datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(q)]).Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                        datamap=mapread(condfiles_subs{1,q}{cond_bootvect.(['j',num2str(q)]).Data.dat(bootind,h)},'dat');
                         subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                         
                     end
