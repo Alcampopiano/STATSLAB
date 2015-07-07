@@ -25,14 +25,17 @@ if length(design)~=length(varargin);
         'For example, for a 1-way design with 3 levels the last input would be 3']);
 end
 
-%preallocating
-datacell=cell(1,size(condfiles_subs,2));
 
-for i=1:size(condfiles_subs,2);
-    datacell{i}=zeros(nboot,numpnts);
-end
+
 
 if any(strcmp({'chanclust' 'gfa'},STATS.measure));
+    
+    %preallocating
+    datacell=cell(1,size(condfiles_subs,2));
+    
+    for i=1:size(condfiles_subs,2);
+        datacell{i}=zeros(nboot,numpnts);
+    end
     
     switch design
         
@@ -97,6 +100,13 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
     
 elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     
+    % kill file
+    warning off
+    for i=1:length(STATS.condnames);
+        delete(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+    end
+    warning on
+    
     switch design
         
         case 'bw'
@@ -145,7 +155,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                         
                         % memory map load
-                        datamap=mapread(condfiles_subs{1,q}{cond_bootvect.j1.Data.dat(bootind,h)},'dat','datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+                        datamap=mapread(condfiles_subs{1,q}{cond_bootvect.j1.Data.dat(bootind,h)},'dat');
                         subdata_gather(:,:,h)=squeeze(datamap.Data.dat(freqcurrent,:,:))';
                         
                     end

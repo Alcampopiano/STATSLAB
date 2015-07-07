@@ -70,14 +70,16 @@ else
     
 end
 
-
-
 % try to delete previously made mapped files
 warning off
 for i=1:length(STATS.condnames);
     delete(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
     delete(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
     delete(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+end
+
+for i=1:conAcol;
+    delete(['zsurrogates_',STATS.savestring,'_contrastA',num2str(i),'.map']);
 end
 warning on
 
@@ -134,10 +136,10 @@ for i=1:STATS.freqbins;
 end
 
 % build temporary file names
-for ext=1:conAcol
-    [~,tmpfname_tmp]=fileparts(tempname);
-    tmpfname_diff{ext}=tmpfname_tmp;
-end
+% for ext=1:conAcol
+%     [~,tmpfname_tmp]=fileparts(tempname);
+%     tmpfname_diff{ext}=tmpfname_tmp;
+% end
 
 % bootstrap loop
 for bootind=1:nsamp;
@@ -222,7 +224,11 @@ for bootind=1:nsamp;
             
             
         end
-        mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+        
+        % here are the z surrogates that we do stats on, the arrray holds
+        % all effect sizes for every band and timepoint for each monte carlo
+        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+        %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
     end
     
     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
@@ -263,7 +269,8 @@ data_A=zeros(nsamp,conAcol);
 
 % access the big difference wave arrays
 for i=1:conAcol
-    diffdata.(['A',num2str(i)])=mapread([tmpfname_diff{i},'.map'],'dat','datsize',[STATS.freqbins numpnts nsamp]);
+    %diffdata.(['A',num2str(i)])=mapread([tmpfname_diff{i},'.map'],'dat');
+    diffdata.(['A',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'dat');
 end
 
 % waitbar for final stages, doing inferential stats
@@ -313,18 +320,18 @@ else
 end
 
 
-if iscell(tmpfname_diff)
-    for i=1:length(tmpfname_diff);
-        % delete([tmpfname_CIup{i}, '.map']);
-        % delete([tmpfname_CIlow{i}, '.map']);
-        delete([tmpfname_diff{i}, '.map']);
-    end
-    
-else
-    %    delete([tmpfname_CIup, '.map']);
-    %    delete([tmpfname_CIlow, '.map']);
-    delete([tmpfname_diff, '.map']);
-end
+% if iscell(tmpfname_diff)
+%     for i=1:length(tmpfname_diff);
+%         % delete([tmpfname_CIup{i}, '.map']);
+%         % delete([tmpfname_CIlow{i}, '.map']);
+%         delete([tmpfname_diff{i}, '.map']);
+%     end
+%
+% else
+%     %    delete([tmpfname_CIup, '.map']);
+%     %    delete([tmpfname_CIlow, '.map']);
+%     delete([tmpfname_diff, '.map']);
+% end
 
 close(h3)
 end
