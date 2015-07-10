@@ -1,7 +1,9 @@
-function [okayhit, IC_choices]=ICpick
+function [okayhit, IC_choices]=ICpick(fnames,numconds)
 
-%size of largest number of subjects gives size if ICCHOIES below
-%perhaps pad with zeros at some point to fill things out if needed.
+%size of largest number of subjects gives size of grid
+tabsize=max(cell2mat(cellfun(@length,fnames,'un',0)));
+
+evstring='global ICCHOICES; ICCHOICES=repmat(cellstr(''''),tabsize,numconds*numconds); ICtable;';
 
 
 [res, jnk, okayhit]=inputgui( ...
@@ -25,10 +27,19 @@ function [okayhit, IC_choices]=ICpick
     'save(fullfile(ParamPath, ParamName),''curdata'');']}, ...
     }, ...
     'title', 'STATSLAB -- statslab()',...%, ...
-    'eval','global ICCHOICES; ICCHOICES=repmat(cellstr(''''),3,3); ICtable;' ...
+    'eval',evstring ...
     );
 global ICCHOICES
 IC_choices=cellfun(@str2num,ICCHOICES(1:end),'UniformOutput',0)';
 clearvars -global ICCHOICES
 end
+
+
+% trialdat=squeeze(double(EEG.data(18,:,:)))';
+% subplot(2,1,1)
+% x=EEG.times;
+% y=1:EEG.trials;
+% surf(x,y,trialdat,'linestyle','none','facecolor','interp'); axis tight; view(0,90);
+% subplot(2,1,2)
+% plot(x,mean(trialdat)); axis tight; grid on;
 
