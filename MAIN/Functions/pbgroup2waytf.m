@@ -216,7 +216,7 @@ for bootind=1:nsamp;
             
             % factor A
             con=conA;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(band_fields{bandind}).factor_A.contrasts=conA;
@@ -232,7 +232,7 @@ for bootind=1:nsamp;
             
             % factor B
             con=conB;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(band_fields{bandind}).factor_B.contrasts=conB;
@@ -248,7 +248,7 @@ for bootind=1:nsamp;
             
             % factor AxB
             con=conAB;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
@@ -325,17 +325,17 @@ for bootind=1:nsamp;
     
     %%% diffwaves should be iteratively written to drive - mem map
     %%% stealing differnce waves in order to calculate "real" CIs
-    for ext=1:conAcol
-        diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
-    end
-    
-    for ext=1:conBcol
-        diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
-    end
-    
-    for ext=1:conABcol
-        diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
-    end
+%     for ext=1:conAcol
+%         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
+%     end
+%     
+%     for ext=1:conBcol
+%         diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
+%     end
+%     
+%     for ext=1:conABcol
+%         diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
+%     end
     
     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 end
@@ -430,7 +430,7 @@ for bandind=1:STATS.freqbins;
         % factor A
         con=conA;
         for i=1:conAcol;
-            data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(:,timecurrent);
+            data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(bandind,timecurrent,:);
         end
         
         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
@@ -449,7 +449,7 @@ for bandind=1:STATS.freqbins;
         % factor B
         con=conB;
         for i=1:conBcol;
-            data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(:,timecurrent);
+            data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(bandind,timecurrent,:);
         end
         
         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_B, con, nsamp, alpha, options.FWE);
@@ -468,7 +468,7 @@ for bandind=1:STATS.freqbins;
         % factor A
         con=conAB;
         for i=1:conABcol;
-            data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(:,timecurrent);
+            data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(bandind,timecurrent,:);
         end
         
         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_AB, con, nsamp, alpha, options.FWE);

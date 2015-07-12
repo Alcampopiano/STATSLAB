@@ -1,4 +1,4 @@
-function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup1way(condfiles, numconds, numpnts, nboot, jlvls, alpha, nsamp, design, condnames, varargin)
+function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup1way(STATS,condfiles, numconds, numpnts, nboot, jlvls, alpha, nsamp, design, condnames, varargin)
 tic
 
 
@@ -93,7 +93,7 @@ CIlowbootA=cell(conAcol,1);
 CIupbootA=cell(conAcol,1);
 
 % this function runs the analysis without resampling from subjects
-[sample_results condwaves] = pbgroup1way_sample(numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA);
+[sample_results condwaves] = pbgroup1way_sample(STATS, numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA);
 
 % build results structure
 results=struct('factor_A',{[]});

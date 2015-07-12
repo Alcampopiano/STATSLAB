@@ -1,4 +1,4 @@
-function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2way(condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
+function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2way(STATS,condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
 tic
 %{
 
@@ -17,7 +17,7 @@ pairwise differences, but fewer contrasts of course.
 
 nargs = length(varargin);
 if round(nargs/2)~=nargs/2
-   error('need propertyName/propertyValue pairs for optional inputs')
+    error('need propertyName/propertyValue pairs for optional inputs')
 end
 
 % Set default contrast coefficients for 2-way
@@ -89,21 +89,39 @@ else
     
 end
 
+% try to delete previously made mapped files
+warning off
+% for i=1:length(STATS.condnames);
+%     delete(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+%     delete(['mont_groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+%     delete(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map']);
+% end
+
+for i=1:conAcol;
+    delete(['zsurrogates_',STATS.savestring,'_contrastA',num2str(i),'.map']);
+end
+
+for i=1:conBcol;
+    delete(['zsurrogates_',STATS.savestring,'_contrastB',num2str(i),'.map']);
+end
+
+for i=1:conABcol;
+    delete(['zsurrogates_',STATS.savestring,'_contrastAB',num2str(i),'.map']);
+end
+warning on
+
+
+
 %preallocate sizes
 [rowconds colconds]=size(condfiles_subs);
 condwaves_trim_gather=cell(1,numconds);
 condwaves_trim=zeros(numconds,numpnts);
 %datacell=cell(1,colconds);
 
-% delete from disk the .map files that might have been left over from a
-% previous analysia
- delete('.map');
- % disp(' **** deleting stray .map files ****');
-
 % this function builds bootstrap inds and writes them to the drive instead
 % of holding them in RAM, which makes it scalable (e.g., for 100,000 resamples!)
 [rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nsamp,design,jlvls,klvls);
-    
+
 % preallocate cell arrays used to accumulate the nsamp CIs
 CIlowbootA=cell(conAcol,1);
 CIlowbootB=cell(conBcol,1);
@@ -114,32 +132,32 @@ CIupbootAB=cell(conABcol,1);
 
 %conA, conB, conAB
 % this function runs the analysis without resampling from subjects
-[sample_results condwaves] = pbgroup2way_sample(numconds, numpnts, nboot, jlvls, klvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA, 'conB', conB, 'conAB', conAB);
+[sample_results condwaves] = pbgroup2way_sample(STATS,numconds, numpnts, nboot, jlvls, klvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA, 'conB', conB, 'conAB', conAB);
 
-% build results structure
-results=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
-results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-
-for i=1:conAcol;
-    results.factor_A.CI{i,1}=zeros(2,numpnts);
-end
-
-results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
-
-
-for i=1:conBcol;
-    results.factor_B.CI{i,1}=zeros(2,numpnts);
-end
-
-results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
-
-
-for i=1:conABcol;
-    results.factor_AxB.CI{i,1}=zeros(2,numpnts);
-end
-
-% make identical results stucture to eventually hold inferential stats
-inferential_results=results;
+% % build results structure
+% results=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
+% results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
+%
+% for i=1:conAcol;
+%     results.factor_A.CI{i,1}=zeros(2,numpnts);
+% end
+%
+% results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
+%
+%
+% for i=1:conBcol;
+%     results.factor_B.CI{i,1}=zeros(2,numpnts);
+% end
+%
+% results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
+%
+%
+% for i=1:conABcol;
+%     results.factor_AxB.CI{i,1}=zeros(2,numpnts);
+% end
+%
+% % make identical results stucture to eventually hold inferential stats
+% inferential_results=results;
 
 % load and arrange data
 h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 549 550 40]);
@@ -160,7 +178,7 @@ for bootind=1:nsamp;
     for i=1:numconds;
         condwaves_trim_gather{i}(bootind,:)=mean(datacell{i},1);
     end
-                                    
+    
     %arrange the data for the calculations
     [rowcell ~]=size(datacell{1,1});
     
@@ -174,16 +192,19 @@ for bootind=1:nsamp;
         % arrange data into a matrix with subs (or single subject boot samples) X conditions
         for condcurrent=1:colconds;
             data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
-        end 
+        end
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
+        results.factor_A.contrasts=conA;
         results.factor_A.pval(:,timecurrent)=pvalgen;
         results.factor_A.alpha(:,timecurrent)=pcrit;
         results.factor_A.test_stat(:,timecurrent)=psihat_stat;
+        results.factor_A.test_statz(:,timecurrent)=psihat_statz;
+        
         
         for i=1:conAcol;
             results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
@@ -192,12 +213,14 @@ for bootind=1:nsamp;
         
         % factor B
         con=conB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
+        results.factor_B.contrasts=conB;
         results.factor_B.pval(:,timecurrent)=pvalgen;
         results.factor_B.alpha(:,timecurrent)=pcrit;
         results.factor_B.test_stat(:,timecurrent)=psihat_stat;
+        results.factor_B.test_statz(:,timecurrent)=psihat_statz;
         
         for i=1:conBcol;
             results.factor_B.CI{i,1}(1,timecurrent)=conflow(i);
@@ -206,13 +229,14 @@ for bootind=1:nsamp;
         
         % factor AxB
         con=conAB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
+        results.factor_AxB.contrasts=conAB;
         results.factor_AxB.pval(:,timecurrent)=pvalgen;
         results.factor_AxB.alpha(:,timecurrent)=pcrit;
         results.factor_AxB.test_stat(:,timecurrent)=psihat_stat;
-        
+        results.factor_AxB.test_statz(:,timecurrent)=psihat_statz;
         
         for i=1:conABcol;
             results.factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
@@ -227,35 +251,69 @@ for bootind=1:nsamp;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     for ext=1:conAcol
-        CIlowbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(1,:);
-        CIupbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(2,:);
-    end
+        temparray=results.factor_A.test_statz(ext,:);  
+        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'datsize',[1 numpnts nsamp]);
+    end   
+    %for ext=1:conAcol 
+        % here are the z surrogates that we do stats on, the arrray holds
+        % all effect sizes for every band and timepoint for each monte carlo
+        %mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'datsize',[conAcol numpnts nsamp]);
+    %end
+    
+    
     
     for ext=1:conBcol
-        CIlowbootB{ext,1}(bootind,:)=results.factor_B.CI{ext,1}(1,:);
-        CIupbootB{ext,1}(bootind,:)=results.factor_B.CI{ext,1}(2,:);
+        temparray=results.factor_B.test_statz(ext,:);  
+        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'datsize',[1 numpnts nsamp]);
+
     end
+    %for ext=1:conBcol     
+        % here are the z surrogates that we do stats on, the arrray holds
+        % all effect sizes for every band and timepoint for each monte carlo
+        %mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'datsize',[conBcol numpnts nsamp]);
+    %end
     
     for ext=1:conABcol
-        CIlowbootAB{ext,1}(bootind,:)=results.factor_AxB.CI{ext,1}(1,:);
-        CIupbootAB{ext,1}(bootind,:)=results.factor_AxB.CI{ext,1}(2,:);
+        temparray=results.factor_AxB.test_statz(ext,:);
+        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'datsize',[1 numpnts nsamp]);
+
     end
+    %for ext=1:conABcol
+        % here are the z surrogates that we do stats on, the arrray holds
+        % all effect sizes for every band and timepoint for each monte carlo
+        %mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'datsize',[conABcol numpnts nsamp]);
+    %end
     
-    %%% diffwaves should be iteratively written to drive - mem map
-    %%% stealing differnce waves in order to calculate "real" CIs
-    for ext=1:conAcol
-        diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);     
-    end
-    
-    for ext=1:conBcol
-        diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
-    end
-    
-    for ext=1:conABcol
-        diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
-    end
-    
-    waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
+    %     for ext=1:conAcol
+    %         CIlowbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(1,:);
+    %         CIupbootA{ext,1}(bootind,:)=results.factor_A.CI{ext,1}(2,:);
+    %     end
+    %
+    %     for ext=1:conBcol
+    %         CIlowbootB{ext,1}(bootind,:)=results.factor_B.CI{ext,1}(1,:);
+    %         CIupbootB{ext,1}(bootind,:)=results.factor_B.CI{ext,1}(2,:);
+    %     end
+    %
+    %     for ext=1:conABcol
+    %         CIlowbootAB{ext,1}(bootind,:)=results.factor_AxB.CI{ext,1}(1,:);
+    %         CIupbootAB{ext,1}(bootind,:)=results.factor_AxB.CI{ext,1}(2,:);
+    %     end
+    %
+    %     %%% diffwaves should be iteratively written to drive - mem map
+    %     %%% stealing differnce waves in order to calculate "real" CIs
+    %     for ext=1:conAcol
+    %         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
+    %     end
+    %
+    %     for ext=1:conBcol
+    %         diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
+    %     end
+    %
+    %     for ext=1:conABcol
+    %         diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
+    %     end
+    %
+         waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 end
 
 
@@ -279,25 +337,25 @@ end
 %[CIlowAB CIupAB]=grand_pb_bootCI(CIAB, conABcol, numpnts, nsamp, alpha);
 
 
-% map write the CI arrays, might be cool to see them at some point
-for ext=1:conAcol
-    fidm=mapwrite(CIlowbootA{ext,1},['CIlowbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(CIupbootA{ext,1},['CIupbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(diffwaveA{ext,1},['diffwaveA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    
-end
-
-for ext=1:conBcol
-    fidm=mapwrite(CIlowbootB{ext,1},['CIlowbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(CIupbootB{ext,1},['CIupbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(diffwaveB{ext,1},['diffwaveB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-end
-
-for ext=1:conABcol
-    fidm=mapwrite(CIlowbootAB{ext,1},['CIlowbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(CIupbootAB{ext,1},['CIupbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-    fidm=mapwrite(diffwaveAB{ext,1},['diffwaveAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-end
+% % map write the CI arrays, might be cool to see them at some point
+% for ext=1:conAcol
+%     fidm=mapwrite(CIlowbootA{ext,1},['CIlowbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(CIupbootA{ext,1},['CIupbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(diffwaveA{ext,1},['diffwaveA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     
+% end
+% 
+% for ext=1:conBcol
+%     fidm=mapwrite(CIlowbootB{ext,1},['CIlowbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(CIupbootB{ext,1},['CIupbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(diffwaveB{ext,1},['diffwaveB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+% end
+% 
+% for ext=1:conABcol
+%     fidm=mapwrite(CIlowbootAB{ext,1},['CIlowbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(CIupbootAB{ext,1},['CIupbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     fidm=mapwrite(diffwaveAB{ext,1},['diffwaveAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+% end
 
 close(h1,h2);
 %%%%%%%%%%%%%%%%%% inferential statistics %%%%%%%%%%%%%%%%%
@@ -315,16 +373,19 @@ data_AB=zeros(nsamp,conABcol);
 
 % access the big difference wave arrays
 for i=1:conAcol
-    diffdata.(['A',num2str(i)])=mapread(['diffwaveA',num2str(i),'.map'],'dat','datsize',[nsamp numpnts]);
+    
+    diffdata.(['A',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'dat');
+    
 end
 
 for i=1:conBcol
-    diffdata.(['B',num2str(i)])=mapread(['diffwaveB',num2str(i),'.map'],'dat','datsize',[nsamp numpnts]);
+    diffdata.(['B',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'dat');
 end
 
 for i=1:conABcol
-    diffdata.(['AB',num2str(i)])=mapread(['diffwaveAB',num2str(i),'.map'],'dat','datsize',[nsamp numpnts]);
+    diffdata.(['AB',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'dat');
 end
+
 
 % waitbar for final stages, doing inferential stats
 h3 = waitbar(0,'1','Name','inferential statistics','Position',[1100 486 550 40]);
@@ -337,12 +398,13 @@ for timecurrent=1:numpnts;
     % factor A
     con=conA;
     for i=1:conAcol;
-        data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(:,timecurrent);
+        data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(1,timecurrent,:);
     end
     
     [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
     
     % passing results into results structure
+    inferential_results.factor_A.contrasts=conA;
     inferential_results.factor_A.pval(:,timecurrent)=pvalgen;
     inferential_results.factor_A.alpha(:,timecurrent)=pcrit;
     inferential_results.factor_A.test_stat(:,timecurrent)=psihat_stat;
@@ -355,12 +417,13 @@ for timecurrent=1:numpnts;
     % factor B
     con=conB;
     for i=1:conBcol;
-        data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(:,timecurrent);
+        data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(1,timecurrent,:);
     end
     
     [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_B, con, nsamp, alpha, options.FWE);
     
     % passing results into results structure
+    inferential_results.factor_B.contrasts=conB;
     inferential_results.factor_B.pval(:,timecurrent)=pvalgen;
     inferential_results.factor_B.alpha(:,timecurrent)=pcrit;
     inferential_results.factor_B.test_stat(:,timecurrent)=psihat_stat;
@@ -373,12 +436,13 @@ for timecurrent=1:numpnts;
     % factor A
     con=conAB;
     for i=1:conABcol;
-        data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(:,timecurrent);
+        data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(1,timecurrent,:);
     end
     
     [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_AB, con, nsamp, alpha, options.FWE);
     
     % passing results into results structure
+    inferential_results.factor_AxB.contrasts=conAB;
     inferential_results.factor_AxB.pval(:,timecurrent)=pvalgen;
     inferential_results.factor_AxB.alpha(:,timecurrent)=pcrit;
     inferential_results.factor_AxB.test_stat(:,timecurrent)=psihat_stat;
@@ -392,16 +456,18 @@ for timecurrent=1:numpnts;
     waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
 
+warning off
 % edit may 8th/15
 % clean temporary mapped files
 if iscell(tmpfname)
-    for i=1:length(tempfname);
-        delete(tempfname{i});
+    for i=1:length(tmpfname);
+        delete(tmpfname{i});
     end
     
 else
-    delete(tempfname);
+    delete(tmpfname);
 end
+warning on
 
 close(h3)
 end

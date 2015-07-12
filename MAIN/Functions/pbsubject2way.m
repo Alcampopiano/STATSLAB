@@ -1,4 +1,4 @@
-function [condfiles results] = pbsubject2way(condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, condnames, varargin)
+function [condfiles results] = pbsubject2way(STATS,condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, condnames, varargin)
 tic
 % bla bla bla
 
@@ -85,15 +85,16 @@ else
     
     %%%% there is probably a better way of doing this, but I was tired at
     %%%% that moment
-    % fix cell within a cell
-    condfiles=cell(1,numconds);
+    %fix cell within a cell
+    condfiles_cell=cell(1,numconds);
     for i=1:numconds
-        [rowcondcell colcondcell]=size(condfiles_cellcell{i});
+        [rowcondcell colcondcell]=size(condfiles{i});
         for j=1:rowcondcell
-        condfiles{j,i}=condfiles_cellcell{i}{j};
+        condfiles_cell{j,i}=condfiles{i}{j};
         end  
     end
-   
+   clear condfiles
+   condfiles=condfiles_cell;
 end
 
 %preallocate sizes
@@ -164,7 +165,7 @@ for filecurrent=1:rowconds;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
                  
         % passing results into results structure
         results.(field_name{filecurrent}).factor_A.pval(:,timecurrent)=pvalgen;
@@ -179,7 +180,7 @@ for filecurrent=1:rowconds;
         
         % factor B
         con=conB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_B.pval(:,timecurrent)=pvalgen;
@@ -194,7 +195,7 @@ for filecurrent=1:rowconds;
         
         % factor AxB
         con=conAB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, FWE);
+        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_AxB.pval(:,timecurrent)=pvalgen;

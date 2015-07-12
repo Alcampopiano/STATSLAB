@@ -97,7 +97,7 @@ switch STATS.design
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
-            [condfiles results]=pbsubject2way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
+            [condfiles results]=pbsubject2way(STATS,condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
                 STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.condnames, varargin{:});
             
         end
@@ -122,7 +122,7 @@ switch STATS.design
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
-            [condfiles results]=pbsubject1way(condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
+            [condfiles results]=pbsubject1way(STATS,condfiles,STATS.numconds, STATS.numpnts, STATS.nboot, ...
                 STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
             
         end

@@ -1,4 +1,4 @@
-function [results condwaves] = pbgroup1way_sample(numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, varargin)
+function [results condwaves] = pbgroup1way_sample(STATS,numconds, numpnts, nboot, jlvls, alpha, condfiles_subs, varargin)
 %{
 
 contrasts using con2way default to pooling across one factor. However, you
@@ -109,7 +109,7 @@ for timecurrent=1:numpnts;
     
     % factor A
     con=conA;
-    [psihat_stat, pvalgen, pcrit, conflow, confup]=pbstats(data, con, nboot, alpha, options.FWE);
+    [psihat_stat, pvalgen, pcrit, conflow, confup, psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_A.pval(:,timecurrent)=pvalgen;

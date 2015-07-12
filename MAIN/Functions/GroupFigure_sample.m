@@ -221,7 +221,7 @@ switch isfactorial
                 
                
                 
-                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);USE_THIS
+                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);
                 %CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,513:922);
                 
                 h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);

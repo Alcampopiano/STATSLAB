@@ -26,7 +26,7 @@ datcon=data*con;
 psihat_stat=mean(datcon,1);
 
 % get z effect
-psihat_statz=(mean(datcon,1))/(std(datcon,1,1));
+psihat_statz=(mean(datcon,1))./(std(datcon,1,1));
 
 % define random indices
 %bootinds=randi(N,nboot,N);
