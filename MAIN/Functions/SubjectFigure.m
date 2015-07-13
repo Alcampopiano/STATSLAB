@@ -65,6 +65,15 @@ if any(strcmp(varargin,'all'));
     options.yaxis='auto';
     options.caxis='auto';
     options.zaxis=[0 inf];
+    options.timeplot=1:length(STATS.xtimes);
+    
+    if any(strcmp(varargin,'timeplot'));
+        timems=find(strcmp(varargin,'timeplot'));
+        MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        varargin{timems+1}=MStoTF_min:MStoTF_max;      
+    end
+    
     
     % overwrite options with plot options
     % read the acceptable names
@@ -135,6 +144,14 @@ else
     options.yaxis='auto';
     options.caxis='auto';
     options.zaxis=[0 inf];
+    options.timeplot=1:length(STATS.xtimes);
+    
+    if any(strcmp(varargin,'timeplot'));
+        timems=find(strcmp(varargin,'timeplot'));
+        MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        varargin{timems+1}=MStoTF_min:MStoTF_max;
+    end
     
     % read the acceptable names
     optionNames = fieldnames(options);
@@ -194,26 +211,26 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract CI
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
                             % extract difference wave
-                            plotdiff=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            plotdiff=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
                             subplot(length(subnames),1,q);
                             
                             % plot zeroline
-                            plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
                             hold on
                             
                             % plot CI
-                            jbfill(STATS.xtimes,CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                            jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
                             hold on
                             
                             % plot diff wave
-                            plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
+                            plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             ylim(gca,options.yaxis);
                             grid on
                             
@@ -225,26 +242,26 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract MOE
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             CI_diffup=CI_up-CI_low;
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
                             subplot(length(subnames),1,q);
-                            surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                             zlim(gca,options.zaxis);
                             hold on
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -274,11 +291,11 @@ switch STATS.design
                         
                     case 'diff'
                         
-                        X=linspace(min(STATS.xtimes),max(STATS.xtimes),length(STATS.xtimes));
+                        X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
                         for q=1:length(subnames);
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
@@ -288,11 +305,11 @@ switch STATS.design
                             set(gca,'YTickLabel',[]);
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -372,11 +389,11 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract CI
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
                             % extract difference wave
-                            plotdiff=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            plotdiff=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
@@ -384,15 +401,15 @@ switch STATS.design
                            
                             
                             % plot zeroline
-                            plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
                             hold on
                             
                             % plot CI
-                            jbfill(STATS.xtimes,CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                            jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
                             hold on
                             
                             % plot diff wave
-                            plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
+                            plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
                             axis tight
                             ylim(gca,options.yaxis);
@@ -405,27 +422,27 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract MOE
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             CI_diffup=CI_up-CI_low;
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
                             subplot(length(subnames),1,q);
-                            surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                             axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -453,11 +470,11 @@ switch STATS.design
                         end
                         
                     case 'diff'
-                        X=linspace(min(STATS.xtimes),max(STATS.xtimes),length(STATS.xtimes));
+                        X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
                         for q=1:length(subnames);
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                             
                             % begin plotting
                             figure(i);
@@ -467,11 +484,11 @@ switch STATS.design
                             set(gca,'YTickLabel',[]);
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -544,27 +561,27 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract CI
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,options.timeplot);
                             
                             % extract difference wave
-                            plotdiff=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),:);
+                            plotdiff=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),options.timeplot);
                             
                             % begin plotting
                             figure(numfigsA+i);
                             subplot(length(subnames),1,q);
                             
                             % plot zeroline
-                            plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
                             axis tight
                             hold on
                             
                             % plot CI
-                            jbfill(STATS.xtimes,CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                            jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
                             hold on
                             
                             % plot diff wave
-                            plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
+                            plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
                             ylim(gca, options.yaxis);
                             grid on
@@ -577,27 +594,27 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract MOE
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,options.timeplot);
                             CI_diffup=CI_up-CI_low;
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),options.timeplot);
                             
                             % begin plotting
                             figure(numfigsA+i);
                             subplot(length(subnames),1,q);
-                            surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                             axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -625,11 +642,11 @@ switch STATS.design
                         end
                         
                     case 'diff'
-                        X=linspace(min(STATS.xtimes),max(STATS.xtimes),length(STATS.xtimes));
+                        X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
                         for q=1:length(subnames);
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_B.test_stat(options.FactorB(i),options.timeplot);
                             
                             % begin plotting
                             figure(numfigsA+i);
@@ -639,11 +656,11 @@ switch STATS.design
                             set(gca,'YTickLabel',[]);
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_B.CI{options.FactorB(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -717,11 +734,11 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract CI
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,options.timeplot);
                             
                             % extract difference wave
-                            plotdiff=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),:);
+                            plotdiff=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),options.timeplot);
                             %test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
                             
                             % begin plotting
@@ -729,16 +746,16 @@ switch STATS.design
                             subplot(length(subnames),1,q);
                             
                             % plot zeroline
-                            plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
                             axis tight
                             hold on
                             
                             % plot CI
-                            jbfill(STATS.xtimes,CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                            jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
                             hold on
                             
                             % plot diff wave
-                            plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
+                            plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
                             ylim(gca, options.yaxis);
                             grid on
@@ -751,25 +768,25 @@ switch STATS.design
                         for q=1:length(subnames);
                             
                             % extract MOE
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,:);
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,options.timeplot);
                             CI_diffup=CI_up-CI_low;
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),options.timeplot);
                             
                             % begin plotting
                             figure(numfigsA+numfigsB+i);
                             subplot(length(subnames),1,q);
-                            surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                             axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -799,11 +816,11 @@ switch STATS.design
                         
                     case 'diff'
                         
-                        X=linspace(min(STATS.xtimes),max(STATS.xtimes),length(STATS.xtimes));
+                        X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
                         for q=1:length(subnames);
                             
                             % extract difference wave
-                            test_stat=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),:);
+                            test_stat=STATS.subject_results.(subnames{q}).factor_AxB.test_stat(options.FactorAB(i),options.timeplot);
                             
                             % begin plotting
                             figure(numfigsA+numfigsB+i);
@@ -813,11 +830,11 @@ switch STATS.design
                             set(gca,'YTickLabel',[]);
                             
                             % find where CI includes zero
-                            sigvect=ones(1,STATS.numpnts);
-                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,:);
-                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,:);
+                            sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                            CI_low(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(1,options.timeplot);
+                            CI_up(1,:)=STATS.subject_results.(subnames{q}).factor_AxB.CI{options.FactorAB(i),1}(2,options.timeplot);
                             
-                            for m=1:STATS.numpnts;
+                            for m=1:length(sigvect);
                                 
                                 if CI_low(m)<=0 && CI_up(m)>=0
                                     sigvect(m)=0;
@@ -903,13 +920,13 @@ switch STATS.design
                             for q=1:length(subnames);
                                 
                                 % extract CI
-                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                                 %CI_diffup=CI_up-CI_low;
                                 %CI_difflow=CI_diffup*-1;
                                 
                                 % extract difference wave
-                                plotdiff=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                                plotdiff=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                                 %test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
                                 
                                 % begin plotting
@@ -917,16 +934,16 @@ switch STATS.design
                                 subplot(length(subnames),1,q);
                                 
                                 % plot zeroline
-                                plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                                plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
                                 axis tight
                                 hold on
                                 
                                 % plot CI
-                                jbfill(STATS.xtimes,CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                                jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
                                 hold on
                                 
                                 % plot diff wave
-                                plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
+                                plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                                 ylim(gca,options.yaxis);
                                 grid on
                                 
@@ -938,25 +955,25 @@ switch STATS.design
                             for q=1:length(subnames);
                                 
                                 % extract MOE
-                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                                 CI_diffup=(CI_up-CI_low)/2;
                                 
                                 % extract difference wave
-                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                                 
                                 % begin plotting
                                 figure(y);
                                 subplot(length(subnames),1,q);
-                                surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                                surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                                 axis tight
                                 zlim(gca,options.zaxis);
                                 hold on
                                 
                                 % find where CI includes zero
-                                sigvect=ones(1,STATS.numpnts);
+                                sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
                                 
-                                for m=1:STATS.numpnts;
+                                for m=1:length(sigvect);
                                     
                                     if CI_low(m)<=0 && CI_up(m)>=0
                                         sigvect(m)=0;
@@ -985,11 +1002,11 @@ switch STATS.design
                             
                         case 'diff'
                             
-                            X=linspace(min(STATS.xtimes),max(STATS.xtimes),length(STATS.xtimes));
+                            X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
                             for q=1:length(subnames);
                                 
                                 % extract difference wave
-                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
                                 
                                 % begin plotting
                                 figure(y);
@@ -999,11 +1016,11 @@ switch STATS.design
                                 set(gca,'YTickLabel',[]);
                                 
                                 % find where CI includes zero
-                                sigvect=ones(1,STATS.numpnts);
-                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,:);
-                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,:);
+                                sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
                                 
-                                for m=1:STATS.numpnts;
+                                for m=1:length(sigvect);
                                     
                                     if CI_low(m)<=0 && CI_up(m)>=0
                                         sigvect(m)=0;

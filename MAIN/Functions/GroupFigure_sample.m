@@ -163,11 +163,11 @@ switch isfactorial
                 
                 % get the condition waveforms
                 if STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==1
-                    plot1st(k,:)=STATS.condwaves_trim(j,:);
+                    plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
                     leg1stlist{k}=STATS.condnames{j};
                     k=k+1;
                 elseif STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==-1
-                    plot2nd(m,:)=STATS.condwaves_trim(j,:);
+                    plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
                     leg2ndlist{m}=STATS.condnames{j};
                     m=m+1;
                 end
@@ -180,7 +180,7 @@ switch isfactorial
             % should this be SUM or MEAN if pooling across levels?
             plot1st=mean(plot1st,1);
             plot2nd=mean(plot2nd,1);
-            plotdiff=STATS.sample_results.factor_A.test_stat(options.FactorA(i),:);
+            plotdiff=STATS.sample_results.factor_A.test_stat(options.FactorA(i),options.timeplot);
             
             % concatenate, if needed, the legend lables
             leg1st=strjoin_statslab(leg1stlist,'+');
@@ -189,9 +189,9 @@ switch isfactorial
             % begin plotting
             figure(i);
             subplot(2,1,1)
-            h(1)=plot(STATS.xtimes,plot1st,'r', 'LineWidth',3);
+            h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
             hold on
-            h(2)=plot(STATS.xtimes,plot2nd,'b','LineWidth',3);
+            h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
             set(gca,'FontSize',20)
             %title('CS vs CT')
             lh=legend(leg1st,leg2nd);
@@ -201,10 +201,10 @@ switch isfactorial
             grid on
             
             subplot(2,1,2)
-            h(3)=plot(STATS.xtimes,plotdiff,'k');
-            CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,:);
-            CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);
-            h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
+            h(3)=plot(STATS.xtimes(options.timeplot),plotdiff,'k');
+            CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,options.timeplot);
+            CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,options.timeplot);
+            h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
             axis tight
             grid on
             
