@@ -16,7 +16,12 @@ else
 end
 
 % special case where using 'all' plots all possible contrasts
-if length(varargin)==1 && strcmp(varargin{1},'all');
+if any(strcmp(varargin,'all')); 
+    
+    % something silly to make varargin pairable
+    % varar=cell(1,2);
+    % varar{1}=varargin{1};
+    % varargin=varar;
     
     % this finds out if the design was factorial or not and sets default
     % options accordingly
@@ -45,6 +50,41 @@ if length(varargin)==1 && strcmp(varargin{1},'all');
         
     end
     
+    % get rid of 'all' in varargin option and convert ms entries into TFs
+    remall=strcmp(varargin,'all');
+    varargin(remall)=[];
+    if any(strcmp(varargin,'timeplot'));
+        timems=find(strcmp(varargin,'timeplot'));
+        MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+        varargin{timems+1}=MStoTF_min:MStoTF_max;
+        
+    end
+    
+    
+    nargs = length(varargin);
+    if round(nargs/2)~=nargs/2
+        error('need propertyName/propertyValue pairs for optional inputs')
+    end
+    
+    % add other options
+    options.timeplot=1:length(STATS.xtimes);
+    
+    % read the acceptable names
+    optionNames = fieldnames(options);
+    
+    for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
+        inpName = pair{1};
+        
+        if any(strcmp(inpName,optionNames))
+            
+            % overwrite default options
+            options.(inpName) = pair{2};
+        else
+            error('%s is not a recognized parameter name',inpName)
+        end
+    end  
+
     % else check for name/val agreement and set defaults to empty
 else
     nargs = length(varargin);
@@ -77,6 +117,17 @@ else
         
     end
     
+    
+   % add other options
+   options.timeplot=1:length(STATS.xtimes);
+   if any(strcmp(varargin,'timeplot'));
+       timems=find(strcmp(varargin,'timeplot'));
+       MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+       MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+       varargin{timems+1}=MStoTF_min:MStoTF_max;
+       
+   end
+    
     % read the acceptable names
     optionNames = fieldnames(options);
     
@@ -96,6 +147,7 @@ end
 
 % update STATS structure
 STATS.plotoptions=options;
+
 
 % switch cases for factorial vs. single-factor
 switch isfactorial
@@ -177,11 +229,11 @@ switch isfactorial
                     
                     % get the condition waveforms
                     if STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,:);
+                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,:);
+                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end
@@ -194,7 +246,7 @@ switch isfactorial
                 % should this be SUM or MEAN if pooling across levels?
                 plot1st=mean(plot1st,1);
                 plot2nd=mean(plot2nd,1);
-                plotdiff=STATS.sample_results.factor_A.test_stat(options.FactorA(i),:);
+                plotdiff=STATS.sample_results.factor_A.test_stat(options.FactorA(i),options.timeplot);
                 
                 % concatenate, if needed, the legend lables
                 leg1st=strjoin_statslab(leg1stlist,'+');
@@ -203,9 +255,9 @@ switch isfactorial
                 % begin plotting
                 figure;
                 subplot(2,1,1)
-                h(1)=plot(STATS.xtimes,plot1st,'r', 'LineWidth',3);
+                h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
                 hold on
-                h(2)=plot(STATS.xtimes,plot2nd,'b','LineWidth',3);
+                h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -215,16 +267,16 @@ switch isfactorial
                 grid on
                 
                 subplot(2,1,2)
-                h(3)=plot(STATS.xtimes,plotdiff,'k');
-                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,:);%USE_THIS
+                h(3)=plot(STATS.xtimes(options.timeplot),plotdiff,'k');
+                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,options.timeplot);%USE_THIS
                 %CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,513:922);
                 
                
                 
-                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,:);
+                CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,options.timeplot);
                 %CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,513:922);
                 
-                h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
+                h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
                 grid on
                 
@@ -247,11 +299,11 @@ switch isfactorial
                     
                     % get the condition waveforms
                     if STATS.sample_results.factor_B.contrasts(j,options.FactorB(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,:);
+                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_B.contrasts(j,options.FactorB(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,:);
+                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end
@@ -264,7 +316,7 @@ switch isfactorial
                 % should this be SUM or MEAN if pooling across levels?
                 plot1st=mean(plot1st,1);
                 plot2nd=mean(plot2nd,1);
-                plotdiff=STATS.sample_results.factor_B.test_stat(options.FactorB(i),:);
+                plotdiff=STATS.sample_results.factor_B.test_stat(options.FactorB(i),options.timeplot);
                 
                 % concatenate, if needed, the legend lables
                 leg1st=strjoin_statslab(leg1stlist,'+');
@@ -273,9 +325,9 @@ switch isfactorial
                 % begin plotting
                 figure;
                 subplot(2,1,1)
-                h(1)=plot(STATS.xtimes,plot1st,'r', 'LineWidth',3);
+                h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
                 hold on
-                h(2)=plot(STATS.xtimes,plot2nd,'b','LineWidth',3);
+                h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -285,10 +337,10 @@ switch isfactorial
                 grid on
                 
                 subplot(2,1,2)
-                h(3)=plot(STATS.xtimes,plotdiff,'k');
-                CIup=STATS.sample_results.factor_B.CI{options.FactorB(i)}(2,:);
-                CIlow=STATS.sample_results.factor_B.CI{options.FactorB(i)}(1,:);
-                h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
+                h(3)=plot(STATS.xtimes(options.timeplot),plotdiff,'k');
+                CIup=STATS.sample_results.factor_B.CI{options.FactorB(i)}(2,options.timeplot);
+                CIlow=STATS.sample_results.factor_B.CI{options.FactorB(i)}(1,options.timeplot);
+                h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
                 grid on
                 
@@ -311,11 +363,11 @@ switch isfactorial
                     
                     % get condition waveforms and labels
                     if STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,:);
+                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,:);
+                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end
@@ -326,7 +378,7 @@ switch isfactorial
                 % create interaction difference waveforms 
                 plot1stdiff=plot1st(1,:)-plot2nd(1,:);
                 plot2nddiff=plot2nd(2,:)-plot1st(2,:);
-                plotdiff=STATS.sample_results.factor_AxB.test_stat(options.FactorAB(i),:);
+                plotdiff=STATS.sample_results.factor_AxB.test_stat(options.FactorAB(i),options.timeplot);
                 
                 % concatenate, if needed, the legend lables
                 leg1st=strjoin_statslab({leg1stlist{1} leg2ndlist{1}},'-');
@@ -335,9 +387,9 @@ switch isfactorial
                 % begin plotting
                 figure;
                 subplot(2,1,1)
-                h(1)=plot(STATS.xtimes,plot1stdiff,'r', 'LineWidth',3);
+                h(1)=plot(STATS.xtimes(options.timeplot),plot1stdiff,'r', 'LineWidth',3);
                 hold on
-                h(2)=plot(STATS.xtimes,plot2nddiff,'b','LineWidth',3);
+                h(2)=plot(STATS.xtimes(options.timeplot),plot2nddiff,'b','LineWidth',3);
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -347,10 +399,10 @@ switch isfactorial
                 grid on
                 
                 subplot(2,1,2)
-                h(3)=plot(STATS.xtimes,plotdiff,'k');
-                CIup=STATS.sample_results.factor_AxB.CI{options.FactorAB(i)}(2,:);
-                CIlow=STATS.sample_results.factor_AxB.CI{options.FactorAB(i)}(1,:);
-                h(4)=jbfill(STATS.xtimes,CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
+                h(3)=plot(STATS.xtimes(options.timeplot),plotdiff,'k');
+                CIup=STATS.sample_results.factor_AxB.CI{options.FactorAB(i)}(2,options.timeplot);
+                CIlow=STATS.sample_results.factor_AxB.CI{options.FactorAB(i)}(1,options.timeplot);
+                h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
                 grid on
                 

@@ -701,6 +701,99 @@ switch options.measure
         xtimes=EEG.times;
         disp('***** finished extracting selected channel(s) ***** ')
         
+    case 'scalpchansub'
+        disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
+        
+
+        
+        for k=1:numconds;
+            
+            [rowcond colcond]=size(condfiles_subs{k});
+            
+            if k==1;
+                
+                miscinfo=cell(rowcond+1,4);
+                miscinfo(1,:)={'sub', 'ind', 'chan', 'val'};
+                miscinfo(2:end,1)=condfiles_subs{1}(:);
+                
+                for s=1:rowcond; % scroll through subjects
+                    
+                    % load file from first condition
+                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+                    EEG = eeg_checkset(EEG);
+                    
+                    % determin the largest neg channel during window of interest
+                    h=figure; title(['condition as, subject ', num2str(s)]); 
+                    pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
+                    
+                    timewin=input('type in timewindow around N170\n');
+                    close(h);
+                    
+                    MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+                    MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+                    
+                    % for each channel get min value within a window
+                    [min_val_time min_ind_time]=min(mean(EEG.data(:,MStoTF_min:MStoTF_max),3),[],2);
+                    
+                    % then, get the index for the min channel
+                    [min_val_chan(s) min_ind_chan(s)]=min(min_val_time);
+                                        
+                    % add chanlabel to speadsheet
+                    miscinfo{s+1,2}=min_ind_chan(s);
+                    miscinfo{s+1,4}=min_val_chan(s);
+                    
+                    chanlab{s}=EEG.chanlocs(min_ind_chan(s)).labels;
+                    miscinfo{s+1,3}=chanlab{s};
+                                        
+                    % steal data from the channels you are interested in
+                    data=EEG.data(min_ind_chan,:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    clear data
+                    
+                end
+                
+            end
+            
+            if k>1;
+
+                for s=1:rowcond; % scroll through subjects
+                    
+                    % load file from first condition
+                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+                    EEG = eeg_checkset(EEG);
+                    
+                    % determin the largest neg channel during window of interest
+                    %figure; h=pop_timtopo(EEG, [-100 400], [NaN], 'ERP data and scalp maps of as','electrodes','on');
+                    
+                    %chanlab{s}=input('type in chanlabel you want');
+                    %close(h);
+                    
+                    % add chanlabel to speadsheet
+                    %miscinfo(s,3)=chanlab;
+                    
+                    %chanind(s)=find(strcmp({EEG.chanlocs.labels},chanlab));
+                    %miscinfo(s,2)=chanind;
+                    
+                    
+                    % steal data from the channels you are interested in
+                    data=EEG.data(min_ind_chan(s),:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    clear data
+                    
+                end
+                  
+            end  
+            
+        end
+        STATS.miscinfo=miscinfo;
+        xtimes=EEG.times;
+        disp('***** finished extracting selected channel(s) ***** ')
         
         
     case 'scalpersp'
@@ -786,87 +879,87 @@ switch options.measure
         xtimes=EEG.times;
         disp('***** finished extracting selected channel(s) ***** ')
         
-%    case 'icaersp'
-%         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
-%         
-%         for k=1:numconds;
-%             
-%             [rowcond colcond]=size(condfiles_subs{k});
-%             
-%             for s=1:rowcond; % scroll through subjects
-%                 
-%                 % load file
-%                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-%                 EEG = eeg_checkset(EEG);
-%                 
-%                 try
-%                     % scroll through chans the user wants and collect relavent indices
-%                     for i=1:length(options.chans)
-%                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
-%                     end
-%                     
-%                 catch
-%                     error(['One of the channels you want does not exist for some subjects. ' ...
-%                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-%                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-%                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-%                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
-%                 end
-%                 
-%                 % steal data from the channels you are interested in
-%                 data=EEG.data(chanind,:,:);
-%                 
-%                 % save it with original filename but get rid of original
-%                 % extention (hence the 1:end-4)
-%                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-%                 clear data
-%                 
-%             end
-%             
-%         end
-%         xtimes=EEG.times;
-%         disp('***** finished extracting selected channel(s) ***** ')
+        %    case 'icaersp'
+        %         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
+        %
+        %         for k=1:numconds;
+        %
+        %             [rowcond colcond]=size(condfiles_subs{k});
+        %
+        %             for s=1:rowcond; % scroll through subjects
+        %
+        %                 % load file
+        %                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+        %                 EEG = eeg_checkset(EEG);
+        %
+        %                 try
+        %                     % scroll through chans the user wants and collect relavent indices
+        %                     for i=1:length(options.chans)
+        %                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+        %                     end
+        %
+        %                 catch
+        %                     error(['One of the channels you want does not exist for some subjects. ' ...
+        %                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
+        %                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
+        %                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
+        %                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
+        %                 end
+        %
+        %                 % steal data from the channels you are interested in
+        %                 data=EEG.data(chanind,:,:);
+        %
+        %                 % save it with original filename but get rid of original
+        %                 % extention (hence the 1:end-4)
+        %                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+        %                 clear data
+        %
+        %             end
+        %
+        %         end
+        %         xtimes=EEG.times;
+        %         disp('***** finished extracting selected channel(s) ***** ')
         
-%    case 'icaitc'
-%         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
-%         
-%         for k=1:numconds;
-%             
-%             [rowcond colcond]=size(condfiles_subs{k});
-%             
-%             for s=1:rowcond; % scroll through subjects
-%                 
-%                 % load file
-%                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-%                 EEG = eeg_checkset(EEG);
-%                 
-%                 try
-%                     % scroll through chans the user wants and collect relavent indices
-%                     for i=1:length(options.chans)
-%                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
-%                     end
-%                     
-%                 catch
-%                     error(['One of the channels you want does not exist for some subjects. ' ...
-%                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-%                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-%                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-%                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
-%                 end
-%                 
-%                 % steal data from the channels you are interested in
-%                 data=EEG.data(chanind,:,:);
-%                 
-%                 % save it with original filename but get rid of original
-%                 % extention (hence the 1:end-4)
-%                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-%                 clear data
-%                 
-%             end
-%             
-%         end
-%         xtimes=EEG.times;
-%         disp('***** finished extracting selected channel(s) ***** ')
+        %    case 'icaitc'
+        %         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
+        %
+        %         for k=1:numconds;
+        %
+        %             [rowcond colcond]=size(condfiles_subs{k});
+        %
+        %             for s=1:rowcond; % scroll through subjects
+        %
+        %                 % load file
+        %                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+        %                 EEG = eeg_checkset(EEG);
+        %
+        %                 try
+        %                     % scroll through chans the user wants and collect relavent indices
+        %                     for i=1:length(options.chans)
+        %                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+        %                     end
+        %
+        %                 catch
+        %                     error(['One of the channels you want does not exist for some subjects. ' ...
+        %                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
+        %                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
+        %                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
+        %                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
+        %                 end
+        %
+        %                 % steal data from the channels you are interested in
+        %                 data=EEG.data(chanind,:,:);
+        %
+        %                 % save it with original filename but get rid of original
+        %                 % extention (hence the 1:end-4)
+        %                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+        %                 clear data
+        %
+        %             end
+        %
+        %         end
+        %         xtimes=EEG.times;
+        %         disp('***** finished extracting selected channel(s) ***** ')
         
 end
 
@@ -885,19 +978,19 @@ STATS.numconds=numconds;
 STATS.srate=EEG.srate;
 STATS.xmin=EEG.xmin;
 STATS.xmax=EEG.xmax;
-STATS.tfcycles=options.tfcycles; 
-STATS.freqs=options.freqs; 
+STATS.tfcycles=options.tfcycles;
+STATS.freqs=options.freqs;
 STATS.timesout=options.timesout;
 
 %if any(strcmp({'scalpchan','scalpersp','scalpitc'},options.measure));
-    %STATS.chanlabels=varargin{2};
-    STATS.chanlabels=options.chans;
+%STATS.chanlabels=varargin{2};
+STATS.chanlabels=options.chans;
 %else
-    %STATS.chanlabels=[];
+%STATS.chanlabels=[];
 %end
 
 % set measures for following resampling procedure
-if any(strcmp({'icamax','scalpchan'},options.measure))
+if any(strcmp({'icamax','scalpchan','scalpchansub'},options.measure))
     STATS.measure='chanclust';
 elseif any(strcmp({'icagfa','scalpgfa'},options.measure))
     STATS.measure='gfa';

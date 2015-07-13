@@ -381,6 +381,7 @@ switch STATS.design
                             % begin plotting
                             figure(i);
                             subplot(length(subnames),1,q);
+                           
                             
                             % plot zeroline
                             plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
@@ -393,6 +394,7 @@ switch STATS.design
                             % plot diff wave
                             plot(STATS.xtimes,plotdiff,'Color',options.diffcol);
                             
+                            axis tight
                             ylim(gca,options.yaxis);
                             grid on
                             
@@ -414,6 +416,7 @@ switch STATS.design
                             figure(i);
                             subplot(length(subnames),1,q);
                             surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
@@ -553,6 +556,7 @@ switch STATS.design
                             
                             % plot zeroline
                             plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            axis tight
                             hold on
                             
                             % plot CI
@@ -584,6 +588,7 @@ switch STATS.design
                             figure(numfigsA+i);
                             subplot(length(subnames),1,q);
                             surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
@@ -725,6 +730,7 @@ switch STATS.design
                             
                             % plot zeroline
                             plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                            axis tight
                             hold on
                             
                             % plot CI
@@ -756,6 +762,7 @@ switch STATS.design
                             figure(numfigsA+numfigsB+i);
                             subplot(length(subnames),1,q);
                             surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            axis tight
                             zlim(gca,options.zaxis);
                             hold on
                             
@@ -911,6 +918,7 @@ switch STATS.design
                                 
                                 % plot zeroline
                                 plot(STATS.xtimes,zeros(1,length(STATS.xtimes)),'r','LineWidth',1);
+                                axis tight
                                 hold on
                                 
                                 % plot CI
@@ -941,6 +949,7 @@ switch STATS.design
                                 figure(y);
                                 subplot(length(subnames),1,q);
                                 surf([STATS.xtimes;STATS.xtimes], ones(2,length(STATS.xtimes)), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                                axis tight
                                 zlim(gca,options.zaxis);
                                 hold on
                                 
