@@ -726,31 +726,31 @@ switch options.measure
                     h=figure; title(['condition as, subject ', num2str(s)]); 
                     pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
                     
-                    timewin=input('type in timewindow around N170\n');
+                    timewin=input('type in timewindow around P1\n');
                     close(h);
                     
                     MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
                     MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
                     
                     % for each channel get min value within a window
-                    [min_val_time min_ind_time]=min(mean(EEG.data(:,MStoTF_min:MStoTF_max),3),[],2);
+                    [max_val_time max_ind_time]=max(mean(EEG.data(:,MStoTF_min:MStoTF_max),3),[],2);
                     
                     % then, get the index for the min channel
-                    [min_val_chan(s) min_ind_chan(s)]=min(min_val_time);
+                    [max_val_chan(s) max_ind_chan(s)]=max(max_val_time);
                                         
                     % add chanlabel to speadsheet
-                    miscinfo{s+1,2}=min_ind_chan(s);
-                    miscinfo{s+1,4}=min_val_chan(s);
+                    miscinfo{s+1,2}=max_ind_chan(s);
+                    miscinfo{s+1,4}=max_val_chan(s);
                     
-                    chanlab{s}=EEG.chanlocs(min_ind_chan(s)).labels;
+                    chanlab{s}=EEG.chanlocs(max_ind_chan(s)).labels;
                     miscinfo{s+1,3}=chanlab{s};
                                         
                     % steal data from the channels you are interested in
-                    data=EEG.data(min_ind_chan,:,:);
+                    data=EEG.data(max_ind_chan,:,:);
                     
                     % save it with original filename but get rid of original
                     % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
                     clear data
                     
                 end
@@ -779,11 +779,11 @@ switch options.measure
                     
                     
                     % steal data from the channels you are interested in
-                    data=EEG.data(min_ind_chan(s),:,:);
+                    data=EEG.data(max_ind_chan(s),:,:);
                     
                     % save it with original filename but get rid of original
                     % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
                     clear data
                     
                 end

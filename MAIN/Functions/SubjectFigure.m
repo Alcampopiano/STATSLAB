@@ -271,7 +271,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs));
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                             
@@ -319,7 +319,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs))+1.5;
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                             
                             
@@ -452,7 +452,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs));
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                             
@@ -498,7 +498,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs))+1.5;
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                             
                             % give everyone a colorbar
@@ -624,7 +624,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs));
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                             
@@ -670,7 +670,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs))+1.5;
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                             
                             
@@ -796,7 +796,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs));
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                             
@@ -844,7 +844,7 @@ switch STATS.design
                             
                             timelocs=find(sigvect>0);
                             zeroplace=zeros(1,length(timelocs))+1.5;
-                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                            timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                             
                             
@@ -983,7 +983,7 @@ switch STATS.design
                                 
                                 timelocs=find(sigvect>0);
                                 zeroplace=zeros(1,length(timelocs));
-                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                                 Z=zeros(1,length(timevect));
                                 scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                                 
@@ -1030,7 +1030,7 @@ switch STATS.design
                                 
                                 timelocs=find(sigvect>0);
                                 zeroplace=zeros(1,length(timelocs))+1.5;
-                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(1));
+                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                                 scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                                 
                                 
