@@ -605,13 +605,13 @@ switch options.measure
             MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
             
             % for each channel get max value within a window
-            [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max),[],2);
+            [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
             
             % then, get the index for the max channel
             [max_val_chan max_ind_chan]=max(max_val_time);
             
             % for each channel get min value within a window
-            [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max),[],2);
+            [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
             
             % then, get the index for the min channel
             [min_val_chan min_ind_chan]=min(min_val_time);
@@ -726,27 +726,27 @@ switch options.measure
                     h=figure; title(['condition as, subject ', num2str(s)]); 
                     pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
                     
-                    timewin=input('type in timewindow around P1\n');
+                    timewin=input('type in timewindow around N170\n');
                     close(h);
                     
                     MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
                     MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
                     
                     % for each channel get min value within a window
-                    [max_val_time max_ind_time]=max(mean(EEG.data(:,MStoTF_min:MStoTF_max),3),[],2);
+                    [val_time ind_time]=min(mean(EEG.data(:,MStoTF_min:MStoTF_max,:),3),[],2);
                     
                     % then, get the index for the min channel
-                    [max_val_chan(s) max_ind_chan(s)]=max(max_val_time);
+                    [val_chan(s) ind_chan(s)]=min(val_time);
                                         
                     % add chanlabel to speadsheet
-                    miscinfo{s+1,2}=max_ind_chan(s);
-                    miscinfo{s+1,4}=max_val_chan(s);
+                    miscinfo{s+1,2}=ind_chan(s);
+                    miscinfo{s+1,4}=val_chan(s);
                     
-                    chanlab{s}=EEG.chanlocs(max_ind_chan(s)).labels;
+                    chanlab{s}=EEG.chanlocs(ind_chan(s)).labels;
                     miscinfo{s+1,3}=chanlab{s};
                                         
                     % steal data from the channels you are interested in
-                    data=EEG.data(max_ind_chan,:,:);
+                    data=EEG.data(ind_chan(s),:,:);
                     
                     % save it with original filename but get rid of original
                     % extention (hence the 1:end-4)
@@ -779,7 +779,7 @@ switch options.measure
                     
                     
                     % steal data from the channels you are interested in
-                    data=EEG.data(max_ind_chan(s),:,:);
+                    data=EEG.data(ind_chan(s),:,:);
                     
                     % save it with original filename but get rid of original
                     % extention (hence the 1:end-4)
