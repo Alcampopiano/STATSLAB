@@ -35,51 +35,76 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % TESTING resampling procedure, remove or incorporate this after testing jun4th/15
-        % resample in a different way from Datacell, the result of
-        % GroupFigure_sample & GroupStatistics_sample will now be a resampling, NOT
-        % simply including all subjects as this function should normally do
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-        %     for q=1:1000;
-        %         alldatacell{1,i}(q,:)=trimmean(subdata(q,:,datacellind(q,:)),40,3);
-        %     end
-        
-        % this line SHOULD be here but was commented out due to testing on
-        % jun4th/15
-        % create grand avergae surrogates
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         alldatacell{1,i}=mean(subdata,3);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     
 elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     
-    
-    
-    
     for i=1:colfile;
         [subrow subcol]=size(condfiles_subs{i});
-        
-        
-        
         
         for j=1:subrow;
             
             % memory map load
             datamap=mapread(condfiles_subs{1,i}{j,:},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
             
+            
+            
+            if ~strcmp(STATS.tfbsline,'none');
+                
+                %%% Remove baseline for each subject
+                %%%%%%%%%%%%%%%%%%%%%%
+                meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
+                for pg=1:STATS.nboot;
+                    
+                    % need flexible inputs
+                    
+                    %meangather=mean(datamap.Data.dat(:,108:156,pg),2); % baseline period
+                    meangather=mean(datamap.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2);
+                    meanrep=repmat(meangather,1,STATS.timesout);
+                    meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
+                end
+                
+                [~,tmpmeanrem1]=fileparts(tempname);
+                mapwrite(meanrem,[tmpmeanrem1,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+                datamap=mapread([tmpmeanrem1,'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+                
+                
+            end
+            
+            
+            %clear datamap
+            %%%%%%%%%%%%%%%%%%%%%%%
+            % edit
             % write the condition waveforms for each subject to disk
             condition=mean(datamap.Data.dat,3);
+            
             save([condfiles_subs{1,i}{j,:}(1:end-4),'_TF_waves.mat'],'condition');
             clear condition
             
             if j==1;
                 
-                dat_avg=datamap;
-                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%
+                if strcmp(STATS.tfbsline,'none');
+                    
+                    % should be here when no baseline rem
+                    dat_avg=datamap;
+                    
+                else
+                    % writing and reading same array to disk to keep cumulative
+                    % averaging code consistent when doing baseline rem
+                    [~,tmpmeanrem2]=fileparts(tempname);
+                    mapwrite(datamap.Data.dat,[tmpmeanrem2,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+                    dat_avg=mapread([tmpmeanrem2,'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+                    
+                end
                 % create a temp file name to store large freq surrogates
-                [~,tmpfname]=fileparts(tempname);
+                %[~,tmpfname]=fileparts(tempname);
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
             elseif j>1;
                 
@@ -88,7 +113,8 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                 end
                 % create a temp file name to store large freq surrogates
                 [~,tmpfname]=fileparts(tempname);
-                mapwrite((dat_avg.Data.dat+datamap.Data.dat)/2,[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+                %mapwrite((dat_avg.Data.dat+datamap.Data.dat)/2,[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+                mapwrite((dat_avg.Data.dat+datamap.Data.dat),[tmpfname,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
                 dat_avg=mapread([tmpfname,'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
                 
                 try
@@ -103,23 +129,68 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             clear datamap
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % take average based on subrow subjects in each condition
+        [~,tmpfname_mean]=fileparts(tempname);
+        mapwrite((dat_avg.Data.dat./subrow),[tmpfname_mean,'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+        clear dat_avg
+        dat_avg=mapread([tmpfname_mean,'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+        
         % try to delete previous mapped files;
         warning off
         delete(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map']);
         warning on
         
-        % save full surrogate arrays X condition
-        mapwrite(dat_avg.Data.dat,['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%
+        if ~strcmp(STATS.tfbsline,'none');
+            % removal of baseline, edit
+            meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
+            for pg=1:STATS.nboot;
+                
+                % need flexible inputs
+                meangather=mean(dat_avg.Data.dat(:,108:156,pg),2); % baseline period
+                meanrep=repmat(meangather,1,STATS.timesout);
+                meanrem(:,:,pg)=dat_avg.Data.dat(:,:,pg)-meanrep;
+            end
+            
+            % save full surrogate arrays X condition
+            mapwrite(meanrem,['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+            
+            
+            % save mean TF waveforms
+            condition=mean(meanrem,3);
+            
+        else
+            
+            % this should be here instead of meanrem when no baseline removal option is chosen
+            mapwrite(dat_avg.Data.dat,['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout STATS.nboot]);
+            
+            % this should be here instead of meanrem when no baseline removal option is chosen
+            condition=mean(dat_avg.Data.dat,3); %%%% keep
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%
+        end
         
-        % save mean TF waveforms
-        condition=mean(dat_avg.Data.dat,3);
         save(['group_TFwaves_',STATS.savestring, '_', STATS.condnames{i},'.mat'],'condition');
         clear condition
         %mapwrite(mean(dat_avg.Data.dat,3),['group_TFwaves_',STATS.savestring, '_', STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout]);
         
         % fill up datacell with the full TF surrogates to be used in statistics.
         alldatacell{1,i}=mapread(['groupboots_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+        
+        
+        % try to delete previous mapped files;
+        warning off
+        delete([tmpmeanrem1, '.map']);
+        delete([tmpmeanrem2, '.map']);
         delete([tmpfname,'.map']);
+        delete([tmpfname_mean,'.map']);
+        warning on
         clear dat_avg
         
     end

@@ -1,4 +1,4 @@
-function [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2waytf(STATS, condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
+function [sample_results condwaves condfiles_subs] = pbgroup2waytf(STATS, condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
 tic
 %{
 
@@ -143,365 +143,329 @@ CIupbootAB=cell(conABcol,1);
 % this function runs the analysis without resampling from subjects
 [sample_results condwaves] = pbgroup2waytf_sample(STATS, numconds, numpnts, nboot, jlvls, klvls, alpha, condfiles_subs, 'FWE', options.FWE, 'conA', conA, 'conB', conB, 'conAB', conAB);
 
-% % build results structure
-% results=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
-% results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
-%
-% for i=1:conAcol;
-%     results.factor_A.CI{i,1}=zeros(2,numpnts);
+% % % build results structure
+% % results=struct('factor_A',{[]},'factor_B',{[]},'factor_AxB',{[]});
+% % results.factor_A=struct('contrasts',{conA},'pval',{zeros(conAcol,numpnts)},'alpha',{zeros(conAcol,numpnts)},'test_stat',{zeros(conAcol,numpnts)},'CI',{cell(conAcol,1)}, 'FWE', options.FWE);
+% %
+% % for i=1:conAcol;
+% %     results.factor_A.CI{i,1}=zeros(2,numpnts);
+% % end
+% %
+% % results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
+% %
+% %
+% % for i=1:conBcol;
+% %     results.factor_B.CI{i,1}=zeros(2,numpnts);
+% % end
+% %
+% % results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
+% %
+% %
+% % for i=1:conABcol;
+% %     results.factor_AxB.CI{i,1}=zeros(2,numpnts);
+% % end
+% 
+% % make identical results stucture to eventually hold inferential stats
+% % inferential_results=results;
+
+% h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 549 550 40]);
+% childh1 = get(h1, 'Children');
+% set(childh1, 'Position',[5 10 538 15]);
+% 
+% h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 550 40]);
+% childh2 = get(h2, 'Children');
+% set(childh2, 'Position',[5 10 538 15]);
+% 
+% % band fields
+% for i=1:STATS.freqbins;
+%     band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
 % end
-%
-% results.factor_B=struct('contrasts',{conB},'pval',{zeros(conBcol,numpnts)},'alpha',{zeros(conBcol,numpnts)},'test_stat',{zeros(conBcol,numpnts)},'CI',{cell(conBcol,1)}, 'FWE', options.FWE);
-%
-%
-% for i=1:conBcol;
-%     results.factor_B.CI{i,1}=zeros(2,numpnts);
-% end
-%
-% results.factor_AxB=struct('contrasts',{conAB},'pval',{zeros(conABcol,numpnts)},'alpha',{zeros(conABcol,numpnts)},'test_stat',{zeros(conABcol,numpnts)},'CI',{cell(conABcol,1)}, 'FWE', options.FWE);
-%
-%
-% for i=1:conABcol;
-%     results.factor_AxB.CI{i,1}=zeros(2,numpnts);
-% end
-
-% make identical results stucture to eventually hold inferential stats
-% inferential_results=results;
-
-h1 = waitbar(0,'1','Name','resamples from group','Position',[1100 549 550 40]);
-childh1 = get(h1, 'Children');
-set(childh1, 'Position',[5 10 538 15]);
-
-h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 550 40]);
-childh2 = get(h2, 'Children');
-set(childh2, 'Position',[5 10 538 15]);
-
-% band fields
-for i=1:STATS.freqbins;
-    band_fields{i,1}=['band_', strrep(num2str(STATS.TF_freqs(i)),'.','_')];
-end
-
-% bootstrap loop
-for bootind=1:nsamp;
-    
-    % this function builds datacell
-    [datacell] = bootgrandaverage(STATS,condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls,klvls);
-    
-    % write the average of each cell in datacell to a mapped file.
-    % get condition waveforms for plotting purposes
-    for i=1:numconds;
-        mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
-        
-        %%%%% dont worry about this, not necessary to have z score condition waves
-        % also map z score effect for each monte carlo
-        % mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,1,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
-    end
-    
-    %arrange the data for the calculations
-    rowcell=STATS.nboot;
-    
-    for bandind=1:STATS.freqbins;
-        
-        % loop for stats at each timepoint
-        for timecurrent=1:STATS.timesout;
-            
-            % reset data to zeros after every calculation at each timepoint
-            data=zeros(rowcell,numconds);
-            
-            % arrange data into a matrix with subs (or single subject boot samples) X conditions
-            for condcurrent=1:colconds;
-                % data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
-                data(:,condcurrent)=datacell{1,condcurrent}.Data.dat(bandind,timecurrent,:);
-            end
-            
-            % factor A
-            con=conA;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
-            
-            % passing results into results structure
-            results.(band_fields{bandind}).factor_A.contrasts=conA;
-            results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
-            results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-            results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
-            results.(band_fields{bandind}).factor_A.test_statz(:,timecurrent)=psihat_statz;
-            
-            for i=1:conAcol;
-                results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
-                results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
-            end
-            
-            % factor B
-            con=conB;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
-            
-            % passing results into results structure
-            results.(band_fields{bandind}).factor_B.contrasts=conB;
-            results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
-            results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-            results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
-            results.(band_fields{bandind}).factor_B.test_statz(:,timecurrent)=psihat_statz;
-            
-            for i=1:conBcol;
-                results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
-                results.(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
-            end
-            
-            % factor AxB
-            con=conAB;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
-            
-            % passing results into results structure
-            results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
-            results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
-            results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-            results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
-            results.(band_fields{bandind}).factor_AxB.test_statz(:,timecurrent)=psihat_statz;
-            
-            
-            for i=1:conABcol;
-                results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
-                results.(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
-            end
-            
-            
-        end
-        waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%This is where we extract only what we need from each bootstrap%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    for ext=1:conAcol
-        for bandind=1:STATS.freqbins;
-            
-            %[~,tmpfname_tmp]=fileparts(tempname);
-            %tmpfname_diff{ext}=tmpfname_tmp;
-            temparray(bandind,:)=results.(band_fields{bandind}).factor_A.test_statz(ext,:);
-            %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-            
-            
-        end
-        
-        % here are the z surrogates that we do stats on, the arrray holds
-        % all effect sizes for every band and timepoint for each monte carlo
-        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-        %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-    end
-    
-    for ext=1:conBcol
-        for bandind=1:STATS.freqbins;
-            
-            %[~,tmpfname_tmp]=fileparts(tempname);
-            %tmpfname_diff{ext}=tmpfname_tmp;
-            temparray(bandind,:)=results.(band_fields{bandind}).factor_B.test_statz(ext,:);
-            %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-            
-            
-        end
-        
-        % here are the z surrogates that we do stats on, the arrray holds
-        % all effect sizes for every band and timepoint for each monte carlo
-        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-        %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-    end
-    
-    for ext=1:conABcol
-        for bandind=1:STATS.freqbins;
-            
-            %[~,tmpfname_tmp]=fileparts(tempname);
-            %tmpfname_diff{ext}=tmpfname_tmp;
-            temparray(bandind,:)=results.(band_fields{bandind}).factor_AxB.test_statz(ext,:);
-            %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-            
-            
-        end
-        
-        % here are the z surrogates that we do stats on, the arrray holds
-        % all effect sizes for every band and timepoint for each monte carlo
-        mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-        %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
-    end
-    
-    %%% diffwaves should be iteratively written to drive - mem map
-    %%% stealing differnce waves in order to calculate "real" CIs
+% 
+% % bootstrap loop
+% for bootind=1:nsamp;
+%     
+%     % this function builds datacell
+%     [datacell] = bootgrandaverage(STATS,condfiles_subs,numconds,nboot,numpnts,cond_bootvect,bootind,design,jlvls,klvls);
+%     
+%     % write the average of each cell in datacell to a mapped file.
+%     % get condition waveforms for plotting purposes
+%     for i=1:numconds;
+%         mapwrite(mean(datacell{i}.Data.dat,3),['tempmont_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
+%         
+%         %%%%% dont worry about this, not necessary to have z score condition waves
+%         % also map z score effect for each monte carlo
+%         % mapwrite((mean(datacell{i}.Data.dat,3))./(std(datacell{i}.Data.dat,1,3)),['tempmontz_',STATS.savestring,'_',STATS.condnames{i},'.map'],'datsize',[STATS.freqbins STATS.timesout nsamp]);
+%     end
+%     
+%     %arrange the data for the calculations
+%     rowcell=STATS.nboot;
+%     
+%     for bandind=1:STATS.freqbins;
+%         
+%         % loop for stats at each timepoint
+%         for timecurrent=1:STATS.timesout;
+%             
+%             % reset data to zeros after every calculation at each timepoint
+%             data=zeros(rowcell,numconds);
+%             
+%             % arrange data into a matrix with subs (or single subject boot samples) X conditions
+%             for condcurrent=1:colconds;
+%                 % data(:,condcurrent)=datacell{1,condcurrent}(:,timecurrent);
+%                 data(:,condcurrent)=datacell{1,condcurrent}.Data.dat(bandind,timecurrent,:);
+%             end
+%             
+%             % factor A
+%             con=conA;
+%             [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+%             
+%             % passing results into results structure
+%             results.(band_fields{bandind}).factor_A.contrasts=conA;
+%             results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
+%             results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
+%             results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+%             results.(band_fields{bandind}).factor_A.test_statz(:,timecurrent)=psihat_statz;
+%             
+%             for i=1:conAcol;
+%                 results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
+%                 results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
+%             end
+%             
+%             % factor B
+%             con=conB;
+%             [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+%             
+%             % passing results into results structure
+%             results.(band_fields{bandind}).factor_B.contrasts=conB;
+%             results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
+%             results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
+%             results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
+%             results.(band_fields{bandind}).factor_B.test_statz(:,timecurrent)=psihat_statz;
+%             
+%             for i=1:conBcol;
+%                 results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
+%                 results.(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
+%             end
+%             
+%             % factor AxB
+%             con=conAB;
+%             [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+%             
+%             % passing results into results structure
+%             results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
+%             results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
+%             results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
+%             results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
+%             results.(band_fields{bandind}).factor_AxB.test_statz(:,timecurrent)=psihat_statz;
+%             
+%             
+%             for i=1:conABcol;
+%                 results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
+%                 results.(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
+%             end
+%             
+%             
+%         end
+%         waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
+%     end
+%     
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %%%This is where we extract only what we need from each bootstrap%%%%%%%%%%%%%%%%%%%%
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     
 %     for ext=1:conAcol
-%         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
+%         for bandind=1:STATS.freqbins;
+%             
+%             %[~,tmpfname_tmp]=fileparts(tempname);
+%             %tmpfname_diff{ext}=tmpfname_tmp;
+%             temparray(bandind,:)=results.(band_fields{bandind}).factor_A.test_statz(ext,:);
+%             %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%             
+%             
+%         end
+%         
+%         % here are the z surrogates that we do stats on, the arrray holds
+%         % all effect sizes for every band and timepoint for each monte carlo
+%         mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%         %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
 %     end
 %     
 %     for ext=1:conBcol
-%         diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
+%         for bandind=1:STATS.freqbins;
+%             
+%             %[~,tmpfname_tmp]=fileparts(tempname);
+%             %tmpfname_diff{ext}=tmpfname_tmp;
+%             temparray(bandind,:)=results.(band_fields{bandind}).factor_B.test_statz(ext,:);
+%             %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%             
+%             
+%         end
+%         
+%         % here are the z surrogates that we do stats on, the arrray holds
+%         % all effect sizes for every band and timepoint for each monte carlo
+%         mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%         %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
 %     end
 %     
 %     for ext=1:conABcol
-%         diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
+%         for bandind=1:STATS.freqbins;
+%             
+%             %[~,tmpfname_tmp]=fileparts(tempname);
+%             %tmpfname_diff{ext}=tmpfname_tmp;
+%             temparray(bandind,:)=results.(band_fields{bandind}).factor_AxB.test_statz(ext,:);
+%             %mapwrite(results.(band_fields{bandind}).factor_A.test_statz(ext,:),[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%             
+%             
+%         end
+%         
+%         % here are the z surrogates that we do stats on, the arrray holds
+%         % all effect sizes for every band and timepoint for each monte carlo
+%         mapwrite(temparray,['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
+%         %mapwrite(temparray,[tmpfname_diff{ext},'.map'],'datsize',[STATS.freqbins numpnts nsamp]);
 %     end
-    
-    waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
-end
-
-
-% put lower and upper bounds into a cell, lowers 1st, uppers second
-%CIA={CIlowbootA,CIupbootA};
-%CIB={CIlowbootB,CIupbootB};
-%CIAB={CIlowbootAB,CIupbootAB};
-
-
-%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%
-% Mother CIs, the way they are here, do NOT need to be cacultaed, instead,
-% just find the CIs from the bootstrapped average differecnce wave
-% (psihat_stat). You should do that here so that you dont have to keep
-% calculating them after running this function, which is getting annoying
-%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%
-% calculate the 95% "mother" CIs based on what you have accumulated
-%[CIlowA CIupA]=grand_pb_bootCI(CIA, conAcol, numpnts, nsamp, alpha);
-%[CIlowB CIupB]=grand_pb_bootCI(CIB, conBcol, numpnts, nsamp, alpha);
-%[CIlowAB CIupAB]=grand_pb_bootCI(CIAB, conABcol, numpnts, nsamp, alpha);
-
-
-% map write the CI arrays, might be cool to see them at some point
-% for ext=1:conAcol
-%     fidm=mapwrite(CIlowbootA{ext,1},['CIlowbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(CIupbootA{ext,1},['CIupbootA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(diffwaveA{ext,1},['diffwaveA',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%
-% end
-%
-% for ext=1:conBcol
-%     fidm=mapwrite(CIlowbootB{ext,1},['CIlowbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(CIupbootB{ext,1},['CIupbootB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(diffwaveB{ext,1},['diffwaveB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-% end
-%
-% for ext=1:conABcol
-%     fidm=mapwrite(CIlowbootAB{ext,1},['CIlowbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(CIupbootAB{ext,1},['CIupbootAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
-%     fidm=mapwrite(diffwaveAB{ext,1},['diffwaveAB',num2str(ext),'.map'],'datsize',[nsamp numpnts]);
+%     
+%     %%% diffwaves should be iteratively written to drive - mem map
+%     %%% stealing differnce waves in order to calculate "real" CIs
+% %     for ext=1:conAcol
+% %         diffwaveA{ext,1}(bootind,:)=results.factor_A.test_stat(ext,:);
+% %     end
+% %     
+% %     for ext=1:conBcol
+% %         diffwaveB{ext,1}(bootind,:)=results.factor_B.test_stat(ext,:);
+% %     end
+% %     
+% %     for ext=1:conABcol
+% %         diffwaveAB{ext,1}(bootind,:)=results.factor_AxB.test_stat(ext,:);
+% %     end
+%     
+%     waitbar(bootind/nsamp,h1,sprintf('%12s',[num2str(bootind),'/',num2str(nsamp)]))
 % end
 
-close(h1,h2);
-%%%%%%%%%%%%%%%%%% inferential statistics %%%%%%%%%%%%%%%%%
 
-% get condition waveforms to plot
-for i=1:numconds;
-    
-    %     %%%%%% dont worry about this one, make var equal to the regular unit waveforms
-    %     % also map z score effect for each monte carlo
-    %     dat_tempmontz=mapread(['tempmontz_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
-    %     condwaves_trim{i}=mean(dat_tempmontz.Data.dat,3);
-    
-    dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat');
-    condwaves_trim{i}=mean(dat_tempmont.Data.dat,3);
-end
-
-%preallocate samll data arrays
-data_A=zeros(nsamp,conAcol);
-data_B=zeros(nsamp,conBcol);
-data_AB=zeros(nsamp,conABcol);
-
-
-% access the big difference wave arrays
-for i=1:conAcol
-    
-    diffdata.(['A',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'dat');
-    
-end
-
-for i=1:conBcol
-    diffdata.(['B',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'dat');
-end
-
-for i=1:conABcol
-    diffdata.(['AB',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'dat');
-end
-
-% waitbar for final stages, doing inferential stats
-h3 = waitbar(0,'1','Name','inferential statistics on frequency bands','Position',[1100 486 550 40]);
-childh3 = get(h3, 'Children');
-set(childh3, 'Position',[5 10 538 15]);
-
-for bandind=1:STATS.freqbins;
-    
-    % loop for stats at each timepoint
-    for timecurrent=1:numpnts;
-        
-        % factor A
-        con=conA;
-        for i=1:conAcol;
-            data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(bandind,timecurrent,:);
-        end
-        
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
-        
-        % passing results into results structure
-        inferential_results.(band_fields{bandind}).factor_A.contrasts=conA;
-        inferential_results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
-        inferential_results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-        inferential_results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
-        
-        for i=1:conAcol;
-            inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
-            inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
-        end
-        
-        % factor B
-        con=conB;
-        for i=1:conBcol;
-            data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(bandind,timecurrent,:);
-        end
-        
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_B, con, nsamp, alpha, options.FWE);
-        
-        % passing results into results structure
-        inferential_results.(band_fields{bandind}).factor_B.contrasts=conB;
-        inferential_results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
-        inferential_results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-        inferential_results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
-        
-        for i=1:conBcol;
-            inferential_results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
-            inferential_results.(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
-        end
-        
-        % factor A
-        con=conAB;
-        for i=1:conABcol;
-            data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(bandind,timecurrent,:);
-        end
-        
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_AB, con, nsamp, alpha, options.FWE);
-        
-        % passing results into results structure
-        inferential_results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
-        inferential_results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
-        inferential_results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-        inferential_results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
-        
-        
-        for i=1:conABcol;
-            inferential_results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
-            inferential_results.(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
-        end
-        
-        %waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
-    end
-    waitbar(bandind/STATS.freqbins,h3,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
-end
+% close(h1,h2);
+% %%%%%%%%%%%%%%%%%% inferential statistics %%%%%%%%%%%%%%%%%
+% 
+% % get condition waveforms to plot
+% for i=1:numconds;
+%     
+%     %     %%%%%% dont worry about this one, make var equal to the regular unit waveforms
+%     %     % also map z score effect for each monte carlo
+%     %     dat_tempmontz=mapread(['tempmontz_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat','datsize',[STATS.freqbins STATS.timesout nsamp]);
+%     %     condwaves_trim{i}=mean(dat_tempmontz.Data.dat,3);
+%     
+%     dat_tempmont=mapread(['tempmont_',STATS.savestring, '_', STATS.condnames{i},'.map'], 'dat');
+%     condwaves_trim{i}=mean(dat_tempmont.Data.dat,3);
+% end
+% 
+% %preallocate samll data arrays
+% data_A=zeros(nsamp,conAcol);
+% data_B=zeros(nsamp,conBcol);
+% data_AB=zeros(nsamp,conABcol);
+% 
+% 
+% % access the big difference wave arrays
+% for i=1:conAcol
+%     
+%     diffdata.(['A',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastA',num2str(ext),'.map'],'dat');
+%     
+% end
+% 
+% for i=1:conBcol
+%     diffdata.(['B',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastB',num2str(ext),'.map'],'dat');
+% end
+% 
+% for i=1:conABcol
+%     diffdata.(['AB',num2str(i)])=mapread(['zsurrogates_',STATS.savestring,'_contrastAB',num2str(ext),'.map'],'dat');
+% end
+% 
+% % waitbar for final stages, doing inferential stats
+% h3 = waitbar(0,'1','Name','inferential statistics on frequency bands','Position',[1100 486 550 40]);
+% childh3 = get(h3, 'Children');
+% set(childh3, 'Position',[5 10 538 15]);
+% 
+% for bandind=1:STATS.freqbins;
+%     
+%     % loop for stats at each timepoint
+%     for timecurrent=1:numpnts;
+%         
+%         % factor A
+%         con=conA;
+%         for i=1:conAcol;
+%             data_A(:,i)=diffdata.(['A',num2str(i)]).Data.dat(bandind,timecurrent,:);
+%         end
+%         
+%         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_A, con, nsamp, alpha, options.FWE);
+%         
+%         % passing results into results structure
+%         inferential_results.(band_fields{bandind}).factor_A.contrasts=conA;
+%         inferential_results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
+%         inferential_results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
+%         inferential_results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+%         
+%         for i=1:conAcol;
+%             inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
+%             inferential_results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
+%         end
+%         
+%         % factor B
+%         con=conB;
+%         for i=1:conBcol;
+%             data_B(:,i)=diffdata.(['B',num2str(i)]).Data.dat(bandind,timecurrent,:);
+%         end
+%         
+%         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_B, con, nsamp, alpha, options.FWE);
+%         
+%         % passing results into results structure
+%         inferential_results.(band_fields{bandind}).factor_B.contrasts=conB;
+%         inferential_results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
+%         inferential_results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
+%         inferential_results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
+%         
+%         for i=1:conBcol;
+%             inferential_results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
+%             inferential_results.(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
+%         end
+%         
+%         % factor A
+%         con=conAB;
+%         for i=1:conABcol;
+%             data_AB(:,i)=diffdata.(['AB',num2str(i)]).Data.dat(bandind,timecurrent,:);
+%         end
+%         
+%         [psihat_stat pvalgen pcrit conflow confup]=pbstats_diff(data_AB, con, nsamp, alpha, options.FWE);
+%         
+%         % passing results into results structure
+%         inferential_results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
+%         inferential_results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
+%         inferential_results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
+%         inferential_results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
+%         
+%         
+%         for i=1:conABcol;
+%             inferential_results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
+%             inferential_results.(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
+%         end
+%         
+%         %waitbar(timecurrent/numpnts,h3,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+%     end
+%     waitbar(bandind/STATS.freqbins,h3,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
+% end
 
 % edit may 8th/15
 % clean temporary mapped files
-if iscell(tmpfname)
-    for i=1:length(tempfname);
-        delete(tempfname{i});
+try
+    if iscell(tmpfname)
+        for i=1:length(tempfname);
+            delete(tempfname{i});
+        end
+        
+    else
+        delete(tempfname);
     end
+catch
     
-else
-    delete(tempfname);
 end
 
-close(h3)
+%close(h3)
 end
 
 

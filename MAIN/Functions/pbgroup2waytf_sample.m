@@ -147,13 +147,13 @@ for bandind=1:STATS.freqbins;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(band_fields{bandind}).factor_A.contrasts=conA;
         results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
         
         for i=1:conAcol;
            results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
@@ -162,13 +162,13 @@ for bandind=1:STATS.freqbins;
         
         % factor B
         con=conB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(band_fields{bandind}).factor_B.contrasts=conB;
         results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
+        results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_statz;
         
         for i=1:conBcol;
             results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
@@ -177,13 +177,13 @@ for bandind=1:STATS.freqbins;
         
         % factor AxB
         con=conAB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
         results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
+        results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_statz;
         
         for i=1:conABcol;
             results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
@@ -193,7 +193,7 @@ for bandind=1:STATS.freqbins;
         waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
     
-    waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
+    waitbar(bandind/STATS.freqbins,h1,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
 end
 close(h1,h2);
 
