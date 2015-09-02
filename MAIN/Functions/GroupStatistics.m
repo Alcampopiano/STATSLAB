@@ -94,7 +94,7 @@ switch STATS.design
         
         if any(strcmp({'ersp' 'itc'},STATS.measure));
             
-            [inferential_results sample_results condwaves condfiles_subs condwaves_trim] = pbgroup2waytf(STATS, condfiles, STATS.numconds, STATS.timesout, STATS.nboot, ...
+            [sample_results condwaves condfiles_subs] = pbgroup2waytf(STATS, condfiles, STATS.numconds, STATS.timesout, STATS.nboot, ...
                 STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
@@ -107,11 +107,11 @@ switch STATS.design
         
         
         % update STATS structure
-        STATS.inferential_results=inferential_results;
+        %STATS.inferential_results=inferential_results;
         STATS.sample_results=sample_results;
         STATS.condwaves=condwaves;
         STATS.bootfiles=condfiles_subs;
-        STATS.condwaves_trim=condwaves_trim;
+        %STATS.condwaves_trim=condwaves_trim;
         
         disp('******* finished calculating statistics *******')
         disp('******* Saving STATS structure *******')

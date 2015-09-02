@@ -713,11 +713,11 @@ switch STATS.design
                 for j=1:length(STATS.condnames);
                     
                     % get condition waveforms and labels
-                    if STATS.inferential_results.factor_AxB.contrasts(j,options.FactorAB(i))==1
+                    if STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==1
                         %plot1st(k,:)=STATS.condwaves_trim(j,:);
                         lab1stlist{k}=STATS.condnames{j};
                         k=k+1;
-                    elseif STATS.inferential_results.factor_AxB.contrasts(j,options.FactorAB(i))==-1
+                    elseif STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==-1
                         %plot2nd(m,:)=STATS.condwaves_trim(j,:);
                         lab2ndlist{m}=STATS.condnames{j};
                         m=m+1;

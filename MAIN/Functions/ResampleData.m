@@ -67,6 +67,7 @@ STATS.nboot=nboot;
 % added it is exandable in this for
 options.trialcap='none';
 
+
 % get field names
 optionnames = fieldnames(options);
 
@@ -153,8 +154,23 @@ for filecurrent=1:colfile;
     
     % deal with trial cap if there is one
     if capflag
+        
+%         %%% trialcap edit when doing trial cap on a per subject basis
+%         %%%%%%%%%%%%%%%%%%%%
+%         load('trialmins.mat')
+%         load('trialpre.mat')
+%         
+%         for cp=1:length(trialmins)
+%             if strfind(fnames{1,filecurrent},trialpre{cp})
+%                 trialEEG=trialmins(cp);
+%             end
+%         end       
+        
+        %%%% this should be here when setting cap that applies to
+        %%%% everyone, although the above edit should be made as an option
+        %%%% so that trial caps can be used on a per subject basis
         if trialEEG>STATS.trialcap
-            trialEEG=STATS.trialcap;
+           trialEEG=STATS.trialcap;
         end
     end
     

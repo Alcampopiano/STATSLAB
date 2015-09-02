@@ -86,14 +86,15 @@ else
     %%%% there is probably a better way of doing this, but I was tired at
     %%%% that moment
     % fix cell within a cell
-    condfiles=cell(1,numconds);
+    condfiles_cell=cell(1,numconds);
     for i=1:numconds
-        [rowcondcell colcondcell]=size(condfiles_cellcell{i});
+        [rowcondcell colcondcell]=size(condfiles{i});
         for j=1:rowcondcell
-            condfiles{j,i}=condfiles_cellcell{i}{j};
+            condfiles_cell{j,i}=condfiles{i}{j};
         end
     end
-    
+    clear condfiles
+   condfiles=condfiles_cell;
 end
 
 %preallocate sizes
@@ -148,11 +149,35 @@ set(childh2, 'Position',[5 10 538 15]);
 for filecurrent=1:rowconds;
     
     for condcurrent=1:colconds;
+        
+        warning off
+        try
+            for td=1:colconds;
+                delete([tmpmeanrem{td},'.map']);
+            end     
+        catch 
+        end
+        warning on
         %conds=load(condfiles{filecurrent,condcurrent});
         %datacell{1,condcurrent}=conds.data;
         
         % memory map load
         datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+        
+        %%% Remove baseline for each subject
+        %%%%%%%%%%%%%%%%%%%%%%
+        meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
+        for pg=1:STATS.nboot;
+            
+            % need flexible inputs
+            meangather=mean(datamap.Data.dat(:,108:156,pg),2); % baseline period
+            meanrep=repmat(meangather,1,STATS.timesout);
+            meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
+        end
+       
+        [~,tmpmeanrem{condcurrent}]=fileparts(tempname);
+        mapwrite(meanrem,[tmpmeanrem{condcurrent},'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+        datamap=mapread([tmpmeanrem{condcurrent},'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         datacell{1,condcurrent}=datamap;
         clear datamap
         
@@ -184,13 +209,13 @@ for filecurrent=1:rowconds;
             
             % factor A
             con=conA;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.contrasts=conA;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
             
             
             for i=1:conAcol;
@@ -200,13 +225,13 @@ for filecurrent=1:rowconds;
             
             % factor B
             con=conB;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.contrasts=conB;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_statz;
             
             
             for i=1:conBcol;
@@ -216,22 +241,22 @@ for filecurrent=1:rowconds;
             
             % factor AxB
             con=conAB;
-            [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.contrasts=conAB;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_statz;
             
             for i=1:conABcol;
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
             end
             
-            waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
+           
         end
-        
+        waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
     end
     
     waitbar(filecurrent/rowconds,h1,sprintf('%12s',[num2str(filecurrent),'/',num2str(rowconds)]))
