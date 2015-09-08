@@ -94,7 +94,7 @@ else
         end
     end
     clear condfiles
-   condfiles=condfiles_cell;
+    condfiles=condfiles_cell;
 end
 
 %preallocate sizes
@@ -154,8 +154,8 @@ for filecurrent=1:rowconds;
         try
             for td=1:colconds;
                 delete([tmpmeanrem{td},'.map']);
-            end     
-        catch 
+            end
+        catch
         end
         warning on
         %conds=load(condfiles{filecurrent,condcurrent});
@@ -164,20 +164,24 @@ for filecurrent=1:rowconds;
         % memory map load
         datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         
-        %%% Remove baseline for each subject
-        %%%%%%%%%%%%%%%%%%%%%%
-        meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
-        for pg=1:STATS.nboot;
+        if ~strcmp(STATS.tfbsline,'none');
             
-            % need flexible inputs
-            meangather=mean(datamap.Data.dat(:,108:156,pg),2); % baseline period
-            meanrep=repmat(meangather,1,STATS.timesout);
-            meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
+            %%% Remove baseline for each subject
+            %%%%%%%%%%%%%%%%%%%%%%
+            meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
+            for pg=1:STATS.nboot;
+                
+                % need flexible inputs
+                meangather=mean(datamap.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2); % baseline period
+                meanrep=repmat(meangather,1,STATS.timesout);
+                meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
+            end
+            
+            [~,tmpmeanrem{condcurrent}]=fileparts(tempname);
+            mapwrite(meanrem,[tmpmeanrem{condcurrent},'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+            datamap=mapread([tmpmeanrem{condcurrent},'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+            
         end
-       
-        [~,tmpmeanrem{condcurrent}]=fileparts(tempname);
-        mapwrite(meanrem,[tmpmeanrem{condcurrent},'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
-        datamap=mapread([tmpmeanrem{condcurrent},'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         datacell{1,condcurrent}=datamap;
         clear datamap
         
@@ -254,7 +258,7 @@ for filecurrent=1:rowconds;
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
             end
             
-           
+            
         end
         waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
     end

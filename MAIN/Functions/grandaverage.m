@@ -152,7 +152,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             for pg=1:STATS.nboot;
                 
                 % need flexible inputs
-                meangather=mean(dat_avg.Data.dat(:,108:156,pg),2); % baseline period
+                meangather=mean(dat_avg.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2); % baseline period
                 meanrep=repmat(meangather,1,STATS.timesout);
                 meanrem(:,:,pg)=dat_avg.Data.dat(:,:,pg)-meanrep;
             end
