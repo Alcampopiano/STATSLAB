@@ -77,7 +77,8 @@ options.chans=[]; % no pair needed
 options.ICs=[]; % pair with textfile
 options.tfcycles=[3 .5]; % spectral opts
 options.freqs=[3 30]; % spectral opts
-options.timesout=600; % spectral opts
+options.nfreqs=27;
+%options.timesout=600; % spectral opts
 options.tfbsline='none'; % TF baseline default
 
 % get field names
@@ -981,7 +982,8 @@ STATS.xmin=EEG.xmin;
 STATS.xmax=EEG.xmax;
 STATS.tfcycles=options.tfcycles;
 STATS.freqs=options.freqs;
-STATS.timesout=options.timesout;
+STATS.nfreqs=options.nfreqs;
+%STATS.timesout=options.timesout;
 STATS.tfbsline=options.tfbsline;
 
 %if any(strcmp({'scalpchan','scalpersp','scalpitc'},options.measure));

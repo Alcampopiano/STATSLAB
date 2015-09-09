@@ -1,4 +1,4 @@
-function contextconfig = propgrid2contextconfig(propgrid)
+function contextconfig = propgrid2struct(propgrid)
 
 npg=length(propgrid.Properties);
 %nlevels=npg/19;

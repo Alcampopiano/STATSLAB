@@ -251,12 +251,13 @@ for filecurrent=1:colfile;
                                 figure('visible','off');
                                 [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(i,:,:), ...
                                     STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
-                                    STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
-                                % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
+                                    STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'nfreqs',STATS.nfreqs,'timesout',-1,'plotersp','off','plotitc','off');
+                                    %STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
                                 freqbins=size(ersp,1);
                                 STATS.freqbins=freqbins;
                                 STATS.TF_times=times;
                                 STATS.TF_freqs=freqs;
+                                STATS.timesout=size(tfdata,2);
                                 clear ersp itc powbase times freqs erspboot itcboot
                             end
                             
@@ -298,12 +299,13 @@ for filecurrent=1:colfile;
                             figure('visible','off');
                             [ersp,itc,powbase,times,freqs,erspboot,itcboot,tfdata] = newtimef(datacell{1}(1,:,:), ...
                                 STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
-                                STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
-                            % STATS.srate, [3 .5],'freqs',[3 30],'timesout',600);
+                                STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'nfreqs',STATS.nfreqs,'timesout',-1,'plotersp','off','plotitc','off');
+                                    %STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',STATS.timesout,'plotersp','off','plotitc','off');
                             freqbins=size(ersp,1);
                             STATS.freqbins=freqbins;
                             STATS.TF_times=times;
                             STATS.TF_freqs=freqs;
+                            STATS.timesout=size(tfdata,2);
                             clear ersp itc powbase times freqs erspboot itcboot
                             
                         end

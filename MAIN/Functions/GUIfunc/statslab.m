@@ -4,7 +4,7 @@ function [statslab_propgrid, okayhit, STATS]=statslab(nosplash)
 vercheck();
 
 % splash or no splash
-if nargin<1;
+if nargin==1;
     splash_fade;
 end
     
@@ -152,12 +152,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if statslab_propgrid.logical_rw==1;
     
-    %%%%%%%%%%%%
-    %%** this function is not written yet...
-    %%%%%%%%%%%%
-    
+
     % initiate partial function string
-    funcstr=['[STATS]=PlotWinBootCor([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condition_label_rw,'...
+    funcstr=['[STATS]=WinBootCorFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condition_label_rw,'...
         'statslab_propgrid.Ylable_rw);'];
     
     eval(funcstr);
@@ -168,7 +165,7 @@ end
 if statslab_propgrid.logical_slope==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=PlotWinBootCor([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
+    funcstr=['[STATS]=SlopeCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
         'statslab_propgrid.Ylable_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope);'];
     
     eval(funcstr);
@@ -179,7 +176,7 @@ end
 if statslab_propgrid.logical_lowess==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=PlotWinBootCor([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_lowess, statslab_propgrid.condition_label_lowess,'...
+    funcstr=['[STATS]=LowessCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_lowess, statslab_propgrid.condition_label_lowess,'...
         'statslab_propgrid.Ylable_lowess, statslab_propgrid.msplot_lowess, statslab_propgrid.nboot_lowess, statslab_propgrid.span, statslab_propgrid.nbins);'];
     
     eval(funcstr);
