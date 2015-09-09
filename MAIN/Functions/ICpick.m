@@ -3,8 +3,24 @@ function [okayhit, IC_choices]=ICpick(fnames,numconds)
 %size of largest number of subjects gives size of grid
 tabsize=max(cell2mat(cellfun(@length,fnames,'un',0)));
 
-evstring='global ICCHOICES; ICCHOICES=repmat(cellstr(''''),tabsize,numconds*numconds); ICtable;';
+evstring='ICtable;';
 
+% the ICCHOICES array is an empty array, that gets populated with fname
+% elements. The adjacent rows are empty strings '' that get filled with
+% components that you want to extract. The trailing rows (if you have
+% unequal cell numbers), are empty []). The array gets passed globally to
+% input gui in this function, and uitable in ICtable.m
+global ICCHOICES; 
+ICCHOICES=cell(tabsize,numconds*2);
+j=1;
+for i=1:numconds;
+    [rowfname colfname]=size(fnames{i});
+    for q=1:rowfname
+        ICCHOICES{q,j}=fnames{i}{q}; 
+        ICCHOICES{q,j+1}='';    
+    end
+    j=j+2;  
+end
 
 [res, jnk, okayhit]=inputgui( ...
     'geom', ...
@@ -29,17 +45,18 @@ evstring='global ICCHOICES; ICCHOICES=repmat(cellstr(''''),tabsize,numconds*numc
     'title', 'STATSLAB -- statslab()',...%, ...
     'eval',evstring ...
     );
-global ICCHOICES
-IC_choices=cellfun(@str2num,ICCHOICES(1:end),'UniformOutput',0)';
-clearvars -global ICCHOICES
+
+j=2;
+for i=1:numconds;
+    [rowfname colfname]=size(fnames{i});
+    ICCHOICES(1:rowfname,j)=cellfun(@str2num,ICCHOICES(1:rowfname,j),'UniformOutput',0)';
+    j=j+2;
 end
+IC_choices=ICCHOICES;
+clearvars -global ICCHOICES
 
 
-% trialdat=squeeze(double(EEG.data(18,:,:)))';
-% subplot(2,1,1)
-% x=EEG.times;
-% y=1:EEG.trials;
-% surf(x,y,trialdat,'linestyle','none','facecolor','interp'); axis tight; view(0,90);
-% subplot(2,1,2)
-% plot(x,mean(trialdat)); axis tight; grid on;
+
+
+
 
