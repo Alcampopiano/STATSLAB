@@ -72,14 +72,15 @@ function [STATS]=ExtractData(condnames,condfiles,levels,design,savestring,vararg
 
 
 %%%%% options %%%%%
-options.measure=[]; % temporary
-options.chans=[]; % no pair needed
-options.ICs=[]; % pair with textfile
+options.measure=[];
+options.chans='persubject'; % key word default, can be chan label -> 'Cz' or -> {'Fcz' 'Cz'}
+options.ICs='';
 options.tfcycles=[3 .5]; % spectral opts
 options.freqs=[3 30]; % spectral opts
 options.nfreqs=27;
 %options.timesout=600; % spectral opts
 options.tfbsline='none'; % TF baseline default
+
 
 % get field names
 optionnames = fieldnames(options);
@@ -160,360 +161,319 @@ end
 
 switch options.measure
     
-    case {'icamax', 'icaersp', 'icaitc'}
-        disp(' ***** projecting selected ICs to scalp and extracting channel with maximum weight ***** ')
+    case {'icascalp', 'icaersp', 'icaitc'}
+        disp(' ***** projecting selected ICs to scalp and extracting channels ***** ')        
         
-        % load txt file with ICs to retain
-        % trailing unequal positions in ICretain will be filled with zeros,
-        % normally this is problematic but since we only loop through any
-        % given column rowcond (number of subjects in a condition) times,
-        % it should be okay (i.e., the zero is never accessed).
-        ICretain=csvread(options.ICs);
-        
-        %if strcmp(design,'bw');
-        if strcmp(design,'bw');
+        if isempty(options.ICs);
             
-            kk=0;
-            jj=1;
-            for j=1:jlvls;
-                
-                [rowcond colcond]=size(condfiles_subs{jj});
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    for k=1:klvls;
-                        
-                        % load file
-                        EEG = pop_loadset('filename',condfiles_subs{k+kk}{s},'filepath',pathtofiles{k+kk});
-                        EEG = eeg_checkset(EEG);
-                        
-                        % get orignal IC inds
-                        icorig=[1:min(size(EEG.icawinv))];
-                        
-                        compswant=ICretain(s,j);
-                        
-                        icorig(compswant)=[];
-                        
-                        % pick ICs you want to retain
-                        EEGretain = pop_subcomp( EEG, icorig, 0);
-                        EEGretain = eeg_checkset(EEGretain);
-                        
-                        % figure out which channel has max weight
-                        %for i=1:size(EEGretain.icawinv,2);
-                        %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                        %end
-                        
-                        [maxweight maxind]=max(abs(EEGretain.icawinv));
-                        
-                        % put EEG.data into the variable data
-                        data=EEGretain.data(maxind,:,:);
-                        
-                        % save it with original filename but get rid of original
-                        % extention (hence the 1:end-4)
-                        save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                        clear data
-                        
-                        % get residual
-                        EEGres = pop_subcomp( EEG, compswant, 0);
-                        EEGres = eeg_checkset(EEGres);
-                        
-                        % put EEG.data into the variable data
-                        data=EEGres.data(maxind,:,:);
-                        
-                        % save it with original filename but get rid of original
-                        % extention (hence the 1:end-4)
-                        save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                        clear data
-                        
-                    end
-                    
-                end
-                
-                kk=kk+klvls;
-                jj=jj+klvls;
-            end
-            
-            %elseif strcmp(design,'ww')||strcmp(design,'w');
-        elseif strcmp(design,'ww')||strcmp(design,'w');
-            
-            % always assuming that within subjects factors have equal
-            % number of subjects. So I only query the size of condfiles_subs{1}
-            [rowcond colcond]=size(condfiles_subs{1});
-            
-            for s=1:rowcond; % scroll through subjects
-                
-                for k=1:numconds;
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(s);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
-                    % figure out which channel has max weight
-                    %for i=1:size(EEGretain.icawinv,2);
-                    %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                    %end
-                    
-                    [maxweight maxind]=max(abs(EEGretain.icawinv));
-                    
-                    % put EEG.data into the variable data
-                    data=EEGretain.data(maxind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data(maxind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-            %elseif strcmp(design,'bb')||strcmp(design,'b');
-        elseif strcmp(design,'bb')||strcmp(design,'b');
-            
-            for k=1:numconds;
-                
-                [rowcond colcond]=size(condfiles_subs{k});
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(s,k);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
-                    % figure out which channel has max weight
-                    %for i=1:size(EEGretain.icawinv,2);
-                    %    [maxweight(i) maxind(i)]=max(abs(EEGretain.icaweights(i,:)));
-                    %end
-                    
-                    [maxweight maxind]=max(abs(EEGretain.icawinv));
-                    
-                    % put EEG.data into the variable data
-                    data=EEGretain.data(maxind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data(maxind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
+            % GUI IC picker
+            [okayhit, ICretain]=ICpick(condfiles_subs,numconds);
+        else
+            tmp=load(options.ICs);
+            tmpfields=fieldnames(tmp);
+            ICretain=tmp.(tmpfields{1});
         end
+        
+        % GUI, load file, or, neither
+        persubject=0;
+        if strcmp(options.chans,'persubject')
+            
+            % GUI channel picker not written yet
+            [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
+            persubject=1;
+            
+        elseif ~isempty(strfind(options.chans,'.mat'))
+            
+            % load a file
+            tmp=load(options.chans);
+            tmpfields=fieldnames(tmp);
+            chanfile=tmp.(tmpfields{1});
+            persubject=1;
+        end
+        
+        
+        if persubject==0; % take same channel or channel cluster for each subject
+            for i=1:numconds
+                [rowcond colcond]=size(condfiles_subs{i});
+                
+                for j=1:rowcond;
+                    
+                    % load file
+                    EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
+                    EEG = eeg_checkset(EEG);
+                    
+                    % get orignal IC inds
+                    icorig=[1:min(size(EEG.icawinv))];
+                    
+                    compswant=ICretain(j,i+i);
+                    
+                    icorig(compswant)=[];
+                    
+                    % pick ICs you want to retain
+                    EEGretain = pop_subcomp( EEG, icorig, 0);
+                    EEGretain = eeg_checkset(EEGretain);
+                    
+                    
+                    % when some option to select a channel is given
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for ii=1:length(options.chans)
+                            chanind(ii)=find(strcmp({EEG.chanlocs.labels},options.chans{ii}));
+                        end
+                        
+                    catch
+                        error(['Channel ' options.chans{ii}, 'does not exist for subject ', condfiles_subs{i}{j}, ...
+                            'If the data are not interpolated, the channels you are looking for must exist for every subject.']);
+                    end
+                    data=EEGretain.data(chanind,:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    clear data
+                    
+                    % get residual
+                    EEGres = pop_subcomp( EEG, compswant, 0);
+                    EEGres = eeg_checkset(EEGres);
+                    
+                    % put EEG.data into the variable data
+                    data=EEGres.data(chanind,:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+                    clear data
+                    
+                end
+                
+            end
+        end
+        
+        if persubject==1; % take different chans accros subject as indicated in chanfile
+            for i=1:numconds
+                [rowcond colcond]=size(condfiles_subs{i});
+                
+                for j=1:rowcond;
+                    
+                    % load file
+                    EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
+                    EEG = eeg_checkset(EEG);
+                    
+                    % get orignal IC inds
+                    icorig=[1:min(size(EEG.icawinv))];              
+                    
+                    compswant=ICretain(j,i+i);
+                    
+                    icorig(compswant)=[];
+                    
+                    % pick ICs you want to retain
+                    EEGretain = pop_subcomp( EEG, icorig, 0);
+                    EEGretain = eeg_checkset(EEGretain);
+                    
+                    
+                    % when some option to select a channel is given
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for ii=1:length(chanfile{j,i+i})
+                            chanind(ii)=find(strcmp({EEG.chanlocs.labels},chanfile{j,i+i}{ii}));
+                        end
+                        
+                    catch
+                        error(['Channel ' chanfile{j,i+i}{ii}, 'does not exist for subject ', condfiles_subs{i}{j}, ...
+                            'If the data are not interpolated, the channels you are looking for must exist for every subject.']);
+                    end
+                    data=EEGretain.data(chanind,:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                    clear data
+                    
+                    % get residual
+                    EEGres = pop_subcomp( EEG, compswant, 0);
+                    EEGres = eeg_checkset(EEGres);
+                    
+                    % put EEG.data into the variable data
+                    data=EEGres.data(chanind,:,:);
+                    
+                    % save it with original filename but get rid of original
+                    % extention (hence the 1:end-4)
+                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+                    clear data
+                    
+                end
+                
+            end
+        end
+        
         xtimes=EEG.times;
-        disp(' ***** finished projecting selected ICs to scalp and extracting channel with maximum weight ***** ')
+        disp(' ***** finished projecting selected ICs to specified scalp channels ***** ')
         
     case 'icagfa'
         disp(' ***** projecting selected ICs to scalp and extracting data array for later GFA calculation ***** ')
         
-        % load txt file with ICs to retain
-        % trailing unequal positions in ICretain will be filled with zeros,
-        % normally this is problematic but since we only loop through any
-        % given column rowcond (number of subjects in a condition) times,
-        % it should be okay (i.e., the zero is never accessed).
-        ICretain=csvread(options.ICs);
-        
-        % if strcmp(design,'bw');
-        if strcmp(design,'bw');
-            
-            kk=0;
-            jj=1;
-            for j=1:jlvls;
-                
-                [rowcond colcond]=size(condfiles_subs{jj});
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    for k=1:klvls;
-                        
-                        % load file
-                        EEG = pop_loadset('filename',condfiles_subs{k+kk}{s},'filepath',pathtofiles{k+kk});
-                        EEG = eeg_checkset(EEG);
-                        
-                        % get orignal IC inds
-                        icorig=[1:min(size(EEG.icawinv))];
-                        
-                        compswant=ICretain(s,j);
-                        
-                        icorig(compswant)=[];
-                        
-                        % pick ICs you want to retain
-                        EEGretain = pop_subcomp( EEG, icorig, 0);
-                        EEGretain = eeg_checkset(EEGretain);
-                        
-                        % put EEG.data into the variable data
-                        data=EEGretain.data;
-                        
-                        % save it with original filename but get rid of original
-                        % extention (hence the 1:end-4)
-                        save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                        clear data
-                        
-                        % get residual
-                        EEGres = pop_subcomp( EEG, compswant, 0);
-                        EEGres = eeg_checkset(EEGres);
-                        
-                        % put EEG.data into the variable data
-                        data=EEGres.data;
-                        
-                        % save it with original filename but get rid of original
-                        % extention (hence the 1:end-4)
-                        save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                        clear data
-                        
-                    end
-                    
-                end
-                
-                kk=kk+klvls;
-                jj=jj+klvls;
-            end
-            
-            %elseif strcmp(design,'ww')||strcmp(design,'w');
-        elseif strcmp(design,'ww')||strcmp(design,'w');
-            
-            % always assuming that within subjects factors have equal
-            % number of subjects. So I only query the size of condfiles_subs{1}
-            [rowcond colcond]=size(condfiles_subs{1});
-            
-            for s=1:rowcond; % scroll through subjects
-                
-                for k=1:numconds;
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(s);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGretain.data;
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data;
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-            %elseif strcmp(design,'bb')||strcmp(design,'b');
-        elseif strcmp(design,'bb')||strcmp(design,'b');
-            
-            for k=1:numconds;
-                
-                [rowcond colcond]=size(condfiles_subs{k});
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(s,k);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGretain.data;
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data;
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-        end
+%         % load txt file with ICs to retain
+%         % trailing unequal positions in ICretain will be filled with zeros,
+%         % normally this is problematic but since we only loop through any
+%         % given column rowcond (number of subjects in a condition) times,
+%         % it should be okay (i.e., the zero is never accessed).
+%         ICretain=csvread(options.ICs);
+%         
+%         % if strcmp(design,'bw');
+%         if strcmp(design,'bw');
+%             
+%             kk=0;
+%             jj=1;
+%             for j=1:jlvls;
+%                 
+%                 [rowcond colcond]=size(condfiles_subs{jj});
+%                 
+%                 for s=1:rowcond; % scroll through subjects
+%                     
+%                     for k=1:klvls;
+%                         
+%                         % load file
+%                         EEG = pop_loadset('filename',condfiles_subs{k+kk}{s},'filepath',pathtofiles{k+kk});
+%                         EEG = eeg_checkset(EEG);
+%                         
+%                         % get orignal IC inds
+%                         icorig=[1:min(size(EEG.icawinv))];
+%                         
+%                         compswant=ICretain(s,j);
+%                         
+%                         icorig(compswant)=[];
+%                         
+%                         % pick ICs you want to retain
+%                         EEGretain = pop_subcomp( EEG, icorig, 0);
+%                         EEGretain = eeg_checkset(EEGretain);
+%                         
+%                         % put EEG.data into the variable data
+%                         data=EEGretain.data;
+%                         
+%                         % save it with original filename but get rid of original
+%                         % extention (hence the 1:end-4)
+%                         save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+%                         clear data
+%                         
+%                         % get residual
+%                         EEGres = pop_subcomp( EEG, compswant, 0);
+%                         EEGres = eeg_checkset(EEGres);
+%                         
+%                         % put EEG.data into the variable data
+%                         data=EEGres.data;
+%                         
+%                         % save it with original filename but get rid of original
+%                         % extention (hence the 1:end-4)
+%                         save([condfiles_subs{k+kk}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+%                         clear data
+%                         
+%                     end
+%                     
+%                 end
+%                 
+%                 kk=kk+klvls;
+%                 jj=jj+klvls;
+%             end
+%             
+%             %elseif strcmp(design,'ww')||strcmp(design,'w');
+%         elseif strcmp(design,'ww')||strcmp(design,'w');
+%             
+%             % always assuming that within subjects factors have equal
+%             % number of subjects. So I only query the size of condfiles_subs{1}
+%             [rowcond colcond]=size(condfiles_subs{1});
+%             
+%             for s=1:rowcond; % scroll through subjects
+%                 
+%                 for k=1:numconds;
+%                     
+%                     % load file
+%                     EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+%                     EEG = eeg_checkset(EEG);
+%                     
+%                     % get orignal IC inds
+%                     icorig=[1:min(size(EEG.icawinv))];
+%                     
+%                     compswant=ICretain(s);
+%                     
+%                     icorig(compswant)=[];
+%                     
+%                     % pick ICs you want to retain
+%                     EEGretain = pop_subcomp( EEG, icorig, 0);
+%                     EEGretain = eeg_checkset(EEGretain);
+%                     
+%                     % put EEG.data into the variable data
+%                     data=EEGretain.data;
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+%                     clear data
+%                     
+%                     % get residual
+%                     EEGres = pop_subcomp( EEG, compswant, 0);
+%                     EEGres = eeg_checkset(EEGres);
+%                     
+%                     % put EEG.data into the variable data
+%                     data=EEGres.data;
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+%                     clear data
+%                     
+%                 end
+%                 
+%             end
+%             
+%             %elseif strcmp(design,'bb')||strcmp(design,'b');
+%         elseif strcmp(design,'bb')||strcmp(design,'b');
+%             
+%             for k=1:numconds;
+%                 
+%                 [rowcond colcond]=size(condfiles_subs{k});
+%                 
+%                 for s=1:rowcond; % scroll through subjects
+%                     
+%                     % load file
+%                     EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+%                     EEG = eeg_checkset(EEG);
+%                     
+%                     % get orignal IC inds
+%                     icorig=[1:min(size(EEG.icawinv))];
+%                     
+%                     compswant=ICretain(s,k);
+%                     
+%                     icorig(compswant)=[];
+%                     
+%                     % pick ICs you want to retain
+%                     EEGretain = pop_subcomp( EEG, icorig, 0);
+%                     EEGretain = eeg_checkset(EEGretain);
+%                     
+%                     % put EEG.data into the variable data
+%                     data=EEGretain.data;
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+%                     clear data
+%                     
+%                     % get residual
+%                     EEGres = pop_subcomp( EEG, compswant, 0);
+%                     EEGres = eeg_checkset(EEGres);
+%                     
+%                     % put EEG.data into the variable data
+%                     data=EEGres.data;
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+%                     clear data
+%                     
+%                 end
+%                 
+%             end
+%             
+%         end
         xtimes=EEG.times;
         disp(' ***** finished projecting selected ICs to scalp for later GFA calculations ***** ')
         
@@ -706,7 +666,7 @@ switch options.measure
     case 'scalpchansub'
         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
         
-
+        
         
         for k=1:numconds;
             
@@ -725,7 +685,7 @@ switch options.measure
                     EEG = eeg_checkset(EEG);
                     
                     % determin the largest neg channel during window of interest
-                    h=figure; title(['condition as, subject ', num2str(s)]); 
+                    h=figure; title(['condition as, subject ', num2str(s)]);
                     pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
                     
                     timewin=input('type in timewindow around N170\n');
@@ -739,14 +699,14 @@ switch options.measure
                     
                     % then, get the index for the min channel
                     [val_chan(s) ind_chan(s)]=min(val_time);
-                                        
+                    
                     % add chanlabel to speadsheet
                     miscinfo{s+1,2}=ind_chan(s);
                     miscinfo{s+1,4}=val_chan(s);
                     
                     chanlab{s}=EEG.chanlocs(ind_chan(s)).labels;
                     miscinfo{s+1,3}=chanlab{s};
-                                        
+                    
                     % steal data from the channels you are interested in
                     data=EEG.data(ind_chan(s),:,:);
                     
@@ -760,7 +720,7 @@ switch options.measure
             end
             
             if k>1;
-
+                
                 for s=1:rowcond; % scroll through subjects
                     
                     % load file from first condition
@@ -789,8 +749,8 @@ switch options.measure
                     clear data
                     
                 end
-                  
-            end  
+                
+            end
             
         end
         STATS.miscinfo=miscinfo;
@@ -994,7 +954,7 @@ STATS.chanlabels=options.chans;
 %end
 
 % set measures for following resampling procedure
-if any(strcmp({'icamax','scalpchan','scalpchansub'},options.measure))
+if any(strcmp({'icascalp','scalpchan','scalpchansub'},options.measure))
     STATS.measure='chanclust';
 elseif any(strcmp({'icagfa','scalpgfa'},options.measure))
     STATS.measure='gfa';
