@@ -10,18 +10,20 @@
 % Inputs:
 %
 %
-% condfiles - cell array of filenames for each subject and condition.
-%             Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
-%             load the appropriate subject condition files. After this is done, the
-%             file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
-%             calls instead of using [] and having to manually load.
+% ***condfiles***
 %
-% condnames - cell array of condition labels. For example, {'face' 'house' 'object'}
-%
-% varargin  - key/val pairs. See Options.
+% cell array of filenames for each subject and condition.
+% Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
+% load the appropriate subject condition files. After this is done, the
+% file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
+% calls instead of using [] and having to manually load. ***end***
 %
 %
-% Options:
+% ***condnames***
+%
+% cell array of condition labels. For example, {'face' 'house' 'object'} ***end***
+%
+% ***varargin***
 %
 % icamax    - Project selected ICs to scalp channel with maximum weight determined
 %             by the weight matrix. All ICA options must be followed with
@@ -43,7 +45,7 @@
 %              more than one channel, the channel group will be averaged
 %              together during the resampling stages (ResampleData.m) giving
 %              you a channel cluster. This function does not handle doing
-%              stats on multiple channels independently in the same call.
+%              stats on multiple channels independently in the same call. ***end***
 %
 % Examples:
 % [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'},[],[2 2],'ww','Occipital_Analysis','scalpchan',{'A23', 'A24' })
@@ -790,89 +792,6 @@ switch options.measure
         end
         xtimes=EEG.times;
         disp('***** finished extracting selected channel(s) ***** ')
-        
-        %    case 'icaersp'
-        %         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
-        %
-        %         for k=1:numconds;
-        %
-        %             [rowcond colcond]=size(condfiles_subs{k});
-        %
-        %             for s=1:rowcond; % scroll through subjects
-        %
-        %                 % load file
-        %                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-        %                 EEG = eeg_checkset(EEG);
-        %
-        %                 try
-        %                     % scroll through chans the user wants and collect relavent indices
-        %                     for i=1:length(options.chans)
-        %                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
-        %                     end
-        %
-        %                 catch
-        %                     error(['One of the channels you want does not exist for some subjects. ' ...
-        %                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-        %                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-        %                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-        %                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
-        %                 end
-        %
-        %                 % steal data from the channels you are interested in
-        %                 data=EEG.data(chanind,:,:);
-        %
-        %                 % save it with original filename but get rid of original
-        %                 % extention (hence the 1:end-4)
-        %                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-        %                 clear data
-        %
-        %             end
-        %
-        %         end
-        %         xtimes=EEG.times;
-        %         disp('***** finished extracting selected channel(s) ***** ')
-        
-        %    case 'icaitc'
-        %         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
-        %
-        %         for k=1:numconds;
-        %
-        %             [rowcond colcond]=size(condfiles_subs{k});
-        %
-        %             for s=1:rowcond; % scroll through subjects
-        %
-        %                 % load file
-        %                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-        %                 EEG = eeg_checkset(EEG);
-        %
-        %                 try
-        %                     % scroll through chans the user wants and collect relavent indices
-        %                     for i=1:length(options.chans)
-        %                         chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
-        %                     end
-        %
-        %                 catch
-        %                     error(['One of the channels you want does not exist for some subjects. ' ...
-        %                         'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-        %                         'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-        %                         'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-        %                         'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
-        %                 end
-        %
-        %                 % steal data from the channels you are interested in
-        %                 data=EEG.data(chanind,:,:);
-        %
-        %                 % save it with original filename but get rid of original
-        %                 % extention (hence the 1:end-4)
-        %                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-        %                 clear data
-        %
-        %             end
-        %
-        %         end
-        %         xtimes=EEG.times;
-        %         disp('***** finished extracting selected channel(s) ***** ')
-        
 end
 
 
