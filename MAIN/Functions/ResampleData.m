@@ -8,12 +8,27 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Input arguments:
-%     STATS stucture - you will be prompted to load this
-%     nboot = number of resamples you wish to take from the single-trials
 %
-% varargin - key/val pairs, see Options for details
+% ***STATS stucture*** 
+%
+% you will be prompted to load this if left empty e.g., ''
+% or, give the filename of your STATS structure. ***end***
+%
+% ***condfiles***
+%
+% cell array of filenames for each file you want to resample. 
+% Leave emtpy (ie., '') and MATLAB will bring up an interface for you to
+% load the files. ***end***
+%
+% ***nboot*** 
+% number of resamples you wish to take from the single-trials ***end***
+%
+% key/val pairs, see Options for details
 %
 % Options:
+%
+% ***varargin***
+%
 %       trialcap - a string paired with the number of the cap (e.g., 50).
 %       The trialcap option limits the number of trials used in each resample
 %       to the cap. This helps to equate noise levels due to unequal number of trials in
@@ -23,7 +38,7 @@
 %       will offset the GFA waveform compared to a condition with less noise (more trials).
 %       Typical ERPs occilate around zero, so trialcap does not likely need to be set for
 %       ERPs. Omit this option alltogether if you wish to resample from the
-%       max number of trials (default).
+%       max number of trials (default). ***end***
 %
 %
 % Examples:
