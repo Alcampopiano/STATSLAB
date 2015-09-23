@@ -178,7 +178,7 @@ switch options.measure
         persubject=0;
         if strcmp(options.chans,'persubject')
             
-            % GUI channel picker not written yet
+            % GUI channel picker 
             [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
             persubject=1;
             

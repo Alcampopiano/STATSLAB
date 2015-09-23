@@ -2,7 +2,7 @@ function [handle,Zi,grid,Xi,Yi] = statslab_topoplot(Values,loc_file,varargin)
 
 
 % global variable used for clickchan subfunction (at bottom)
-clear -global CURCLICK
+%clear -global CURCLICK
 global CURCLICK
 CURCLICK={};
 %
@@ -1019,8 +1019,8 @@ else % if STYLE 'blank'
   if strcmp(ELECTRODES,'labelpoint') |  strcmp(ELECTRODES,'numpoint')
     text(-0.6,-0.6, ...
     [ int2str(length(Rd)) ' of ' int2str(length(tmpeloc)) ' electrode locations shown']); 
-    text(-0.6,-0.7, [ 'Click on electrodes to toggle name/number']);
-    tl = title('Channel locations');
+    text(-0.6,-0.7, [ 'Click on electrodes to toggle selection']);
+    tl = title('subject');
     set(tl, 'fontweight', 'bold');
   end;
 end % STYLE 'blank'
