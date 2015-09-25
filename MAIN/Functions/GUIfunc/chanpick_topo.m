@@ -1,19 +1,31 @@
-function [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numconds,varargin)
+function [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numconds)
 
-clearvars -global tmpEEG CHANCHOICES CURCLICK SAVEHIT LOADHIT
+%clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK
 
-global CURCLICK tmpEEG CHANCHOICES SAVEHIT LOADHIT
+global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
 
+% make global so eval can use them in inputgui
+CONDFILES_SUBS=condfiles_subs;
+PATHTOFILES=pathtofiles;
+NUMCONDS=numconds;
 
+% deletes a weird uicontrol object that supergui places on the figure that appears in blue.
+evstring1='statslab_topoplot_loadfile; b=findobj(gcf); delete(b(9)); set(gcf,''Color'', [1 1 1]);';
 
-% the first part of evstring1 just deletes a weird uicontrol object that supergui places
-% on the figure that appears in blue. If this is not the 6th object in the
-% figure, this code will not work. Better to find the object by name
-% somehow.
-evstring1='b=findobj(gcf); delete(b(6)); set(gcf,''Color'', [1 1 1]); statslab_topoplot_loadfile;';
+% recall function
+evstring2=['global LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS; LOADHIT=1;' ...
+    'close(gcf); chanpick_topo(CONDFILES_SUBS,PATHTOFILES,NUMCONDS);'];
 
-
-if isempty(varargin{1})
+if LOADHIT==1;
+    [ParamName ParamPath]=uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
+    tmp=load(fullfile(ParamPath, ParamName), '-mat');
+    field=fieldnames(tmp);
+    CHANCHOICES=tmp.(field{1});
+    INLOAD=1;
+else
+    % grid size
+    tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
+    
     CHANCHOICES=cell(tabsize,numconds*2);
     j=1;
     for i=1:numconds;
@@ -24,104 +36,124 @@ if isempty(varargin{1})
         end
         j=j+2;
     end
-    
-    
-else
-    
-    % load CHANCHOICES
-    [ParamName, ParamPath] = uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
-    load(fullfile(ParamPath, ParamName), '-mat');
-    
 end
 
-
-for jj=1:numconds;
-    for ii=1:length(condfiles_subs{jj}); % number of subs in each condition,
+jj=1;
+ii=1;
+sel=true;
+try
+    while sel
         
-        if ~isempty(varargin{1})
-            tmpEEG = pop_loadset('filename',condfiles_subs{jj}{ii},'filepath',pathtofiles{1});
-            tmpEEG = eeg_checkset(tmpEEG);
+        CURSUB=condfiles_subs{jj}{ii};
+        
+        tmpEEG = pop_loadset('filename',CURSUB,'filepath',pathtofiles{jj});
+        tmpEEG = eeg_checkset(tmpEEG);
+        
+        disp(['working on channel selections for file: ' CURSUB]);
+        
+        [res, jnk, okayhit]=inputgui( ...
+            'geom', ...
+            {...
+            {6 22 [0 0] [1 1]} ... % this is just to control the size of the GUI {6 22 [0 0] [1 1]} ...
+            {6 22 [0.05 0] [2 1]} ... % load config
+            {6 22 [3.95 0] [2 1]} ... %2 saveas
+            {6 22 [0.05 95] [1 1]} ... %3 BACK
+            {6 22 [0.85 95] [1 1]} ... %3 NEXT
             
-            
-            if ~isempty(CHANCHOICES{ii,jj*2});
-                for q=1:length(CHANCHOICES{ii,jj*2});
-                    labs=tmpEEG.chanlocs(CHANCHOICES{ii,jj*2}{q}).labels;
-                    
-                    oh=findobj('String',[labs, '_']);
-                    
-                    if isempty(oh)
-                        oh=findobj('String',labs);
-                    end
-                    set(oh, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
-                end
-                
-            end
-            LOADHIT=0;
-            
-        else
-            tmpEEG = pop_loadset('filename',condfiles_subs{jj}{ii},'filepath',pathtofiles{1});
-            tmpEEG = eeg_checkset(tmpEEG);
-            disp(['working on channel selections for file: ' condfiles_subs{jj}{ii}]);
-            
-            [res, jnk, okayhit]=inputgui( ...
-                'geom', ...
-                {...
-                {6 22 [0 0] [1 1]} ... % this is just to control the size of the GUI {6 22 [0 0] [1 1]} ...
-                {6 22 [0.05 0] [2 1]} ... % load config
-                {6 22 [3.95 0] [2 1]} ... %2 saveas
-                
-                }, ...
-                'uilist', ...
-                {...
-                {'Style', 'text', 'tag','txt_ccfp','string',blanks(30)} ... %1 this is just to control the size of the GU
-                {'Style', 'pushbutton', 'string', 'Load Parameters', ...
-                'callback', 'global LOADHIT; LOADHIT=1; close(gcf)'} ... %2
-                {'Style', 'pushbutton','string','Save channel selection file', ...
-                'callback','global SAVEHIT; SAVEHIT=1;'}, ...
-                }, ...
-                'title', 'STATSLAB -- statslab()',...%, ...
-                'eval',evstring1 ...
-                );
-            
-            
-            
-            
-            
-            
-            
-        end
+            }, ...
+            'uilist', ...
+            {...
+            {'Style', 'text', 'tag','txt_ccfp','string',blanks(30)} ... %1 this is just to control the size of the GU
+            {'Style', 'pushbutton', 'string', 'Load Parameters', ...
+            'callback', evstring2} ... %2
+            {'Style', 'pushbutton','string','Save channel selection file', ...
+            'callback','global SAVEHIT; SAVEHIT=1; close(gcf);'}, ...
+            {'Style', 'pushbutton','string','BACK', ...
+            'callback','global BACK; BACK=1; close(gcf);'}, ...
+            {'Style', 'pushbutton','string','NEXT', ...
+            'callback','global NEXT; NEXT=1; close(gcf);'}, ...
+            }, ...
+            'title', 'STATSLAB -- statslab()',...%, ...
+            'eval',evstring1 ...
+            );
         
         if SAVEHIT==1;
-            CHANCHOICES{ii,jj*2}=CURCLICK;
+            
+            if ~isempty(CHANCHOICES{ii,jj+1})
+                CHANCHOICES{ii,jj+1}=[CHANCHOICES{ii,jj+1} CURCLICK];
+            else
+                CHANCHOICES{ii,jj+1}=CURCLICK;
+            end
             [ParamName, ParamPath]=uiputfile('*.*','channel selection file');
             save(fullfile(ParamPath, ParamName),'CHANCHOICES');
             SAVEHIT=0;
             okayhit='hello';
-            
-        elseif LOADHIT==1;
-            
-            [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numconds,1);
-            
-            % load CHANCHOICES
-            [ParamName, ParamPath] = uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
-            load(fullfile(ParamPath, ParamName), '-mat');
-            %LOADHIT=0;
-            okayhit='hello';
-            
-            
         else
-            CHANCHOICES{ii,jj*2}=CURCLICK;
+            
+            if ~isempty(CHANCHOICES{ii,jj+1})
+                CHANCHOICES{ii,jj+1}=[CHANCHOICES{ii,jj+1} CURCLICK];
+            else
+                CHANCHOICES{ii,jj+1}=CURCLICK;
+            end
+        end
+        
+        if isempty(BACK) && isempty(NEXT);
+            
+            % control while loop params
+            if ii<length(condfiles_subs{jj})
+                ii=ii+1;
+                
+            elseif ii==length(condfiles_subs{jj});
+                ii=1;
+                
+                if jj<numconds;
+                    jj=jj+1;
+                    
+                elseif jj==numconds
+                    break
+                end
+            end
+                       
+        elseif BACK==1;
+            BACK=[];
+            if ii>1;
+                ii=ii-1;
+            end
+            if jj>1
+                jj=jj-1;
+            end
+            okayhit='hello';
+        elseif NEXT==1;
+            NEXT=[];
+            if ii<length(condfiles_subs{jj})
+                ii=ii+1;
+            elseif ii==length(condfiles_subs{jj})
+                if jj<numconds
+                    jj=jj+1;
+                    ii=1;
+                end
+            end
+            okayhit='hello';
         end
         
         % is cancel is hit or fig is closed
         if isempty(okayhit)
             chan_choices=CHANCHOICES;
-            %clearvars -global tmpEEG CURCLICK CHANCHOICES SAVEHIT
+            INLOAD=[];
+            clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
             return
         end
     end
+catch
+    disp('error catch')
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
 end
 
-chan_choices=CHANCHOICES;
-clearvars -global tmpEEG CHANCHOICES CURCLICK SAVEHIT LOADHIT
+if isempty(INLOAD);
+    chan_choices=CHANCHOICES;
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
+elseif INLOAD==1;
+    INLOAD=[]; 
+end
+
 end
