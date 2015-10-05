@@ -2,7 +2,7 @@ function [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numcon
 
 %clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK
 
-global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
+global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH
 
 % make global so eval can use them in inputgui
 CONDFILES_SUBS=condfiles_subs;
@@ -22,6 +22,7 @@ if LOADHIT==1;
     field=fieldnames(tmp);
     CHANCHOICES=tmp.(field{1});
     INLOAD=1;
+    OKAYPUSH=[];
 else
     % grid size
     tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
@@ -87,7 +88,7 @@ try
             [ParamName, ParamPath]=uiputfile('*.*','channel selection file');
             save(fullfile(ParamPath, ParamName),'CHANCHOICES');
             SAVEHIT=0;
-            okayhit='hello';
+            okayhit='cont';
         else
             
             if ~isempty(CHANCHOICES{ii,jj+1})
@@ -113,7 +114,7 @@ try
                     break
                 end
             end
-                       
+            
         elseif BACK==1;
             BACK=[];
             if ii>1;
@@ -122,7 +123,7 @@ try
             if jj>1
                 jj=jj-1;
             end
-            okayhit='hello';
+            okayhit='cont';
         elseif NEXT==1;
             NEXT=[];
             if ii<length(condfiles_subs{jj})
@@ -133,15 +134,23 @@ try
                     ii=1;
                 end
             end
-            okayhit='hello';
+            okayhit='cont';
         end
         
         % is cancel is hit or fig is closed
-        if isempty(okayhit)
-            chan_choices=CHANCHOICES;
-            INLOAD=[];
-            clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
-            return
+        if strcmp(okayhit,'retuninginputui') && ~isempty(INLOAD);
+                INLOAD=[];
+                OKAYPUSH=1;
+                return
+        elseif  isempty(okayhit) && ~isempty(INLOAD);
+                INLOAD=[];
+                return
+        elseif strcmp(okayhit,'retuninginputui') && isempty(INLOAD);        
+                break
+        elseif isempty(okayhit) && ~isempty(OKAYPUSH);
+                break
+        elseif isempty(okayhit) && isempty(OKAYPUSH);
+                break
         end
     end
 catch
@@ -149,11 +158,16 @@ catch
     clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
 end
 
-if isempty(INLOAD);
+
+% ending channel selection
+if isempty(OKAYPUSH)
+    
+    chan_choices=[];
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH 
+    
+elseif ~isempty(OKAYPUSH) % okay was hit
     chan_choices=CHANCHOICES;
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
-elseif INLOAD==1;
-    INLOAD=[]; 
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH
 end
 
 end
