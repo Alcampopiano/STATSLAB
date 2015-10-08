@@ -2,7 +2,7 @@ function [handle,Zi,grid,Xi,Yi] = statslab_topoplot(Values,loc_file,varargin)
 
 
 % global variable used for clickchan subfunction (at bottom)
-global CURCLICK LOADHIT CHANCHOICES CURSUB tmpEEG
+global CURCLICK LOADHIT CHANCHOICES CURSUB tmpEEG NEXT BACK
 
 CURCLICK={};
 %
@@ -1439,9 +1439,26 @@ axis off
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if LOADHIT==1;
+% if LOADHIT==1;
     
-    [rf cf]=find(strcmp(CURSUB,CHANCHOICES));
+%     [rf cf]=find(strcmp(CURSUB,CHANCHOICES));
+%     for q=1:length(CHANCHOICES{rf(1),cf(1)+1});
+%         
+%         labs=tmpEEG.chanlocs(str2double(CHANCHOICES{rf(1),cf(1)+1}{q})).labels;
+%         
+%         oh=findobj('String',[labs, ' ']);
+%         
+%         if isempty(oh)
+%             oh=findobj('String',labs);
+%         end
+%         set(oh, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
+%     end
+%     return
+%        
+
+[rf cf]=find(strcmp(CURSUB,CHANCHOICES));
+if ~isempty(CHANCHOICES{rf(1),cf(1)+1})
+    
     for q=1:length(CHANCHOICES{rf(1),cf(1)+1});
         
         labs=tmpEEG.chanlocs(str2double(CHANCHOICES{rf(1),cf(1)+1}{q})).labels;
@@ -1456,6 +1473,7 @@ if LOADHIT==1;
 end
 
 return
+    
 end
 
 

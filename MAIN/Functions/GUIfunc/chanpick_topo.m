@@ -2,7 +2,7 @@ function [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numcon
 
 %clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK
 
-global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH
+global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
 
 % make global so eval can use them in inputgui
 CONDFILES_SUBS=condfiles_subs;
@@ -10,10 +10,10 @@ PATHTOFILES=pathtofiles;
 NUMCONDS=numconds;
 
 % deletes a weird uicontrol object that supergui places on the figure that appears in blue.
-evstring1='statslab_topoplot_loadfile; b=findobj(gcf); delete(b(9)); set(gcf,''Color'', [1 1 1]);';
+evstring1='global CURPOS; CURPOS=get(gcf, ''Position''); statslab_topoplot_loadfile; b=findobj(gcf); delete(b(9)); set(gcf,''Color'', [1 1 1]);';
 
 % recall function
-evstring2=['global LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS; LOADHIT=1;' ...
+evstring2=['global CURPOS LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS; CURPOS=get(gcf, ''Position''); LOADHIT=1;' ...
     'close(gcf); chanpick_topo(CONDFILES_SUBS,PATHTOFILES,NUMCONDS);'];
 
 if LOADHIT==1;
@@ -42,6 +42,8 @@ end
 jj=1;
 ii=1;
 sel=true;
+
+screenpos='cent';
 try
     while sel
         
@@ -51,6 +53,10 @@ try
         tmpEEG = eeg_checkset(tmpEEG);
         
         disp(['working on channel selections for file: ' CURSUB]);
+        
+        if ~isempty(CURPOS)
+            screenpos=[CURPOS(1) CURPOS(2)];
+        end
         
         [res, jnk, okayhit]=inputgui( ...
             'geom', ...
@@ -68,14 +74,15 @@ try
             {'Style', 'pushbutton', 'string', 'Load Parameters', ...
             'callback', evstring2} ... %2
             {'Style', 'pushbutton','string','Save channel selection file', ...
-            'callback','global SAVEHIT; SAVEHIT=1; close(gcf);'}, ...
+            'callback','global SAVEHIT CURPOS; CURPOS=get(gcf, ''Position''); SAVEHIT=1; close(gcf);'}, ...
             {'Style', 'pushbutton','string','BACK', ...
-            'callback','global BACK; BACK=1; close(gcf);'}, ...
+            'callback','global BACK CURPOS; CURPOS=get(gcf, ''Position''); BACK=1; close(gcf);'}, ...
             {'Style', 'pushbutton','string','NEXT', ...
-            'callback','global NEXT; NEXT=1; close(gcf);'}, ...
+            'callback','global NEXT CURPOS; CURPOS=get(gcf, ''Position''); NEXT=1; close(gcf);'}, ...
             }, ...
             'title', 'STATSLAB -- statslab()',...%, ...
-            'eval',evstring1 ...
+            'eval',evstring1, ...
+            'screenpos', screenpos ...
             );
         
         if SAVEHIT==1;
@@ -123,6 +130,7 @@ try
             if jj>1
                 jj=jj-1;
             end
+               
             okayhit='cont';
         elseif NEXT==1;
             NEXT=[];
@@ -151,11 +159,11 @@ try
                 break
         elseif isempty(okayhit) && isempty(OKAYPUSH);
                 break
-        end
+        end    
     end
 catch
     disp('error catch')
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
 end
 
 
@@ -163,11 +171,11 @@ end
 if isempty(OKAYPUSH)
     
     chan_choices=[];
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH 
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
     
 elseif ~isempty(OKAYPUSH) % okay was hit
     chan_choices=CHANCHOICES;
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH
+    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
 end
 
 end
