@@ -1,181 +1,263 @@
-function [okayhit, chan_choices]=chanpick_topo(condfiles_subs,pathtofiles,numconds)
+function chanpick_topo(condfiles_subs,pathtofiles,numconds)
 
-%clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK
+% Basic Graphical User Interface (GUI) without using GUIDE
+% Available at https://dadorran.wordpress.com
 
-global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
+% There are three basic areas to understand:
+%   1. Layout    (how to position objects on the GUI)
+%   2. Handles to Objects (used to modify object properties)
+%   3. Callback functions (used by User Interface Objects)
 
-% make global so eval can use them in inputgui
-CONDFILES_SUBS=condfiles_subs;
-PATHTOFILES=pathtofiles;
-NUMCONDS=numconds;
+%loadhit=[];
+%if loadhit==1;
+%    [ParamName ParamPath]=uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
+%    tmp=load(fullfile(ParamPath, ParamName), '-mat');
+%    field=fieldnames(tmp);
+%    CHANCHOICES=tmp.(field{1});
+%    INLOAD=1;
+%    OKAYPUSH=[];
+%else
+% grid size
+tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
 
-% deletes a weird uicontrol object that supergui places on the figure that appears in blue.
-evstring1='global CURPOS; CURPOS=get(gcf, ''Position''); statslab_topoplot_loadfile; b=findobj(gcf); delete(b(9)); set(gcf,''Color'', [1 1 1]);';
-
-% recall function
-evstring2=['global CURPOS LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS; CURPOS=get(gcf, ''Position''); LOADHIT=1;' ...
-    'close(gcf); chanpick_topo(CONDFILES_SUBS,PATHTOFILES,NUMCONDS);'];
-
-if LOADHIT==1;
-    [ParamName ParamPath]=uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
-    tmp=load(fullfile(ParamPath, ParamName), '-mat');
-    field=fieldnames(tmp);
-    CHANCHOICES=tmp.(field{1});
-    INLOAD=1;
-    OKAYPUSH=[];
-else
-    % grid size
-    tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
-    
-    CHANCHOICES=cell(tabsize,numconds*2);
-    j=1;
-    for i=1:numconds;
-        [rowfname colfname]=size(condfiles_subs{i});
-        for q=1:rowfname
-            CHANCHOICES{q,j}=condfiles_subs{i}{q};
-            CHANCHOICES{q,j+1}='';
-        end
-        j=j+2;
+chanchoices=cell(tabsize,numconds*2);
+j=1;
+for i=1:numconds;
+    [rowfname colfname]=size(condfiles_subs{i});
+    for q=1:rowfname
+        chanchoices{q,j}=condfiles_subs{i}{q};
+        chanchoices{q,j+1}='';
     end
+    j=j+2;
 end
+%end
 
-jj=1;
-ii=1;
+%create a figure to house the GUI
+f = figure('units','normalized','position',[.25 .25 .5 .65]);
+
+% initialize linked data
+data.chanarray=chanchoices;
+data.condind=1;
+data.subind=1;
+guidata(gcf,data);
+
+%create an editable textbox object
+edit_box_h = uicontrol('style','edit',...
+    'units', 'normalized',...
+    'position', [0.45 0.01 0.1 0.05]);
+
+backh = uicontrol('style', 'pushbutton',...
+    'string', 'Back',...
+    'units', 'normalized',...
+    'position', [0.01 0.01 0.1 0.05],...
+    'callback', {@backfunc});
+
+nexth = uicontrol('style', 'pushbutton',...
+    'string', 'Next',...
+    'units', 'normalized',...
+    'position', [0.11 0.01 0.1 0.05],...
+    'callback', {@nextfunc});
+
+cancelh = uicontrol('style', 'pushbutton',...
+    'string', 'Cancel',...
+    'units', 'normalized',...
+    'position', [0.89 0.01 0.1 0.05],...
+    'callback', {@cancelfunc});
+
+okh = uicontrol('style', 'pushbutton',...
+    'string', 'OK',...
+    'units', 'normalized',...
+    'position', [0.79 0.01 0.1 0.05],...
+    'callback', {@okayfunc});
+
+loadh = uicontrol('style', 'pushbutton',...
+    'string', 'Load',...
+    'units', 'normalized',...
+    'position', [0.01 0.94 0.1 0.05],...
+    'callback', {@loadfunc});
+
+
+saveh = uicontrol('style', 'pushbutton',...
+    'string', 'Save',...
+    'units', 'normalized',...
+    'position', [0.89 0.94 0.1 0.05],...
+    'callback', {@savefunc});
+
+
 sel=true;
-
-screenpos='cent';
-try
-    while sel
-        
-        CURSUB=condfiles_subs{jj}{ii};
-        
-        tmpEEG = pop_loadset('filename',CURSUB,'filepath',pathtofiles{jj});
-        tmpEEG = eeg_checkset(tmpEEG);
-        
-        disp(['working on channel selections for file: ' CURSUB]);
-        
-        if ~isempty(CURPOS)
-            screenpos=[CURPOS(1) CURPOS(2)];
-        end
-        
-        [res, jnk, okayhit]=inputgui( ...
-            'geom', ...
-            {...
-            {6 22 [0 0] [1 1]} ... % this is just to control the size of the GUI {6 22 [0 0] [1 1]} ...
-            {6 22 [0.05 0] [2 1]} ... % load config
-            {6 22 [3.95 0] [2 1]} ... %2 saveas
-            {6 22 [0.05 95] [1 1]} ... %3 BACK
-            {6 22 [0.85 95] [1 1]} ... %3 NEXT
-            
-            }, ...
-            'uilist', ...
-            {...
-            {'Style', 'text', 'tag','txt_ccfp','string',blanks(30)} ... %1 this is just to control the size of the GU
-            {'Style', 'pushbutton', 'string', 'Load Parameters', ...
-            'callback', evstring2} ... %2
-            {'Style', 'pushbutton','string','Save channel selection file', ...
-            'callback','global SAVEHIT CURPOS; CURPOS=get(gcf, ''Position''); SAVEHIT=1; close(gcf);'}, ...
-            {'Style', 'pushbutton','string','BACK', ...
-            'callback','global BACK CURPOS; CURPOS=get(gcf, ''Position''); BACK=1; close(gcf);'}, ...
-            {'Style', 'pushbutton','string','NEXT', ...
-            'callback','global NEXT CURPOS; CURPOS=get(gcf, ''Position''); NEXT=1; close(gcf);'}, ...
-            }, ...
-            'title', 'STATSLAB -- statslab()',...%, ...
-            'eval',evstring1, ...
-            'screenpos', screenpos ...
-            );
-        
-        if SAVEHIT==1;
-            
-            if ~isempty(CHANCHOICES{ii,jj+1})
-                CHANCHOICES{ii,jj+1}=[CHANCHOICES{ii,jj+1} CURCLICK];
-            else
-                CHANCHOICES{ii,jj+1}=CURCLICK;
-            end
-            [ParamName, ParamPath]=uiputfile('*.*','channel selection file');
-            save(fullfile(ParamPath, ParamName),'CHANCHOICES');
-            SAVEHIT=0;
-            okayhit='cont';
-        else
-            
-            if ~isempty(CHANCHOICES{ii,jj+1})
-                CHANCHOICES{ii,jj+1}=[CHANCHOICES{ii,jj+1} CURCLICK];
-            else
-                CHANCHOICES{ii,jj+1}=CURCLICK;
+while sel
+    
+    % invoke data link
+    data=guidata(gcf);
+    
+    cursub=condfiles_subs{data.condind}{data.subind};
+    tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind});
+    tmpEEG = eeg_checkset(tmpEEG);
+    statslab_topoplot([],tmpEEG.chanlocs, 'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
+        'labelpoint', 'plotrad', [], 'chaninfo', tmpEEG, 'nosedir' ,'+Y');
+    disp(['working on channel selections for file: ' cursub]);
+    
+    % waitfor callback
+    uiwait;
+    
+    % gather data linked to the figure
+    data=guidata(gcf);
+    
+    % determine which button was pressed
+    if strcmp(data.button, 'next')
+        data.button=[];
+        if data.subind<length(condfiles_subs{data.condind})
+            data.subind=data.subind+1;
+        elseif data.subind==length(condfiles_subs{data.condind})
+            if data.condind<numconds
+                data.condind=data.condind+1;
+                data.subind=1;
             end
         end
         
-        if isempty(BACK) && isempty(NEXT);
-            
-            % control while loop params
-            if ii<length(condfiles_subs{jj})
-                ii=ii+1;
-                
-            elseif ii==length(condfiles_subs{jj});
-                ii=1;
-                
-                if jj<numconds;
-                    jj=jj+1;
-                    
-                elseif jj==numconds
-                    break
-                end
-            end
-            
-        elseif BACK==1;
-            BACK=[];
-            if ii>1;
-                ii=ii-1;
-            end
-            if jj>1
-                jj=jj-1;
-            end
-               
-            okayhit='cont';
-        elseif NEXT==1;
-            NEXT=[];
-            if ii<length(condfiles_subs{jj})
-                ii=ii+1;
-            elseif ii==length(condfiles_subs{jj})
-                if jj<numconds
-                    jj=jj+1;
-                    ii=1;
-                end
-            end
-            okayhit='cont';
+    elseif strcmp(data.button, 'back')
+        data.button=[];
+        if data.subind>1;
+            data.subind=data.subind-1;
+        end
+        if data.condind>1
+            data.condind=cond-1;
         end
         
-        % is cancel is hit or fig is closed
-        if strcmp(okayhit,'retuninginputui') && ~isempty(INLOAD);
-                INLOAD=[];
-                OKAYPUSH=1;
-                return
-        elseif  isempty(okayhit) && ~isempty(INLOAD);
-                INLOAD=[];
-                return
-        elseif strcmp(okayhit,'retuninginputui') && isempty(INLOAD);        
-                break
-        elseif isempty(okayhit) && ~isempty(OKAYPUSH);
-                break
-        elseif isempty(okayhit) && isempty(OKAYPUSH);
-                break
-        end    
+    elseif strcmp(data.button, 'load')
+        
+        
+    elseif strcmp(data.button, 'save')
+        
+        
+    elseif strcmp(data.button, 'okay')
+        
+        
+    elseif strcmp(data.button, 'cancel')
+        
+        
+        
+        
     end
-catch
-    disp('error catch')
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
-end
-
-
-% ending channel selection
-if isempty(OKAYPUSH)
     
-    chan_choices=[];
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
-    
-elseif ~isempty(OKAYPUSH) % okay was hit
-    chan_choices=CHANCHOICES;
-    clearvars -global CURCLICK tmpEEG CHANCHOICES SAVEHIT CURSUB LOADHIT CONDFILES_SUBS PATHTOFILES NUMCONDS NEXT BACK INLOAD OKAYPUSH CURPOS
+    % overwrite linked data
+    guidata(gcf,data);
+
+    % remove topoplot objects
+    delete(gca);
+    delete(gca);
 end
 
+
+
+%Slider object to control ellipse size
+% uicontrol('style','Slider',...
+%             'Min',0.5,'Max',2,'Value',1,...
+%             'units','normalized',...
+%             'position',[0.1    0.2    0.08    0.25],...
+%             'callback',{@change_size,ellipse_h,ellipse_position });
+%
+% uicontrol('Style','text',...
+%             'units','normalized',...
+%             'position',[0    0.45    0.2    0.1],...
+%             'String','Ellipse Size')
+
 end
+
+
+
+%%
+function savechans(object_handle,event,chanchoices)
+[ParamName, ParamPath]=uiputfile('*.*','channel selection file');
+save(fullfile(ParamPath, ParamName),'chanchoices');
+end
+
+
+%%
+function loadchans(object_handle,event,chanchoices)
+
+
+end
+
+%%
+function okayfunc(object_handle,event,chanchoices)
+
+
+end
+
+
+%%
+function cancelfunc(object_handle,event,chanchoices)
+
+
+end
+
+
+%%
+function nextfunc(object_handle,event)
+
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+
+% invoke data link
+data=guidata(gcf);
+
+if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
+    data.chanarray{data.subind,data.condind*2}=labs;
+    
+else % some chans have been selected previously
+    data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
+    
+end
+
+data.button='next';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+%%
+function backfunc(object_handle,event)
+
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+
+% invoke data link
+data=guidata(gcf);
+
+if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
+    data.chanarray{data.subind,data.condind*2}=labs;
+    
+else % some chans have been selected previously
+    data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
+    
+end
+
+data.button='back';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+
+%updated eg_fun used to demonstrate passing  iables
+%copy paste this code into a file called eg_fun.m
+% function eg_fun(object_handle, event, edit_handle, ellipse_handle)
+%     str_entered = get(edit_handle, 'string');
+%
+%     if strcmp(str_entered, 'red')
+%         col_val = [1 0 0];
+%     elseif strcmp(str_entered, 'green')
+%         col_val = [0 1 0];
+%     elseif strcmp(str_entered, 'blue')
+%          col_val = [0 0 1];
+%     else
+%         col_val = [0 0  0];
+%     end
+%     set(ellipse_handle, 'facecolor', col_val);
+%
+% %change_size code --------------------------------------------------
+% %copy paste this code into a file called change_size.m
+% function  change_size(objHandel, evt, annotation_handle, orig_pos)
+%     slider_value = get(objHandel,'Value');
+%     new_pos = orig_pos;
+%     new_pos(3:4) = orig_pos(3:4)*slider_value;
+%     set(annotation_handle, 'position', new_pos)

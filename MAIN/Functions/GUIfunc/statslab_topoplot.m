@@ -1,10 +1,5 @@
 function [handle,Zi,grid,Xi,Yi] = statslab_topoplot(Values,loc_file,varargin)
 
-
-% global variable used for clickchan subfunction (at bottom)
-global CURCLICK LOADHIT CHANCHOICES CURSUB tmpEEG NEXT BACK
-
-CURCLICK={};
 %
 %%%%%%%%%%%%%%%%%%%%%%%% Set defaults %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -1021,7 +1016,7 @@ else % if STYLE 'blank'
             [ int2str(length(Rd)) ' of ' int2str(length(tmpeloc)) ' electrode locations shown'], 'color', [1 1 1]);
         text(-.65,-0.52, [ 'Click on electrodes to toggle selection'], 'color', [1 1 1]);
         
-        tl = title({CURSUB, 'Click electrodes to toggle selection'});
+        tl = title({'Click electrodes to toggle selection'});
         set(tl, 'fontname', 'Arial', 'fontweight', 'bold', 'interpreter', 'none');    
     end;
     
@@ -1436,85 +1431,6 @@ end;
 hold off
 axis off
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% if LOADHIT==1;
-    
-%     [rf cf]=find(strcmp(CURSUB,CHANCHOICES));
-%     for q=1:length(CHANCHOICES{rf(1),cf(1)+1});
-%         
-%         labs=tmpEEG.chanlocs(str2double(CHANCHOICES{rf(1),cf(1)+1}{q})).labels;
-%         
-%         oh=findobj('String',[labs, ' ']);
-%         
-%         if isempty(oh)
-%             oh=findobj('String',labs);
-%         end
-%         set(oh, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
-%     end
-%     return
-%        
-
-[rf cf]=find(strcmp(CURSUB,CHANCHOICES));
-if ~isempty(CHANCHOICES{rf(1),cf(1)+1})
-    
-    for q=1:length(CHANCHOICES{rf(1),cf(1)+1});
-        
-        labs=tmpEEG.chanlocs(str2double(CHANCHOICES{rf(1),cf(1)+1}{q})).labels;
-        
-        oh=findobj('String',[labs, ' ']);
-        
-        if isempty(oh)
-            oh=findobj('String',labs);
-        end
-        set(oh, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
-    end
-end
-
 return
     
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function clickchan(gcbo,eventdata,handles)
-
-global CURCLICK CHANCHOICES CURSUB
-[rf cf]=find(strcmp(CURSUB,CHANCHOICES));
-
-currentpicks=CHANCHOICES{rf(1),cf(1)+1};
-
-tmp{1} = get(gco, 'userdata');
-
-if ~any(strcmp(tmp{1},currentpicks));
-    
-    if isempty(CURCLICK)
-        CURCLICK{1}=tmp{1};
-        set(gco, 'Color', 'green', 'FontSize',13, 'FontWeight','bold')
-    else
-        if any(strcmp(tmp{1},CURCLICK))
-            set(gco, 'Color', 'black', 'FontSize',10,'FontWeight','normal')
-            a=strcmp(tmp{1},CURCLICK);
-            CURCLICK(a)=[];
-            
-        else
-            lc=length(CURCLICK);
-            CURCLICK{lc+1}=tmp{1};
-            set(gco, 'Color', 'green', 'FontSize',13, 'FontWeight','bold')
-            
-        end
-    end
-    
-else
-    
-    % remove the duplicate of curclick from chanchoices
-    fpick=strcmp(tmp{1},currentpicks);
-    CHANCHOICES{rf(1),cf(1)+1}(fpick)='';
-    set(gco, 'Color', 'black', 'FontSize',10,'FontWeight','normal')
-
-end
-
-disp(CURCLICK)
-
 end
