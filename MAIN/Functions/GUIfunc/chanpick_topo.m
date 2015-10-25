@@ -1,22 +1,5 @@
-function chanpick_topo(condfiles_subs,pathtofiles,numconds)
+function [chanchoices]=chanpick_topo(condfiles_subs,pathtofiles,numconds)
 
-% Basic Graphical User Interface (GUI) without using GUIDE
-% Available at https://dadorran.wordpress.com
-
-% There are three basic areas to understand:
-%   1. Layout    (how to position objects on the GUI)
-%   2. Handles to Objects (used to modify object properties)
-%   3. Callback functions (used by User Interface Objects)
-
-%loadhit=[];
-%if loadhit==1;
-%    [ParamName ParamPath]=uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
-%    tmp=load(fullfile(ParamPath, ParamName), '-mat');
-%    field=fieldnames(tmp);
-%    CHANCHOICES=tmp.(field{1});
-%    INLOAD=1;
-%    OKAYPUSH=[];
-%else
 % grid size
 tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
 
@@ -38,50 +21,58 @@ f = figure('units','normalized','position',[.25 .25 .5 .65]);
 data.chanarray=chanchoices;
 data.condind=1;
 data.subind=1;
-data.button=[];
+data.button='edit'; % just a place holder
 guidata(gcf,data);
 
-%create an editable textbox object
-edit_box_h = uicontrol('style','edit',...
+%create objects
+uiob=uicontrol('style','edit',...
     'units', 'normalized',...
-    'position', [0.45 0.01 0.1 0.05]);
+    'position', [0.45 0.01 0.1 0.05],...
+    'callback', {@editfunc});
 
-backh = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'Back',...
     'units', 'normalized',...
     'position', [0.01 0.01 0.1 0.05],...
     'callback', {@backfunc});
 
-nexth = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'Next',...
     'units', 'normalized',...
     'position', [0.11 0.01 0.1 0.05],...
     'callback', {@nextfunc});
 
-cancelh = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
+    'string', 'Apply to all',...
+    'units', 'normalized',...
+    'position', [0.21 0.01 0.1 0.05],...
+    'callback', {@applyfunc});
+
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'Cancel',...
     'units', 'normalized',...
     'position', [0.89 0.01 0.1 0.05],...
     'callback', {@cancelfunc});
 
-okh = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'OK',...
     'units', 'normalized',...
     'position', [0.79 0.01 0.1 0.05],...
     'callback', {@okayfunc});
 
-loadh = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'Load',...
     'units', 'normalized',...
     'position', [0.01 0.94 0.1 0.05],...
     'callback', {@loadfunc});
 
 
-saveh = uicontrol('style', 'pushbutton',...
+uiob = uicontrol('style', 'pushbutton',...
     'string', 'Save',...
     'units', 'normalized',...
     'position', [0.89 0.94 0.1 0.05],...
     'callback', {@savefunc});
+
 
 
 sel=true;
@@ -90,8 +81,8 @@ while sel
     % invoke data link
     data=guidata(gcf);
     
-    % if save was hit, don't reload
-    if ~strcmp(data.button, 'save')
+    % don't reload unless scrolling through
+    if strcmp(data.button, 'next') || strcmp(data.button, 'back') || strcmp(data.button, 'edit')
         
         % get string of current subject
         cursub=condfiles_subs{data.condind}{data.subind};
@@ -104,8 +95,8 @@ while sel
         'labelpoint', 'plotrad', [], 'chaninfo', tmpEEG, 'nosedir' ,'+Y');
     
     % color the previous selections
-    for q=1:length(data.chanarray{data.subind,data.condind+1});
-        ho=findobj(gcf,'String',data.chanarray{data.subind,data.condind+1}{q});
+    for q=1:length(data.chanarray{data.subind,data.condind*2});
+        ho=findobj(gcf,'String',data.chanarray{data.subind,data.condind*2}{q});
         set(ho, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
     end
     
@@ -119,7 +110,7 @@ while sel
     
     % determine which button was pressed
     if strcmp(data.button, 'next')
-        data.button=[];
+        
         if data.subind<length(condfiles_subs{data.condind})
             data.subind=data.subind+1;
         elseif data.subind==length(condfiles_subs{data.condind})
@@ -130,31 +121,45 @@ while sel
         end
         
     elseif strcmp(data.button, 'back')
-        data.button=[];
+        
         if data.subind>1;
             data.subind=data.subind-1;
-        end
-        if data.condind>1
-            data.condind=cond-1;
+        elseif data.subind==1;
+
+            if data.condind>1
+                data.subind=length(condfiles_subs{data.condind-1});
+                data.condind=data.condind-1;
+            end  
         end
         
     elseif strcmp(data.button, 'load')
+        disp(['loading and still on' ,cursub]);
         
+    elseif strcmp(data.button, 'save') 
+        disp(['saving and still on' ,cursub]);
         
-    elseif strcmp(data.button, 'save')
+    elseif strcmp(data.button, 'apply') 
+        disp(['applied and still on' ,cursub]);
         
-        disp(['still on' ,cursub]);
-        
-        
+    elseif strcmp(data.button, 'edit') 
+        disp(['moving to' ,num2str(data.condind) num2str(data.subind)]);
+
     elseif strcmp(data.button, 'okay')
         
-        
+        % set main output and exit
+        chanchoices=data.chanarray;
+        close(f);
+        return
+
     elseif strcmp(data.button, 'cancel')
         
-        
-        
-        
+        % empty main output
+        chanchoices=[];
+        close(f);
+        return
     end
+    
+    disp([num2str(data.condind) num2str(data.subind)]);
     
     % overwrite linked data
     guidata(gcf,data);
@@ -188,6 +193,9 @@ function savefunc(object_handle,event)
 % update latest state of GUI
 h=findobj(gcf,'Color','g');
 labs=get(h,'String');
+if ~iscell(labs)
+    labs={labs};
+end
 
 % invoke data link
 data=guidata(gcf);
@@ -202,7 +210,6 @@ data.button='save';
 guidata(gcf,data);
 uiresume(gcbf)
 end
-
 
 %%
 function loadfunc(object_handle,event)
@@ -225,22 +232,11 @@ end
 %%
 function okayfunc(object_handle,event)
 
-
-end
-
-
-%%
-function cancelfunc(object_handle,event)
-
-
-end
-
-
-%%
-function nextfunc(object_handle,event)
-
 h=findobj(gcf,'Color','g');
 labs=get(h,'String');
+if ~iscell(labs)
+    labs={labs};
+end
 
 % invoke data link
 data=guidata(gcf);
@@ -248,17 +244,35 @@ data=guidata(gcf);
 % set chanarray to current state when callback was executed
 data.chanarray{data.subind,data.condind*2}=labs;
 
-% query if there was previous data
-% if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
-%     data.chanarray{data.subind,data.condind*2}=labs;
-%     
-% else % some chans have been selected previously
-%     
-%     % set labels to what is a new selection, so no duplicated get into chanarray
-%     labs=setdiff(labs,data.chanarray{data.subind,data.condind*2});
-%     data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
-%     
-% end
+data.button='okay';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+%%
+function cancelfunc(object_handle,event)
+
+% invoke data link
+data=guidata(gcf);
+data.button='cancel';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+%%
+function nextfunc(object_handle,event)
+
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+if ~iscell(labs) && ~isempty(labs)
+    labs={labs};
+end
+
+% invoke data link
+data=guidata(gcf);
+
+% set chanarray to current state when callback was executed
+data.chanarray{data.subind,data.condind*2}=labs;
 
 data.button='next';
 guidata(gcf,data);
@@ -271,6 +285,9 @@ function backfunc(object_handle,event)
 % handles and labels to green objects
 h=findobj(gcf,'Color','g');
 labs=get(h,'String');
+if ~iscell(labs) && ~isempty(labs)
+    labs={labs};
+end
 
 % invoke data link
 data=guidata(gcf);
@@ -278,44 +295,81 @@ data=guidata(gcf);
 % set chanarray to current state when callback was executed
 data.chanarray{data.subind,data.condind*2}=labs;
 
-% query if there was previous data
-% if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
-%     data.chanarray{data.subind,data.condind*2}=labs;
-%     
-% else % some chans have been selected previously
-%     
-%     % set labels to what is a new selection, so no duplicated get into chanarray
-%     labs=setdiff(labs,data.chanarray{data.subind,data.condind*2});
-%     data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
-%     
-% end
-
 data.button='back';
 guidata(gcf,data);
 uiresume(gcbf)
 end
 
+%%
+function applyfunc(object_handle,event)
 
-%updated eg_fun used to demonstrate passing  iables
-%copy paste this code into a file called eg_fun.m
-% function eg_fun(object_handle, event, edit_handle, ellipse_handle)
-%     str_entered = get(edit_handle, 'string');
-%
-%     if strcmp(str_entered, 'red')
-%         col_val = [1 0 0];
-%     elseif strcmp(str_entered, 'green')
-%         col_val = [0 1 0];
-%     elseif strcmp(str_entered, 'blue')
-%          col_val = [0 0 1];
-%     else
-%         col_val = [0 0  0];
-%     end
-%     set(ellipse_handle, 'facecolor', col_val);
-%
-% %change_size code --------------------------------------------------
-% %copy paste this code into a file called change_size.m
-% function  change_size(objHandel, evt, annotation_handle, orig_pos)
-%     slider_value = get(objHandel,'Value');
-%     new_pos = orig_pos;
-%     new_pos(3:4) = orig_pos(3:4)*slider_value;
-%     set(annotation_handle, 'position', new_pos)
+% handles and labels to green objects
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+if ~iscell(labs) && ~isempty(labs)
+    labs={labs};
+end
+
+% invoke data link
+data=guidata(gcf);
+
+% copy all current info into chanarray
+
+% every other col, which hold the subject filenames
+for j=1:2:size(data.chanarray,2);
+    
+    % numsubs + padded cells
+    rowdat=length(data.chanarray(:,j));
+    
+    for i=1:rowdat;
+        
+        % if not padded
+        if ~isempty(data.chanarray{i,j});
+            data.chanarray{i,j+1}=labs;
+            
+        else % break if you hit the padded cells
+            break
+        end
+    end
+    
+end
+
+data.button='apply';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+%%
+function editfunc(object_handle,event)
+
+% handles and labels to green objects
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+if ~iscell(labs) && ~isempty(labs)
+    labs={labs};
+end
+
+% invoke data link
+data=guidata(gcf);
+
+% set chanarray to current state when callback was executed
+data.chanarray{data.subind,data.condind*2}=labs;
+
+% gather edit box entry and set new inds in data struct
+newinds = str2double(get(object_handle, 'string'));
+
+% clear box
+set(object_handle, 'string', '')
+
+if ~isempty(newinds);
+    data.subind=newinds(2);
+    data.condind=newinds(1);
+    data.button='edit';
+    
+else
+    data.button='stay';  
+end
+
+guidata(gcf,data);
+uiresume(gcbf)
+end
