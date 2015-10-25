@@ -30,7 +30,6 @@ for i=1:numconds;
     end
     j=j+2;
 end
-%end
 
 %create a figure to house the GUI
 f = figure('units','normalized','position',[.25 .25 .5 .65]);
@@ -39,6 +38,7 @@ f = figure('units','normalized','position',[.25 .25 .5 .65]);
 data.chanarray=chanchoices;
 data.condind=1;
 data.subind=1;
+data.button=[];
 guidata(gcf,data);
 
 %create an editable textbox object
@@ -90,11 +90,25 @@ while sel
     % invoke data link
     data=guidata(gcf);
     
-    cursub=condfiles_subs{data.condind}{data.subind};
-    tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind});
-    tmpEEG = eeg_checkset(tmpEEG);
+    % if save was hit, don't reload
+    if ~strcmp(data.button, 'save')
+        
+        % get string of current subject
+        cursub=condfiles_subs{data.condind}{data.subind};
+        tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind});
+        tmpEEG = eeg_checkset(tmpEEG);
+    end
+    
+    % call topoplot for 2D locations
     statslab_topoplot([],tmpEEG.chanlocs, 'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
         'labelpoint', 'plotrad', [], 'chaninfo', tmpEEG, 'nosedir' ,'+Y');
+    
+    % color the previous selections
+    for q=1:length(data.chanarray{data.subind,data.condind+1});
+        ho=findobj(gcf,'String',data.chanarray{data.subind,data.condind+1}{q});
+        set(ho, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
+    end
+    
     disp(['working on channel selections for file: ' cursub]);
     
     % waitfor callback
@@ -128,6 +142,8 @@ while sel
         
         
     elseif strcmp(data.button, 'save')
+        
+        disp(['still on' ,cursub]);
         
         
     elseif strcmp(data.button, 'okay')
@@ -167,27 +183,54 @@ end
 
 
 %%
-function savechans(object_handle,event,chanchoices)
+function savefunc(object_handle,event)
+
+% update latest state of GUI
+h=findobj(gcf,'Color','g');
+labs=get(h,'String');
+
+% invoke data link
+data=guidata(gcf);
+
+% set chanarray to current state when callback was executed
+data.chanarray{data.subind,data.condind*2}=labs;
+
 [ParamName, ParamPath]=uiputfile('*.*','channel selection file');
-save(fullfile(ParamPath, ParamName),'chanchoices');
+save(fullfile(ParamPath, ParamName),'data');
+
+data.button='save';
+guidata(gcf,data);
+uiresume(gcbf)
 end
 
 
 %%
-function loadchans(object_handle,event,chanchoices)
+function loadfunc(object_handle,event)
+
+[ParamName ParamPath]=uigetfile('*.mat','choose channel selection file:','*.mat','multiselect','off');
+tmp=load(fullfile(ParamPath, ParamName), '-mat');
+field=fieldnames(tmp);
+chanarray=tmp.(field{1}).chanarray;
+
+% invoke data link to maintain current sub/cond indices
+data=guidata(gcf);
+
+% set only chanarray field to loaded state
+data.chanarray=chanarray;
+data.button='load';
+guidata(gcf,data);
+uiresume(gcbf)
+end
+
+%%
+function okayfunc(object_handle,event)
 
 
 end
 
-%%
-function okayfunc(object_handle,event,chanchoices)
-
-
-end
-
 
 %%
-function cancelfunc(object_handle,event,chanchoices)
+function cancelfunc(object_handle,event)
 
 
 end
@@ -202,13 +245,20 @@ labs=get(h,'String');
 % invoke data link
 data=guidata(gcf);
 
-if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
-    data.chanarray{data.subind,data.condind*2}=labs;
-    
-else % some chans have been selected previously
-    data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
-    
-end
+% set chanarray to current state when callback was executed
+data.chanarray{data.subind,data.condind*2}=labs;
+
+% query if there was previous data
+% if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
+%     data.chanarray{data.subind,data.condind*2}=labs;
+%     
+% else % some chans have been selected previously
+%     
+%     % set labels to what is a new selection, so no duplicated get into chanarray
+%     labs=setdiff(labs,data.chanarray{data.subind,data.condind*2});
+%     data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
+%     
+% end
 
 data.button='next';
 guidata(gcf,data);
@@ -218,19 +268,27 @@ end
 %%
 function backfunc(object_handle,event)
 
+% handles and labels to green objects
 h=findobj(gcf,'Color','g');
 labs=get(h,'String');
 
 % invoke data link
 data=guidata(gcf);
 
-if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
-    data.chanarray{data.subind,data.condind*2}=labs;
-    
-else % some chans have been selected previously
-    data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
-    
-end
+% set chanarray to current state when callback was executed
+data.chanarray{data.subind,data.condind*2}=labs;
+
+% query if there was previous data
+% if isempty(data.chanarray{data.subind,data.condind*2}) % no channels have been selected
+%     data.chanarray{data.subind,data.condind*2}=labs;
+%     
+% else % some chans have been selected previously
+%     
+%     % set labels to what is a new selection, so no duplicated get into chanarray
+%     labs=setdiff(labs,data.chanarray{data.subind,data.condind*2});
+%     data.chanarray{data.subind,data.condind*2}=[data.chanarray{data.subind,data.condind*2}; labs];
+%     
+% end
 
 data.button='back';
 guidata(gcf,data);
