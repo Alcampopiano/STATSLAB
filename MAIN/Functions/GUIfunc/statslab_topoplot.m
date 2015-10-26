@@ -1,12 +1,14 @@
-function [handle,Zi,grid,Xi,Yi] = statslab_topoplot(Values,loc_file,varargin)
+function [handle,Zi,grid,Xi,Yi] = statslab_topoplot(Values,loc_file,cursub,junkvar,varargin)
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%% Set defaults %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-icadefs                 % read defaults MAXTOPOPLOTCHANS and DEFAULT_ELOC and BACKCOLOR
+icadefs % read defaults MAXTOPOPLOTCHANS and DEFAULT_ELOC and BACKCOLOR
+
 if ~exist('BACKCOLOR')  % if icadefs.m does not define BACKCOLOR
-    BACKCOLOR = [.93 .96 1];  % EEGLAB standard
+    BACKCOLOR = [.93 .96 1]; % EEGLAB standard
 end
+
 whitebk = 'off';  % by default, make gridplot background color = EEGLAB screen background color
 
 plotgrid = 'off';
@@ -1016,8 +1018,9 @@ else % if STYLE 'blank'
             [ int2str(length(Rd)) ' of ' int2str(length(tmpeloc)) ' electrode locations shown'], 'color', [1 1 1]);
         text(-.65,-0.52, [ 'Click on electrodes to toggle selection'], 'color', [1 1 1]);
         
-        tl = title({'Click electrodes to toggle selection'});
-        set(tl, 'fontname', 'Arial', 'fontweight', 'bold', 'interpreter', 'none');    
+        %tl = title({'Click electrodes to toggle selection'});
+        tl = title({cursub});
+        set(tl, 'fontname', 'Arial', 'FontSize',18,'fontweight', 'bold', 'interpreter', 'none');    
     end;
     
 %     
@@ -1421,11 +1424,16 @@ end;
 %
 %%%%%%%%%%%%% Set EEGLAB background color to match head border %%%%%%%%%%%%%%%%%%%%%%%%
 %
-try,
-    icadefs;
-    set(gcf, 'color', BACKCOLOR);
-catch,
-end;
+
+%%% Allan edit
+% try,
+%     icadefs;
+%     set(gcf, 'color', BACKCOLOR);
+% catch,
+% end;
+set(gcf, 'color','w')
+%%%
+
 
 %title(titaxis,{'hello', ' ', 'hello2'})
 hold off

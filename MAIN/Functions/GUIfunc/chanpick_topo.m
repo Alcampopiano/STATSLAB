@@ -25,7 +25,13 @@ data.button='edit'; % just a place holder
 guidata(gcf,data);
 
 %create objects
-uiob=uicontrol('style','edit',...
+uiob = uicontrol('Style','text',...
+    'units', 'normalized',...
+    'Position',[0.4 0.05 0.2 0.05],...
+    'BackgroundColor', 'w',...
+    'String','Subject x Condition (index)');
+
+uiob_text = uicontrol('style','edit',...
     'units', 'normalized',...
     'position', [0.45 0.01 0.1 0.05],...
     'callback', {@editfunc});
@@ -73,13 +79,13 @@ uiob = uicontrol('style', 'pushbutton',...
     'position', [0.89 0.94 0.1 0.05],...
     'callback', {@savefunc});
 
-
-
 sel=true;
 while sel
     
     % invoke data link
     data=guidata(gcf);
+    
+    set(uiob_text, 'string', num2str([data.subind data.condind]));
     
     % don't reload unless scrolling through
     if strcmp(data.button, 'next') || strcmp(data.button, 'back') || strcmp(data.button, 'edit')
@@ -91,7 +97,7 @@ while sel
     end
     
     % call topoplot for 2D locations
-    statslab_topoplot([],tmpEEG.chanlocs, 'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
+    statslab_topoplot([],tmpEEG.chanlocs,cursub,[],'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
         'labelpoint', 'plotrad', [], 'chaninfo', tmpEEG, 'nosedir' ,'+Y');
     
     % color the previous selections
@@ -159,7 +165,7 @@ while sel
         return
     end
     
-    disp([num2str(data.condind) num2str(data.subind)]);
+    disp(num2str([data.subind data.condind]));
     
     % overwrite linked data
     guidata(gcf,data);
@@ -169,23 +175,7 @@ while sel
     delete(gca);
 end
 
-
-
-%Slider object to control ellipse size
-% uicontrol('style','Slider',...
-%             'Min',0.5,'Max',2,'Value',1,...
-%             'units','normalized',...
-%             'position',[0.1    0.2    0.08    0.25],...
-%             'callback',{@change_size,ellipse_h,ellipse_position });
-%
-% uicontrol('Style','text',...
-%             'units','normalized',...
-%             'position',[0    0.45    0.2    0.1],...
-%             'String','Ellipse Size')
-
 end
-
-
 
 %%
 function savefunc(object_handle,event)
@@ -234,7 +224,7 @@ function okayfunc(object_handle,event)
 
 h=findobj(gcf,'Color','g');
 labs=get(h,'String');
-if ~iscell(labs)
+if ~iscell(labs) && ~isempty(labs)
     labs={labs};
 end
 
