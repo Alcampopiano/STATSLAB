@@ -351,6 +351,9 @@ if ~isempty(labs)
                     fprintf(['WARNING -> Subject ', data.chanarray{i,j}, ' is not consistent with current channel selections\n\n' ...
                         'Please review subject x condition index ' num2str([i q]),'\n\n']);
                     
+                    % remove any previous selections that might have been applied before hitting apply all
+                    data.chanarray{i,j+1}={};
+                    
                     % move to next iteration
                     continue
                 end
