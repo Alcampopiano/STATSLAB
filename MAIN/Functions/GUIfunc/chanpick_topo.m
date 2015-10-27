@@ -24,12 +24,15 @@ data.subind=1;
 data.button='edit'; % just a place holder
 guidata(gcf,data);
 
+% ui positions note
+%[0.4 0.05 0.2 0.05] -> [infromleft upfrombottom length height]
+
 %create objects
 uiob = uicontrol('Style','text',...
     'units', 'normalized',...
     'Position',[0.4 0.05 0.2 0.05],...
     'BackgroundColor', 'w',...
-    'String','Subject x Condition (index)');
+    'String','Subject x Condition Index');
 
 uiob_text = uicontrol('style','edit',...
     'units', 'normalized',...
@@ -52,7 +55,7 @@ uiob = uicontrol('style', 'pushbutton',...
     'string', 'Apply to all',...
     'units', 'normalized',...
     'position', [0.21 0.01 0.1 0.05],...
-    'callback', {@applyfunc});
+    'callback', {@applyfunc,pathtofiles});
 
 uiob = uicontrol('style', 'pushbutton',...
     'string', 'Cancel',...
@@ -67,16 +70,16 @@ uiob = uicontrol('style', 'pushbutton',...
     'callback', {@okayfunc});
 
 uiob = uicontrol('style', 'pushbutton',...
-    'string', 'Load',...
+    'string', 'Load Selections',...
     'units', 'normalized',...
-    'position', [0.01 0.94 0.1 0.05],...
+    'position', [0.01 0.94 0.15 0.05],...
     'callback', {@loadfunc});
 
 
 uiob = uicontrol('style', 'pushbutton',...
-    'string', 'Save',...
+    'string', 'Save Selections',...
     'units', 'normalized',...
-    'position', [0.89 0.94 0.1 0.05],...
+    'position', [0.84 0.94 0.15 0.05],...
     'callback', {@savefunc});
 
 sel=true;
@@ -90,15 +93,20 @@ while sel
     % don't reload unless scrolling through
     if strcmp(data.button, 'next') || strcmp(data.button, 'back') || strcmp(data.button, 'edit')
         
+        
         % get string of current subject
         cursub=condfiles_subs{data.condind}{data.subind};
-        tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind});
-        tmpEEG = eeg_checkset(tmpEEG);
+        tmpEEG=load('-mat', [pathtofiles{data.condind} cursub]);
+        tmpEEGlocs=tmpEEG.EEG.chanlocs;
+        tmpEEGinfo=tmpEEG.EEG.chaninfo;
+        clear tmpEEG
+        %tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind}, 'loadmode','info');
+        
     end
     
     % call topoplot for 2D locations
-    statslab_topoplot([],tmpEEG.chanlocs,cursub,[],'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
-        'labelpoint', 'plotrad', [], 'chaninfo', tmpEEG, 'nosedir' ,'+Y');
+    statslab_topoplot([],tmpEEGlocs,cursub,[],'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
+        'labelpoint', 'plotrad', [], 'chaninfo', tmpEEGinfo, 'nosedir' ,'+Y');
     
     % color the previous selections
     for q=1:length(data.chanarray{data.subind,data.condind*2});
@@ -106,7 +114,7 @@ while sel
         set(ho, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
     end
     
-    disp(['working on channel selections for file: ' cursub]);
+    %disp(['working on channel selections for file: ' cursub]);
     
     % waitfor callback
     uiwait;
@@ -131,32 +139,32 @@ while sel
         if data.subind>1;
             data.subind=data.subind-1;
         elseif data.subind==1;
-
+            
             if data.condind>1
                 data.subind=length(condfiles_subs{data.condind-1});
                 data.condind=data.condind-1;
-            end  
+            end
         end
         
-    elseif strcmp(data.button, 'load')
-        disp(['loading and still on' ,cursub]);
+%     elseif strcmp(data.button, 'load')
+%         disp(['loading and still on' ,cursub]);
+%         
+%     elseif strcmp(data.button, 'save')
+%         disp(['saving and still on' ,cursub]);
+%         
+%     elseif strcmp(data.button, 'apply')
+%         disp(['applied and still on' ,cursub]);
+%         
+%     elseif strcmp(data.button, 'edit')
+%         disp(['moving to' ,num2str(data.condind) num2str(data.subind)]);
         
-    elseif strcmp(data.button, 'save') 
-        disp(['saving and still on' ,cursub]);
-        
-    elseif strcmp(data.button, 'apply') 
-        disp(['applied and still on' ,cursub]);
-        
-    elseif strcmp(data.button, 'edit') 
-        disp(['moving to' ,num2str(data.condind) num2str(data.subind)]);
-
     elseif strcmp(data.button, 'okay')
         
         % set main output and exit
         chanchoices=data.chanarray;
         close(f);
         return
-
+        
     elseif strcmp(data.button, 'cancel')
         
         % empty main output
@@ -165,11 +173,11 @@ while sel
         return
     end
     
-    disp(num2str([data.subind data.condind]));
+    %disp(num2str([data.subind data.condind]));
     
     % overwrite linked data
     guidata(gcf,data);
-
+    
     % remove topoplot objects
     delete(gca);
     delete(gca);
@@ -291,7 +299,9 @@ uiresume(gcbf)
 end
 
 %%
-function applyfunc(object_handle,event)
+function applyfunc(object_handle,event,pathtofiles)
+
+fprintf('\n *** Please wait while channel consistency is checked ***\n\n');
 
 % handles and labels to green objects
 h=findobj(gcf,'Color','g');
@@ -303,27 +313,59 @@ end
 % invoke data link
 data=guidata(gcf);
 
-% copy all current info into chanarray
-
-% every other col, which hold the subject filenames
-for j=1:2:size(data.chanarray,2);
+% don't check if nothing is selected
+if ~isempty(labs)
     
-    % numsubs + padded cells
-    rowdat=length(data.chanarray(:,j));
+    % remove white spaces before checking consistency
+    labstrim=strtrim(labs);
     
-    for i=1:rowdat;
+    % every other col, which hold the subject filenames
+    q=1;
+    for j=1:2:size(data.chanarray,2);
         
-        % if not padded
-        if ~isempty(data.chanarray{i,j});
-            data.chanarray{i,j+1}=labs;
+        % numsubs + padded cells
+        rowdat=length(data.chanarray(:,j));
+        
+        for i=1:rowdat;
             
-        else % break if you hit the padded cells
-            break
+            % if not padded
+            if ~isempty(data.chanarray{i,j});
+                
+                
+                % determine if consistency is an issue
+                % load file with path
+                tmpEEG=load('-mat', [pathtofiles{data.condind} data.chanarray{i,j}]);
+                locs={tmpEEG.EEG.chanlocs.labels};
+                clear tmpEEG
+                
+                % check chanlocs against labs
+                con=setdiff(labstrim,locs);
+                
+                % if consistent, data.chanarray{i,j+1}=labs;
+                if isempty(con)
+                    data.chanarray{i,j+1}=labs;
+                    
+                    % if not, continue or break to skip to next subject
+                else
+                    % print warning, giving subject and condition index
+                    fprintf(['WARNING -> Subject ', data.chanarray{i,j}, ' is not consistent with current channel selections\n\n' ...
+                        'Please review subject x condition index ' num2str([i q]),'\n\n']);
+                    
+                    % move to next iteration
+                    continue
+                end
+                
+            else % break if you hit the padded cells
+                break
+            end
         end
+        q=q+1;
     end
+    fprintf('*** Finished checking consistency. See above output for possible inconsistent files ***\n\n');
     
+else
+    fprintf('*** nothing to apply ***\n\n');
 end
-
 data.button='apply';
 guidata(gcf,data);
 uiresume(gcbf)
@@ -352,12 +394,12 @@ newinds = str2double(get(object_handle, 'string'));
 set(object_handle, 'string', '')
 
 if ~isempty(newinds);
-    data.subind=newinds(2);
-    data.condind=newinds(1);
+    data.subind=newinds(1);
+    data.condind=newinds(2);
     data.button='edit';
     
 else
-    data.button='stay';  
+    data.button='stay';
 end
 
 guidata(gcf,data);
