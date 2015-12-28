@@ -96,9 +96,12 @@ while sel
         
         % get string of current subject
         cursub=condfiles_subs{data.condind}{data.subind};
-        tmpEEG=load('-mat', [pathtofiles{data.condind} cursub]);
-        tmpEEGlocs=tmpEEG.EEG.chanlocs;
-        tmpEEGinfo=tmpEEG.EEG.chaninfo;
+        tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind}, 'loadmode','info');
+        tmpEEGlocs=tmpEEG.chanlocs;
+        tmpEEGinfo=tmpEEG.chaninfo;
+        %tmpEEG=load('-mat', [pathtofiles{data.condind} cursub]);
+        %tmpEEGlocs=tmpEEG.EEG.chanlocs;
+        %tmpEEGinfo=tmpEEG.EEG.chaninfo;
         clear tmpEEG
         %tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind}, 'loadmode','info');
         
@@ -106,7 +109,7 @@ while sel
     
     % call topoplot for 2D locations
     statslab_topoplot([],tmpEEGlocs,cursub,[],'style', 'blank', 'drawaxis', 'on', 'electrodes', ...
-        'labelpoint', 'plotrad', [], 'chaninfo', tmpEEGinfo, 'nosedir' ,'+Y');
+        'labelpoint', 'plotrad', [], 'chaninfo', tmpEEGinfo, 'nosedir' ,'+X');
     
     % color the previous selections
     for q=1:length(data.chanarray{data.subind,data.condind*2});
@@ -334,8 +337,10 @@ if ~isempty(labs)
                 
                 % determine if consistency is an issue
                 % load file with path
-                tmpEEG=load('-mat', [pathtofiles{data.condind} data.chanarray{i,j}]);
-                locs={tmpEEG.EEG.chanlocs.labels};
+                % tmpEEG=load('-mat', [pathtofiles{data.condind} data.chanarray{i,j}]);
+                %locs={tmpEEG.EEG.chanlocs.labels};
+                tmpEEG = pop_loadset('filename',data.chanarray{i,j},'filepath',pathtofiles{data.condind}, 'loadmode','info');
+                locs={tmpEEG.chanlocs.labels};
                 clear tmpEEG
                 
                 % check chanlocs against labs
