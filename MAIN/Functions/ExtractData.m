@@ -517,23 +517,23 @@ switch options.measure
     case 'scalpchan'
         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
         
-        
+        % FIX THIS SECTION, crashes on else if
         % GUI, load file, or, neither
         persubject=0;
-        if strcmp(options.chans,'persubject')
-            
-            % GUI channel picker not written yet
-            [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
-            persubject=1;
-            
-        elseif ~isempty(strfind(options.chans,'.mat'))
-            
-            % load a file
-            tmp=load(options.chans);
-            tmpfields=fieldnames(tmp);
-            chanfile=tmp.(tmpfields{1});
-            persubject=1;
-        end
+%         if strcmp(options.chans,'persubject')
+%             
+%             % GUI channel picker not written yet
+%             [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
+%             persubject=1;
+%             
+%         elseif ~isempty(strfind(options.chans,'.mat'))
+%             
+%             % load a file
+%             tmp=load(options.chans);
+%             tmpfields=fieldnames(tmp);
+%             chanfile=tmp.(tmpfields{1});
+%             persubject=1;
+%         end
         
         if persubject==0;
             for k=1:numconds;
