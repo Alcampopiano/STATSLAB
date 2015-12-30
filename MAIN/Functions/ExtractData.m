@@ -12,44 +12,72 @@
 %
 % ***condfiles***
 %
-% cell array of filenames for each subject and condition.
-% Leave emtpy (ie., []) and MATLAB will bring up an interface for you to
-% load the appropriate subject condition files. After this is done, the
-% file is saved (e.g., confiles_scalpchan.mat) and can be entered for subsequent
-% calls instead of using [] and having to manually load. ***end***
-%
+% Leave emtpy and MATLAB will bring up an interface for you to
+% load the appropriate SET files. After this is done, a 
+% file is saved (e.g., condfiles_scalpchan.mat). For subsequent calls 
+% type this file name in to avoid having to manually choose files again. ***end***
 %
 % ***condnames***
 %
-% cell array of condition labels. For example, {'face' 'house' 'object'} ***end***
+% Type in your condition labels on seprate lines. For example,
+%
+% face
+% house 
+% object ***end***
+%
+% ***levels***
+%
+% Levels of your design. For example, type [2 3] for a 2x3 design,
+% [2] for a two-condition design etc. Three-way designs not allowed. ***end***
+%
+% ***design***
+%
+% a single-charater indicating your design. For example, 'w' for a
+% within-subjects design with two-conditions, 'ww' for a two-factor, fully
+% within-subjects desgin. 'bw' for a mixed design (cannot use 'wb'). ***end***
+%
+% ***savestring***
+%
+% A keyword or phrase that will be appended to important files as you work through
+% STATSLAB modules. It should identify your study and/or analysis. The
+% important STATS structure will have savestring appended to it. For
+% example,
+%
+% Fcz_ICA_analysis ***end***
 %
 % ***varargin***
 %
-% icamax    - Project selected ICs to scalp channel with maximum weight determined
-%             by the weight matrix. All ICA options must be followed with
-%             a filename of text file (csv) indicating
-%             components to retain for each subject. See demo data to
-%             understand the construction of this file.
+% Key/val pairs
+% 
+% measure	
 %
-% icagfa    - Project selected ICs to the scalp and extract entire data array
-%             for later GFA calculations. All ICA options must be followed with
-%             a filename of text file (csv) indicating
-%             components to retain for each subject. See demo data to
-%             understand the construction of this file.
-%
-% scalpgfa   - Extract the full scalp data array for later GFA
-%              calculations. Does not require any following input arguments.
-%
-% scalpchan  - Extract specified channel(s). Must be followed with cell array
-%              of channel labels. E.g., {'C11' 'C15' 'C12'}. If asking for
-%              more than one channel, the channel group will be averaged
-%              together during the resampling stages (ResampleData.m) giving
-%              you a channel cluster. This function does not handle doing
-%              stats on multiple channels independently in the same call. ***end***
-%
-% Examples:
-% [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'},[],[2 2],'ww','Occipital_Analysis','scalpchan',{'A23', 'A24' })
-% [STATS]=ExtractData({'AE' 'AH' 'SE' 'SH'}, 'condfiles_icamax_analysis.mat', [2 2],'ww','icamax_analysis','icamax','wwICfile.txt')
+% 	ica
+% 	
+% 	icagfa
+% 	
+% 	icaitc
+% 	
+% 	icaersp
+% 	
+% 	icascalp
+% 	
+% 	scalpitc
+% 	
+% 	scalpersp
+% 	
+% 	scalpgfa
+% 	
+% 	scalpchan
+% 	
+% ICs 	
+% 	cell array of strings containing IC labels
+% 	Leave empty and a GUI will appear to allow IC labels to be entered per subect
+% 	
+% chans	
+% 	cell array of strings containing channel labels
+% 	Leave empty and a montage GUI will appear to allow channels to be selected
+% 	
+% tfcycles,freqs,nfreqs,tfbsline -> see EEGLAB's newtimef for these key/val options	***end***
 %
 %
 % Copyright (C) <2015>  <Allan Campopiano>

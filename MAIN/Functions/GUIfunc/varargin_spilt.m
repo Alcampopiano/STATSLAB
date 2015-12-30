@@ -1,13 +1,49 @@
 function [funcstr] = varargin_spilt(funcstr, infield )
-% when varargin is in a cell array taken from property grid, and each varargin input needs to
-% be glued to the end of a string, use this function to spilt varargin up
-% and glue it to the end of another string.
+% Varargin is in a cell array when taken from property grid, so turn it into one string for use in eval.
+% Also add appropriate syntax to this string so that users do not have to add matlab syntax when using GUI.
 
 
 % parse varargin inputs from GUI
 for i=1:length(infield)
     tmpvar{i}=['tmpvar', num2str(i)];
-    varstruct.(tmpvar{i})=infield{i};
+    
+    % determine if its a string or numerical
+    
+    if any(isnan(str2double(infield{i}))); % will be NaN unless it is fully numeric
+        
+        if numel(strsplit(infield{i},' '))>1; %  a cell array of strings, becasue there are spaces
+            
+            % split it up
+            split_cell=strsplit(infield{i},' ');
+            
+            % turn into a char string     
+            newstr='{';
+            for j=1:length(split_cell);
+
+                if j<length(split_cell)
+                    
+                    newstr=[newstr, '''', split_cell{j}, ''' '];
+                else
+                    newstr=[newstr, ' ''', split_cell{j}, '''', '}'];
+                end
+
+            end
+            varstruct.(tmpvar{i})=newstr;
+            
+        else % no spaces so its a full string
+            
+            newstr=['''', infield{i}, '''']; % add single qoutes
+            varstruct.(tmpvar{i})=newstr;
+            
+        end
+        
+    else
+        % entry should be numeric, so build appropriate string
+        newstr=['[', infield{i}, ']'];
+        
+        varstruct.(tmpvar{i})=newstr;
+        
+    end
     
     if i<length(infield)
         
@@ -18,21 +54,6 @@ for i=1:length(infield)
     
     
 end
-
-%
-%     % concatenate varargin things
-%     for i=1:length(statslab_propgrid.varargin_resample)
-%         if i<length(statslab_propgrid.varargin_resample)
-%
-%             funcstr=[funcstr varstruct.(tmpvar{i}) ','];
-%         else
-%             funcstr=[funcstr varstruct.(tmpvar{i}) ');'];
-%         end
-%     end
-
-
-
-
 
 end
 
