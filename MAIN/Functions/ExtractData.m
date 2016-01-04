@@ -3,7 +3,6 @@
 %                                                                                          
 % Inputs:
 % 
-% 
 % ***condfiles***
 % 
 % Leave emtpy and MATLAB will bring up an interface for you to load the appropriate SET files. After this is done the first time, a file is saved (condfiles*.mat). For subsequent calls type this filename in to avoid having to manually choose files again. ***end***
