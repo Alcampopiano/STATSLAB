@@ -1,83 +1,120 @@
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This function extracts data in various forms (e.g., ICs, gfa, scalp, see below)
-% from EEGLAB's .set files. The output files are then used in ResampleData.m with the
-% ultimate goal of calculating percentile bootstrap statistics at every timepoint
-% for single-subjects as well as the group (SubjectStatistics.m, GroupStatistics.m),
-% given any design (up to 2-way).
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% This function extracts various dependent measures (e.g., ICs, gfa, microvolts) from EEGLAB's .set 
+% files. The output files are then used in the subsequent module ResampleData.m
+%                                                                                          
 % Inputs:
-%
-%
+% 
+% 
 % ***condfiles***
-%
-% Leave emtpy and MATLAB will bring up an interface for you to
-% load the appropriate SET files. After this is done, a 
-% file is saved (e.g., condfiles_scalpchan.mat). For subsequent calls 
-% type this file name in to avoid having to manually choose files again. ***end***
-%
+% 
+% Leave emtpy and MATLAB will bring up an interface for you to load the appropriate SET files. After this is done the first time, a file is saved (condfiles*.mat). For subsequent calls type this filename in to avoid having to manually choose files again. ***end***
+% 
 % ***condnames***
-%
-% Type in your condition labels on seprate lines. For example,
-%
+% 
+% Type in your condition labels on separate lines. For example,
+% 
 % face
 % house 
 % object ***end***
-%
-% ***levels***
-%
-% Levels of your design. For example, type [2 3] for a 2x3 design,
-% [2] for a two-condition design etc. Three-way designs not allowed. ***end***
-%
-% ***design***
-%
-% a single-charater indicating your design. For example, 'w' for a
-% within-subjects design with two-conditions, 'ww' for a two-factor, fully
-% within-subjects desgin. 'bw' for a mixed design (cannot use 'wb'). ***end***
-%
-% ***savestring***
-%
-% A keyword or phrase that will be appended to important files as you work through
-% STATSLAB modules. It should identify your study and/or analysis. The
-% important STATS structure will have savestring appended to it. For
-% example,
-%
-% Fcz_ICA_analysis ***end***
-%
-% ***varargin***
-%
-% Key/val pairs
 % 
-% measure	
+% ***levels***
+% 
+% Levels for each factor in your design. Leave a space between factors.
+% 
+% For example, 
+% 
+% 2 3
+% 
+% denotes a 2x3 design.
+% 
+% 2 
+% 
+% denotes a two-condition design. Three-way designs not allowed. ***end***
+% 
+% ***design***
+% 
+% A string indicating your design. Choose from the drop down menu.
+% 
+% w
+% 
+% denotes a within-subjects design with two conditions. 
+% 
+% ww 
+% 
+% denotes a two-factor, fully within-subjects design. 
+% 
+% bw 
 %
-% 	ica
-% 	
-% 	icagfa
-% 	
-% 	icaitc
-% 	
-% 	icaersp
-% 	
-% 	icascalp
-% 	
-% 	scalpitc
-% 	
-% 	scalpersp
-% 	
-% 	scalpgfa
-% 	
-% 	scalpchan
-% 	
-% ICs 	
-% 	cell array of strings containing IC labels
-% 	Leave empty and a GUI will appear to allow IC labels to be entered per subect
-% 	
-% chans	
-% 	cell array of strings containing channel labels
-% 	Leave empty and a montage GUI will appear to allow channels to be selected
-% 	
-% tfcycles,freqs,nfreqs,tfbsline -> see EEGLAB's newtimef for these key/val options	***end***
+% denotes a mixed design  ***end***
+% 
+% ***savestring***
+% 
+% A keyword that will be appended to important files as you work through STATSLAB modules. It should identify your study and/or analysis. The STATS structure will have savestring appended to it. 
+% 
+% For example,
+% 
+% Fcz_ICA_analysis ***end***
+% 
+% ***varargin***
+% 
+% Options are specified in pairs (key -> val)
+% 
+% Measure ->
+% 		
+% 	icamax - project IC to channel with max weight
+% 		
+% 	icagfa - project IC to scalp and measure scalp GFA
+% 		
+% 	icaitc - project IC to selected channel and calculate inter-trial coherence
+% 		
+% 	icaersp - project IC to selected channel and calculate event-related spectral perturbation
+% 		
+% 	icascalp - project IC to selected channel and measure microvolt
+% 		
+% 	scalpitc - inter-trial coherence for selected channel
+% 		
+% 	scalpersp - event-related spectral perturbation for selected channel
+% 		
+% 	scalpgfa - global field power for scalp
+% 		
+% 	scalpchan - measure microvolts for selected scalp channel
+% 		
+% ICs ->		
+% 	IC indexes 	
+% 	Leave empty and a GUI will appear to allow IC indexes to be entered for each subject	
+% 		
+% Chans ->		
+% 	Type in the channel labels for channels you are analyzing. Leave empty and a GUI will appear to allow channels to be selected.
+% 		
+% tfcycles,freqs,nfreqs,tfbsline -> 		
+% 		
+% 	see EEGLAB's newtimef for these key & val options	
+% 		
+% For example,
+% 		
+% measure		
+% scalpchan		
+% chans		
+% Fcz Cz	
+% 
+% will extract standard scalp microvolts for Fcz and Cz (channels are averaged together)	
+% 		
+% For example,		
+% 		
+% measure		
+% icagfa		
+% ICs		
+% []		
+% chans		
+% Fcz		
+% 
+% will extract GFA of selected ICs projected to Fcz. A GUI will pop up to allow specifying IC indexes
+%
+% Using ExtractData at the commandline:
+%
+% ExtractData({'face' 'house'}, [], 2, 'w', 'my_Oz_analysis', 'measure', 'scalpchan', 'chans', 'Oz');
+% ExtractData({'old_cong' 'old_incong' 'young_cong' 'young_incong'}, [], [2 2], 'bw', 'my_Oz_ICAanalysis', 'measure', 'icascalp', 'ICs', [], 'chans', 'Oz');
+%
+% ***end***
 %
 %
 % Copyright (C) <2015>  <Allan Campopiano>

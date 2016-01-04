@@ -1,50 +1,44 @@
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This function bootstraps single trial EEG data for each subject. The 20% trimmed mean is taken
-% across trials (i.e., trimmed ERPS) at each timepoint. Simply load in as many NxMxP .mat files
-% as you wish when the browser comes up. Each file is saved with the original file name with
-% 'bootstrapped' appended to it. This function can take some time to run depending on the number
-% of bootstrapp samples as well as the size and number of files. However, your computer will
-% likely not be rendered usless while it runs as not much RAM is required, just time.
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Input arguments:
-%
-% ***STATS stucture*** 
-%
-% you will be prompted to load this if left empty e.g., ''
-% or, give the filename of your STATS structure. ***end***
-%
+% This function resamples single trial EEG data for each input file. The 20% trimmed mean is taken
+% across trials at each timepoint. Each output file is saved with the original file name with
+% “bootstrapped” appended to it.
+% 
+% Inputs:
+% 
 % ***condfiles***
-%
-% cell array of filenames for each file you want to resample. 
-% Leave emtpy (ie., '') and MATLAB will bring up an interface for you to
-% load the files. ***end***
-%
+% Leave empty and MATLAB will bring up an interface for you to load the appropriate “extracted” files.
+% ***end***
+% 
 % ***nboot*** 
 % number of resamples you wish to take from the single-trials ***end***
-%
-% key/val pairs, see Options for details
-%
-% Options:
-%
+% 
 % ***varargin***
-%
-%       trialcap - a string paired with the number of the cap (e.g., 50).
-%       The trialcap option limits the number of trials used in each resample
-%       to the cap. This helps to equate noise levels due to unequal number of trials in
-%       different conditions. Usually this only a problem when using GFA
-%       measures IF there are highly dissproportionate numbers of trials
-%       across conditions, as one condition with more noise (less trials)
-%       will offset the GFA waveform compared to a condition with less noise (more trials).
-%       Typical ERPs occilate around zero, so trialcap does not likely need to be set for
-%       ERPs. Omit this option alltogether if you wish to resample from the
-%       max number of trials (default). ***end***
-%
-%
-% Examples:
-%     ResampleData(STATS,1000,'trialcap', 50);
-%     ResampleData(STATS,50000); % will take a while
-%
+% Options are specified in pairs (key -> val)
+% 
+% trialcap ->
+% 	
+% 	[numeric] - the trialcap option limits the # of trials used in each resample to the specified value
+% 
+% 	none - sample a new set of trials that is equal in size to the original set 
+% 
+% 
+% FWE ->
+% 	
+% 	none  - no control for familywise error 
+% 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
+% 	
+% For example,
+% 
+% trialcap
+% 100
+% FWE
+% rom
+% 
+% will resample from the single-trial data, randomly choosing with replacement 100 trials. P values and CIs in later steps are adjusted using Rom's method.
+% 
+% Using ResampleData at the commandline:
+% 
+% ResampleData([], 1000, 'trialcap', 'none', 'FWE', 'none');
+% ***end***
 %
 % Copyright (C) <2015>  <Allan Campopiano>
 %

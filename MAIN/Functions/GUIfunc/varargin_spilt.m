@@ -2,6 +2,8 @@ function [funcstr] = varargin_spilt(funcstr, infield )
 % Varargin is in a cell array when taken from property grid, so turn it into one string for use in eval.
 % Also add appropriate syntax to this string so that users do not have to add matlab syntax when using GUI.
 
+% remove whitespace from ends
+infield=strtrim(infield);
 
 % parse varargin inputs from GUI
 for i=1:length(infield)
@@ -16,33 +18,59 @@ for i=1:length(infield)
             % split it up
             split_cell=strsplit(infield{i},' ');
             
-            % turn into a char string     
+            % turn into a char string
             newstr='{';
             for j=1:length(split_cell);
-
+                
                 if j<length(split_cell)
                     
                     newstr=[newstr, '''', split_cell{j}, ''' '];
                 else
                     newstr=[newstr, ' ''', split_cell{j}, '''', '}'];
                 end
-
+                
             end
             varstruct.(tmpvar{i})=newstr;
             
-        else % no spaces so its a full string
+        else % no spaces so its a full string, but could be empty ('[]')
             
-            newstr=['''', infield{i}, '''']; % add single qoutes
-            varstruct.(tmpvar{i})=newstr;
+            if strcmp(infield{i}, '[]') || strcmp(infield{i}, '''') % account for empty as a string
+                varstruct.(tmpvar{i})=infield{i};
+            else
+                newstr=['''', infield{i}, '''']; % add single qoutes
+                varstruct.(tmpvar{i})=newstr;
+                
+            end
+            
             
         end
         
     else
-        % entry should be numeric, so build appropriate string
-        newstr=['[', infield{i}, ']'];
         
-        varstruct.(tmpvar{i})=newstr;
-        
+        if i>1
+            
+            % check varargin for contrast keywords and add transpose operator
+            if strcmp(infield{i-1},'conA') || strcmp(infield{i-1},'conB') || strcmp(infield{i-1},'conAB')
+                
+                % entry should be numeric, so build appropriate string
+                % with transpose
+                newstr=['[', infield{i}, ']'''];
+                varstruct.(tmpvar{i})=newstr;
+                
+            else
+                
+                % entry should be numeric, so build appropriate string
+                newstr=['[', infield{i}, ']'];
+                varstruct.(tmpvar{i})=newstr;
+            end
+            
+        else
+            
+            % entry should be numeric, so build appropriate string
+            newstr=['[', infield{i}, ']'];
+            varstruct.(tmpvar{i})=newstr;
+            
+        end
     end
     
     if i<length(infield)
@@ -54,6 +82,5 @@ for i=1:length(infield)
     
     
 end
-
 end
 
