@@ -40,9 +40,7 @@ for i=1:length(infield)
                 newstr=['''', infield{i}, '''']; % add single qoutes
                 varstruct.(tmpvar{i})=newstr;
                 
-            end
-            
-            
+            end 
         end
         
     else
@@ -71,6 +69,7 @@ for i=1:length(infield)
             varstruct.(tmpvar{i})=newstr;
             
         end
+  
     end
     
     if i<length(infield)

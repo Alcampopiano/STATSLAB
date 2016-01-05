@@ -170,6 +170,13 @@ for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
     end
 end
 
+% turn char to cell array if chan was specified as a char
+if ischar(options.chans) && ~strcmp(options.chans, 'persubject')
+    
+    % then its a char string and needs to be a cell
+    options.chans={options.chans};
+end
+
 
 % there should be a label for each conditon.
 numconds=length(condnames);
