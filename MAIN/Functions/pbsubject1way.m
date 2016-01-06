@@ -1,4 +1,4 @@
-function [condfiles results] = pbsubject1way(condfiles, numconds, numpnts, nboot, jlvls, alpha, condnames, varargin)
+function [condfiles results] = pbsubject1way(STATS, condfiles, numconds, numpnts, nboot, jlvls, alpha, condnames, varargin)
 tic
 % bla bla bla
 
