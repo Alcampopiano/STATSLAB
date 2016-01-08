@@ -208,7 +208,7 @@ if isempty(condfiles);
     % put into its creation by the user.
     condfiles{1}=condfiles_subs;
     condfiles{2}=pathtofiles;
-    save(['condfiles_',options.measure,'.mat'],'condfiles');
+    save(['condfiles_ExtractData_',options.measure,'_',savestring,'.mat'],'condfiles');
     
 else
     load(condfiles);

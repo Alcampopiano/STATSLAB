@@ -61,6 +61,9 @@ if isempty(condfiles) % allowing an input for file names
         condfiles_subs{1,i}(:,1)=tempfname;
     end
     
+    % save so one can load without gui
+    save(['condfiles_GroupStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles_subs');
+    
 else
     
     % load a file name that was given that contains the filenames X condition cell array

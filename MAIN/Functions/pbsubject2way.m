@@ -63,6 +63,10 @@ conAB=options.conAB;
 % load data
 
 if isempty(condfiles)
+    
+    % get rid of condfiles as an empty char string ''
+    clear condfiles
+    
     % load all file names subs X conditions
     for i=1:numconds
         tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
@@ -75,6 +79,9 @@ if isempty(condfiles)
         
     end
     
+    % save so one can load without gui
+    save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles');
+    
 else
     
     % load a file name that was given that contains the filenames X condition cell array
@@ -86,15 +93,15 @@ else
     %%%% there is probably a better way of doing this, but I was tired at
     %%%% that moment
     %fix cell within a cell
-    condfiles_cell=cell(1,numconds);
-    for i=1:numconds
-        [rowcondcell colcondcell]=size(condfiles{i});
-        for j=1:rowcondcell
-        condfiles_cell{j,i}=condfiles{i}{j};
-        end  
-    end
-   clear condfiles
-   condfiles=condfiles_cell;
+%     condfiles_cell=cell(1,numconds);
+%     for i=1:numconds
+%         [rowcondcell colcondcell]=size(condfiles{i});
+%         for j=1:rowcondcell
+%         condfiles_cell{j,i}=condfiles{i}{j};
+%         end  
+%     end
+%    clear condfiles
+%    condfiles=condfiles_cell;
 end
 
 %preallocate sizes

@@ -56,6 +56,10 @@ conA=options.conA;
 % 'bw' design (multiple one-way tests...)
 
 if isempty(condfiles);
+    
+    % get rid of condfiles as an empty char string ''
+    clear condfiles
+    
     % load all file names subs X conditions
     for i=1:numconds
         tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
@@ -66,24 +70,25 @@ if isempty(condfiles);
             condfiles(:,i)=tempfname;
         end
     end
-    
+    % save so one can load without gui
+    save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles');
 else
     
     % load a file name that was given that contains the filenames X condition cell array
     condfiles_data=load(condfiles);
     condfields=fieldnames(condfiles_data);
-    condfiles_cellcell=condfiles_data.(condfields{1});   
+    condfiles=condfiles_data.(condfields{1});   
     
     %%%% there is probably a better way of doing this, but I was tired at
     %%%% that moment
     % fix cell within a cell
-    condfiles=cell(1,numconds);
-    for i=1:numconds
-        [rowcondcell colcondcell]=size(condfiles_cellcell{i});
-        for j=1:rowcondcell
-        condfiles{j,i}=condfiles_cellcell{i}{j};
-        end  
-    end
+%     condfiles=cell(1,numconds);
+%     for i=1:numconds
+%         [rowcondcell colcondcell]=size(condfiles_cellcell{i});
+%         for j=1:rowcondcell
+%         condfiles{j,i}=condfiles_cellcell{i}{j};
+%         end  
+%     end
     
 end
 

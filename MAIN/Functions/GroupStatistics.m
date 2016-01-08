@@ -99,7 +99,7 @@ switch STATS.design
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
-            [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
+            [sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
                 STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
                       
         end
@@ -128,7 +128,7 @@ switch STATS.design
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
-            [inferential_results sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
+            [sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
                 STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
             
         end
