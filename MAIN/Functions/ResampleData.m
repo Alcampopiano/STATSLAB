@@ -19,25 +19,17 @@
 % 	[numeric] - the trialcap option limits the # of trials used in each resample to the specified value
 % 
 % 	none - sample a new set of trials that is equal in size to the original set 
-% 
-% 
-% FWE ->
-% 	
-% 	none  - no control for familywise error 
-% 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
 % 	
 % For example,
 % 
 % trialcap
 % 100
-% FWE
-% rom
 % 
-% will resample from the single-trial data, randomly choosing with replacement 100 trials. P values and CIs in later steps are adjusted using Rom's method.
+% will resample from the single-trial data, randomly choosing with replacement 100 trials.
 % 
 % Using ResampleData at the commandline:
 % 
-% ResampleData([], 1000, 'trialcap', 'none', 'FWE', 'none');
+% ResampleData(STATS, [], 1000, 'trialcap', 'none');
 % ***end***
 %
 % Copyright (C) <2015>  <Allan Campopiano>

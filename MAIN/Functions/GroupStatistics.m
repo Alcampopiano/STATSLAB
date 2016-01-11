@@ -1,59 +1,67 @@
 function [STATS]=GroupStatistics(STATS,condfiles,alpha,nsamp,varargin)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculates group-level statistics for any number of levels, and up to
-% two-way designs of any type (between subjects, withing subjects, mixed).
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Input arguments:
-%     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
-%             the filename to your STATS stucture in the current directory.
-%
-%     alpha = arbitrary threshold for significance (.05 or .01 or whatever you like). Will be adjusted with
-%             Rom's method for controlling for FWE.
-%
-%     nsamp = number of resamples to take from the group data (1000, 5000, or what ever you like). Takes time.
-%
-%
-%     varargin - key/val pairs, see Options for details
-%
-% Options:
-%              FEW control method e.g., 'FWE', 'Rom', or 'FWE, 'none',
-%              Rom's method is default
-%
-%              Contrast matrix for Factor A comparisons. For example, 'conA', [1 0 -1 0; 0 1 0 -1]'
-%              You must add the transpose operator ('), as the example says.
-%              See Wiki (and function usage below) for many more examples. If
-%              left out, certain default contrasts will be used, but this is not
-%              recommended as you should know what you want to compare.
-%
-%              Contrast matrix for Factor B comparisons. For example, 'conB', [1 -1 0 0; 0 0 1 -1]'
-%              You must add the transpose operator ('), as the example says.
-%              See Wiki (and function usage below) for many more examples. If
-%              left out, certain default contrasts will be used, but this is not
-%              recommended as you should know what you want to compare.
-%
-%              Contrast matrix for interaction comparisons. For example,
-%              'conAB', [1 -1 -1 1]'. You must add the transpose operator ('), as the example says.
-%              See Wiki (and function usage below) for many more examples. If
-%              left out, certain default contrasts will be used, but this is not
-%              recommended as you should know what you want to compare.
-%
-%
-% Examples (these are just examples. For large designs, the number of
-% possible pariwise or pooled comparisons increases exponentially):
-%
+% Calculates group-level statistics for any number of levels, and up to two-way designs of any type (between subjects, withing subjects, mixed).
+%  
+% Inputs:
+% 
+% ***condfiles***
+% Leave empty and MATLAB will bring up an interface for you to load the appropriate “bootstrapped” files.
+% ***end***
+% 
+% ***alpha***
+% Statistical significance threshold. Will be adjusted if options for controlling FWE are specified.
+% ***end***
+% 
+% ***nsamp***
+% Number of resamples to take at the group level (resampling randomly from the subjects themselves). Currently this functionality is disabled so the group level analysis always contains all subjects.
+% ***end***
+% 
+% ***varargin***
+% Options are specified in pairs (key -> val)
+% 
+% FWE ->
+% 	
+% 	none  - no control for familywise error 
+% 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
+%  
+% ConA ->
+%  
+% 	[numeric] - Contrast matrix for Factor A comparisons. 
+% 
+% ConB -> 
+% 
+% 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
+% 
+% ConAB -> 
+% 
+% 	[numeric] - Contrast matrix for the interaction, if applicable. 
+% 
+% For example,
+% 
+% FWE
+% Rom
+% ConA
+% 1 0 -1 0; 0 1 0 -1
+% ConB
+% 1 -1 0 0; 0 0 1 -1
+% ConAB
+% 1 -1 -1 1
+% 
+% 
+% Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 - 4]).
+% 
+% Using GroupStatistics at the commandline:
+%  
 % For a 1-way design with 2 conditions (like a t-test):
-% [STATS]=GroupStatistics(STATS,.05,1000, [1 -1]');
-%
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'none', 'conA', [1 -1]');
+%  
 % For a 2-way design with 4 conditions (2x2):
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]', [1 0 -1 0; 0 1 0 -1]');
-%
-% For a 2-way design with 8 conditions (2x4):
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 0 0 -1 0 0 0; 0 1 0 0 0 -1 0 0]', [1 -1 0 0 0 0 0 0; 0 0 0 0 1 -1 0 0]', [0 0 1 -1 0 0 -1 1]');
-%
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
+% 
 % For a 1-way design with 3 conditions:
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', [1 0 -1; 0 1 -1; 1 -1 0]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
+% 
+% ***end***
 %
 % Copyright (C) <2015>  <Allan Campopiano>
 %
