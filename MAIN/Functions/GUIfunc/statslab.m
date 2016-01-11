@@ -116,7 +116,7 @@ end
 if statslab_propgrid.logical_groupfig==1;
     
     % initiate partial function string
-    funcstr='[STATS]=GroupFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_group,';
+    funcstr='[STATS]=GroupFigure_sample([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_group,';
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_groupfig);
     

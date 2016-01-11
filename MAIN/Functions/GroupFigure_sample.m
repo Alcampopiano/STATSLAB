@@ -163,11 +163,11 @@ switch isfactorial
                 
                 % get the condition waveforms
                 if STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==1
-                    plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
+                    plot1st(k,:)=STATS.condwaves(j,options.timeplot);
                     leg1stlist{k}=STATS.condnames{j};
                     k=k+1;
                 elseif STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==-1
-                    plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
+                    plot2nd(m,:)=STATS.condwaves(j,options.timeplot);
                     leg2ndlist{m}=STATS.condnames{j};
                     m=m+1;
                 end
@@ -229,11 +229,11 @@ switch isfactorial
                     
                     % get the condition waveforms
                     if STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot1st(k,:)=STATS.condwaves(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_A.contrasts(j,options.FactorA(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot2nd(m,:)=STATS.condwaves(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end
@@ -299,11 +299,11 @@ switch isfactorial
                     
                     % get the condition waveforms
                     if STATS.sample_results.factor_B.contrasts(j,options.FactorB(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot1st(k,:)=STATS.condwaves(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_B.contrasts(j,options.FactorB(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot2nd(m,:)=STATS.condwaves(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end
@@ -363,11 +363,11 @@ switch isfactorial
                     
                     % get condition waveforms and labels
                     if STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==1
-                        plot1st(k,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot1st(k,:)=STATS.condwaves(j,options.timeplot);
                         leg1stlist{k}=STATS.condnames{j};
                         k=k+1;
                     elseif STATS.sample_results.factor_AxB.contrasts(j,options.FactorAB(i))==-1
-                        plot2nd(m,:)=STATS.condwaves_trim(j,options.timeplot);
+                        plot2nd(m,:)=STATS.condwaves(j,options.timeplot);
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
                     end

@@ -103,6 +103,9 @@ end
 if isempty(condfiles)
     fnames=uigetfile('*.mat','Select all files you wish to bootstrap', 'MultiSelect','on');
     
+    % save so one can load without gui
+    save(['condfiles_ResampleData_',STATS.measure,'_',STATS.savestring,'.mat'],'fnames');
+    
 else
     condfiles=load(condfiles);
     condfields=fieldnames(condfiles);
