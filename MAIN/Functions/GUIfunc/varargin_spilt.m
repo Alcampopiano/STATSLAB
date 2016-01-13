@@ -11,7 +11,7 @@ for i=1:length(infield)
     
     % determine if its a string or numerical
     
-    if any(isnan(str2double(infield{i}))); % will be NaN unless it is fully numeric
+    if any(isnan(str2double_statslab(infield{i}))); % will be NaN unless it is fully numeric
         
         if numel(strsplit(infield{i},' '))>1; %  a cell array of strings, becasue there are spaces
             
