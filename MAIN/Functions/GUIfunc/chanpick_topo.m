@@ -1,4 +1,6 @@
-function [chanchoices]=chanpick_topo(condfiles_subs,pathtofiles,numconds)
+function [cancel_hit chanchoices]=chanpick_topo(condfiles_subs,pathtofiles,numconds)
+
+cancel_hit=0;
 
 % grid size
 tabsize=max(cell2mat(cellfun(@length,condfiles_subs,'un',0)));
@@ -114,6 +116,32 @@ while sel
     % color the previous selections
     for q=1:length(data.chanarray{data.subind,data.condind*2});
         ho=findobj(gcf,'String',data.chanarray{data.subind,data.condind*2}{q});
+        
+        %data.chanarray{data.subind,data.condind*2}{q}
+        %length(data.chanarray{data.subind,data.condind*2}{q})
+        
+%         if isempty(ho) && ~isempty(data.chanarray{data.subind,data.condind*2}{q})
+%             
+%             lost_string=true;
+%             strip_lab=strtrim(data.chanarray{data.subind,data.condind*2}{q});
+%             while lost_string;
+%                 
+%                 ho=findobj(gcf,'String',strip_lab);
+%                 
+%                 if ~isempty(ho);
+%                     lost_string=false;
+%                     
+%                 else
+%                     
+%                     % keep adding trailing spaces until you find a match
+%                     strip_lab=[strip_lab, ' '];
+% 
+%                 end
+%                 
+%             end
+%                 
+%         end
+        
         set(ho, 'Color', 'green', 'FontSize',13, 'FontWeight','bold');
     end
     
@@ -173,6 +201,7 @@ while sel
         % empty main output
         chanchoices=[];
         close(f);
+        cancel_hit=1;
         return
     end
     

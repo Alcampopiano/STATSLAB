@@ -1,112 +1,112 @@
-% This function extracts various dependent measures (e.g., ICs, gfa, microvolts) from EEGLAB's .set 
+% This function extracts various dependent measures (e.g., ICs, gfa, microvolts) from EEGLAB's .set
 % files. The output files are then used in the subsequent module ResampleData.m
-%                                                                                          
+%
 % Inputs:
-% 
+%
 %
 % ***condfiles***
-% 
+%
 % Leave emtpy and MATLAB will bring up an interface for you to load the appropriate SET files. After this is done the first time, a file is saved (condfiles*.mat). For subsequent calls type this filename in to avoid having to manually choose files again. ***end***
-% 
+%
 % ***condnames***
-% 
+%
 % Type in your condition labels on separate lines. For example,
-% 
+%
 % face
-% house 
+% house
 % object ***end***
-% 
+%
 % ***levels***
-% 
+%
 % Levels for each factor in your design. Leave a space between factors.
-% 
-% For example, 
-% 
+%
+% For example,
+%
 % 2 3
-% 
+%
 % denotes a 2x3 design.
-% 
-% 2 
-% 
+%
+% 2
+%
 % denotes a two-condition design. Three-way designs not allowed. ***end***
-% 
+%
 % ***design***
-% 
+%
 % A string indicating your design. Choose from the drop down menu.
-% 
+%
 % w
-% 
-% denotes a within-subjects design with two conditions. 
-% 
-% ww 
-% 
-% denotes a two-factor, fully within-subjects design. 
-% 
-% bw 
+%
+% denotes a within-subjects design with two conditions.
+%
+% ww
+%
+% denotes a two-factor, fully within-subjects design.
+%
+% bw
 %
 % denotes a mixed design  ***end***
-% 
+%
 % ***savestring***
-% 
-% A keyword that will be appended to important files as you work through STATSLAB modules. It should identify your study and/or analysis. The STATS structure will have savestring appended to it. 
-% 
+%
+% A keyword that will be appended to important files as you work through STATSLAB modules. It should identify your study and/or analysis. The STATS structure will have savestring appended to it.
+%
 % For example,
-% 
+%
 % Fcz_ICA_analysis ***end***
-% 
+%
 % ***varargin***
-% 
+%
 % Options are specified in pairs (key -> val)
-% 
+%
 % Measure ->
-% 		
+%
 % 	icamax - project IC to channel with max weight
-% 		
+%
 % 	icagfa - project IC to scalp and measure scalp GFA
-% 		
+%
 % 	icaitc - project IC to selected channel and calculate inter-trial coherence
-% 		
+%
 % 	icaersp - project IC to selected channel and calculate event-related spectral perturbation
-% 		
+%
 % 	icascalp - project IC to selected channel and measure microvolt
-% 		
+%
 % 	scalpitc - inter-trial coherence for selected channel
-% 		
+%
 % 	scalpersp - event-related spectral perturbation for selected channel
-% 		
+%
 % 	scalpgfa - global field power for scalp
-% 		
+%
 % 	scalpchan - measure microvolts for selected scalp channel
-% 		
-% ICs ->		
-% 	IC indexes 	
-% 	Leave empty and a GUI will appear to allow IC indexes to be entered for each subject	
-% 		
-% Chans ->		
+%
+% ICs ->
+% 	IC indexes
+% 	Leave empty and a GUI will appear to allow IC indexes to be entered for each subject
+%
+% Chans ->
 % 	Type in the channel labels for channels you are analyzing. Leave empty and a GUI will appear to allow channels to be selected.
-% 		
-% tfcycles,freqs,nfreqs,tfbsline -> 		
-% 		
-% 	see EEGLAB's newtimef for these key & val options	
-% 		
+%
+% tfcycles,freqs,nfreqs,tfbsline ->
+%
+% 	see EEGLAB's newtimef for these key & val options
+%
 % For example,
-% 		
-% measure		
-% scalpchan		
-% chans		
-% Fcz Cz	
-% 
-% will extract standard scalp microvolts for Fcz and Cz (channels are averaged together)	
-% 		
-% For example,		
-% 		
-% measure		
-% icagfa		
-% ICs		
-% []		
-% chans		
-% Fcz		
-% 
+%
+% measure
+% scalpchan
+% chans
+% Fcz Cz
+%
+% will extract standard scalp microvolts for Fcz and Cz (channels are averaged together)
+%
+% For example,
+%
+% measure
+% icagfa
+% ICs
+% []
+% chans
+% Fcz
+%
 % will extract GFA of selected ICs projected to Fcz. A GUI will pop up to allow specifying IC indexes
 %
 % Using ExtractData at the commandline:
@@ -231,60 +231,84 @@ else
 end
 
 
+%%
+% GUI options for ICs
+if strcmp(options.ICs, 'persubject');
+    
+    % GUI IC picker
+    [okayhit, ICretain]=ICpick(condfiles_subs,numconds);
+    
+    if isempty(okayhit)
+        STATS=[]; % to exit cleanly
+        return
+    end
+    
+else %~isempty(strfind(options.ICs{1},'.mat'))
+    
+    % load a file
+    tmp=load(options.ICs);
+    ICretain=tmp.ICCHOICES;
+    
+    % turn IC selections into numbers
+    j=2;
+    for i=1:numconds;
+        [rowfname colfname]=size(condfiles_subs{i});
+        ICretain(1:rowfname,j)=cellfun(@str2num,ICretain(1:rowfname,j),'UniformOutput',0)';
+        j=j+2;
+    end
+    
+end
+
+%%
+% GUI for channel selections
+
+persubject=0;
+if strcmp(options.chans,'persubject')
+    persubject=1;
+    
+    % GUI channel picker not written yet
+    [cancel_hit chanfile]=chanpick_topo(condfiles_subs, pathtofiles, numconds);
+    
+    if cancel_hit
+        STATS=[]; % to exit cleanly
+        return
+    end
+    
+elseif ~isempty(strfind(options.chans{1},'.mat'))
+    
+    % load a file
+    tmp=load(options.chans{1});
+    chanfile=tmp.data.chanarray;
+end
+%% cases
+
 switch options.measure
     
     case {'icascalp', 'icaersp', 'icaitc'}
         disp(' ***** projecting selected ICs to scalp and extracting channels ***** ')
         
-        if isempty(options.ICs);
+        for i=1:numconds
+            [rowcond colcond]=size(condfiles_subs{i});
             
-            % GUI IC picker
-            [okayhit, ICretain]=ICpick(condfiles_subs,numconds);
-        else
-            tmp=load(options.ICs);
-            tmpfields=fieldnames(tmp);
-            ICretain=tmp.(tmpfields{1});
-        end
-        
-        % GUI, load file, or, neither
-        persubject=0;
-        if strcmp(options.chans,'persubject')
-            
-            % GUI channel picker 
-            [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
-            persubject=1;
-            
-        elseif ~isempty(strfind(options.chans,'.mat'))
-            
-            % load a file
-            tmp=load(options.chans);
-            tmpfields=fieldnames(tmp);
-            chanfile=tmp.(tmpfields{1});
-            persubject=1;
-        end
-        
-        
-        if persubject==0; % take same channel or channel cluster for each subject
-            for i=1:numconds
-                [rowcond colcond]=size(condfiles_subs{i});
+            for j=1:rowcond;
                 
-                for j=1:rowcond;
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(j,i+i);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
+                % load file
+                EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
+                EEG = eeg_checkset(EEG);
+                
+                % get orignal IC inds
+                icorig=[1:min(size(EEG.icawinv))];
+                
+                compswant=ICretain(j,i+i);
+                compswant=compswant{1};
+                
+                icorig(compswant)=[];
+                
+                % pick ICs you want to retain
+                EEGretain = pop_subcomp( EEG, icorig, 0);
+                EEGretain = eeg_checkset(EEGretain);
+                
+                if persubject==0;
                     
                     % when some option to select a channel is given
                     try
@@ -294,54 +318,10 @@ switch options.measure
                         end
                         
                     catch
-                        error(['Channel ' options.chans{ii}, 'does not exist for subject ', condfiles_subs{i}{j}, ...
-                            'If the data are not interpolated, the channels you are looking for must exist for every subject.']);
+                        error(['Channel ' options.chans{ii}, 'does not exist for subject ', condfiles_subs{i}{j}]);
                     end
-                    data=EEGretain.data(chanind,:,:);
                     
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data(chanind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-            
-        elseif persubject==1; % take different chans accros subject as indicated in chanfile
-            for i=1:numconds
-                [rowcond colcond]=size(condfiles_subs{i});
-                
-                for j=1:rowcond;
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % get orignal IC inds
-                    icorig=[1:min(size(EEG.icawinv))];
-                    
-                    compswant=ICretain(j,i+i);
-                    
-                    icorig(compswant)=[];
-                    
-                    % pick ICs you want to retain
-                    EEGretain = pop_subcomp( EEG, icorig, 0);
-                    EEGretain = eeg_checkset(EEGretain);
-                    
+                elseif persubject==1;
                     
                     % when some option to select a channel is given
                     try
@@ -351,31 +331,32 @@ switch options.measure
                         end
                         
                     catch
-                        error(['Channel ' chanfile{j,i+i}{ii}, 'does not exist for subject ', condfiles_subs{i}{j}, ...
-                            'If the data are not interpolated, the channels you are looking for must exist for every subject.']);
+                        error(['Channel ' chanfile{j,i+i}{ii}, 'does not exist for subject ', condfiles_subs{i}{j}]);
                     end
-                    data=EEGretain.data(chanind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                    % get residual
-                    EEGres = pop_subcomp( EEG, compswant, 0);
-                    EEGres = eeg_checkset(EEGres);
-                    
-                    % put EEG.data into the variable data
-                    data=EEGres.data(chanind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
-                    clear data
                     
                 end
                 
+                data=EEGretain.data(chanind,:,:);
+                
+                % save it with original filename but get rid of original
+                % extention (hence the 1:end-4)
+                save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                clear data
+                
+                % get residual
+                EEGres = pop_subcomp( EEG, compswant, 0);
+                EEGres = eeg_checkset(EEGres);
+                
+                % put EEG.data into the variable data
+                data=EEGres.data(chanind,:,:);
+                
+                % save it with original filename but get rid of original
+                % extention (hence the 1:end-4)
+                save([condfiles_subs{i}{j}(1:end-4),'_',options.measure,'_RESextracted.mat'],'data');
+                clear data
+                
             end
+            
         end
         
         xtimes=EEG.times;
@@ -383,17 +364,6 @@ switch options.measure
         
     case 'icagfa'
         disp(' ***** projecting selected ICs to scalp and extracting data array for later GFA calculation ***** ')
-        
-        
-        if isempty(options.ICs);
-            
-            % GUI IC picker
-            [okayhit, ICretain]=ICpick(condfiles_subs,numconds);
-        else
-            tmp=load(options.ICs);
-            tmpfields=fieldnames(tmp);
-            ICretain=tmp.(tmpfields{1});
-        end
         
         for i=1:numconds
             [rowcond colcond]=size(condfiles_subs{i});
@@ -470,153 +440,136 @@ switch options.measure
         
         % likely a temporary case option for sysc14, unless
         % I can keep everything internally consistent without too much trouble
-    case 'bipolar'
-        disp(' ***** extracting the data array for bipolar ***** ')
-        
-        %for k=1:numconds; % always one
-        
-        [rowcond colcond]=size(condfiles_subs{1});
-        
-        miscinfo=cell(rowcond+1,10);
-        miscinfo(1,:)={'sub', 'ind', 'chan', 'val', 'ntrials', 'sub', 'ind', 'chan', 'val', 'ntrials'};
-        miscinfo(2:end,1)=condfiles_subs{1}(:);
-        miscinfo(2:end,6)=condfiles_subs{2}(:);
-        
-        for s=1:rowcond; % scroll through subjects
-            
-            % load file from cond 1
-            EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
-            EEG = eeg_checkset(EEG);
-            miscinfo{s+1,5}=EEG.trials;
-            
-            %create cond 1 chan erps
-            erps_cond1=mean(EEG.data,3);
-            
-            % load file from cond 2
-            EEG = pop_loadset('filename',condfiles_subs{2}{s},'filepath',pathtofiles{1});
-            EEG = eeg_checkset(EEG);
-            miscinfo{s+1,10}=EEG.trials;
-            
-            %create cond 2 chan erps
-            erps_cond2=mean(EEG.data,3);
-            
-            % create the difference ERP waves for each channel
-            erp_diff=erps_cond1-erps_cond2;
-            
-            clear erps_cond1 erps_cond2
-            
-            % copy EEG.data
-            tmpEEG=EEG;
-            tmpEEG.data=erp_diff;
-            
-            % set trials ==1 to trick pop_timtopo into plotting
-            tmpEEG.trials=1;
-            h=figure; pop_timtopo(tmpEEG, [-200  500], [NaN], 'ERP data and scalp maps of left_check');
-            
-            timewin=input('type in the window(ms) to calculate min and max vals\n');
-            close(h);
-            
-            if isempty(timewin)
-                
-                if strcmp(condnames{1},'face')
-                    timewin=[150 180]; % for face house
-                    
-                elseif strcmp(condnames{1},'Left')
-                    timewin=[80 120]; % for left right checker
-                end
-                
-            end
-            
-            MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-            MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-            
-            % for each channel get max value within a window
-            [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
-            
-            % then, get the index for the max channel
-            [max_val_chan max_ind_chan]=max(max_val_time);
-            
-            % for each channel get min value within a window
-            [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
-            
-            % then, get the index for the min channel
-            [min_val_chan min_ind_chan]=min(min_val_time);
-            
-            clear tmpEEG
-            
-            % now we have max and min channel index, steal it from original
-            % data, cond 2 is already loaded so take it from there.
-            datamax=EEG.data(max_ind_chan,:,:);
-            datamin=EEG.data(min_ind_chan,:,:);
-            
-            % create bipolar
-            data=datamax-datamin;
-            miscinfo{s+1,7}=max_ind_chan;
-            miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
-            miscinfo{s+1,9}=max_val_chan;
-            
-            % save it with original filename but get rid of original
-            % extention (hence the 1:end-4)
-            save([condfiles_subs{2}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-            clear data datamax datamin
-            
-            % load cond 1 file
-            EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
-            EEG = eeg_checkset(EEG);
-            miscinfo{s+1,2}=min_ind_chan;
-            miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
-            miscinfo{s+1,4}=min_val_chan;
-            
-            % now we have max and min channel index, steal it from original
-            % data, from cond1.
-            datamax=EEG.data(max_ind_chan,:,:);
-            datamin=EEG.data(min_ind_chan,:,:);
-            
-            % create bipolar
-            data=datamax-datamin;
-            
-            % save it with original filename but get rid of original
-            % extention (hence the 1:end-4)
-            save([condfiles_subs{1}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-            clear data datamax datamin
-            
-        end
-        
-        STATS.miscinfo=miscinfo;
-        xtimes=EEG.times;
-        disp(' ***** finished extracting the data array for bipolar analysis *****')
+%     case 'bipolar'
+%         disp(' ***** extracting the data array for bipolar ***** ')
+%         
+%         %for k=1:numconds; % always one
+%         
+%         [rowcond colcond]=size(condfiles_subs{1});
+%         
+%         miscinfo=cell(rowcond+1,10);
+%         miscinfo(1,:)={'sub', 'ind', 'chan', 'val', 'ntrials', 'sub', 'ind', 'chan', 'val', 'ntrials'};
+%         miscinfo(2:end,1)=condfiles_subs{1}(:);
+%         miscinfo(2:end,6)=condfiles_subs{2}(:);
+%         
+%         for s=1:rowcond; % scroll through subjects
+%             
+%             % load file from cond 1
+%             EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+%             EEG = eeg_checkset(EEG);
+%             miscinfo{s+1,5}=EEG.trials;
+%             
+%             %create cond 1 chan erps
+%             erps_cond1=mean(EEG.data,3);
+%             
+%             % load file from cond 2
+%             EEG = pop_loadset('filename',condfiles_subs{2}{s},'filepath',pathtofiles{1});
+%             EEG = eeg_checkset(EEG);
+%             miscinfo{s+1,10}=EEG.trials;
+%             
+%             %create cond 2 chan erps
+%             erps_cond2=mean(EEG.data,3);
+%             
+%             % create the difference ERP waves for each channel
+%             erp_diff=erps_cond1-erps_cond2;
+%             
+%             clear erps_cond1 erps_cond2
+%             
+%             % copy EEG.data
+%             tmpEEG=EEG;
+%             tmpEEG.data=erp_diff;
+%             
+%             % set trials ==1 to trick pop_timtopo into plotting
+%             tmpEEG.trials=1;
+%             h=figure; pop_timtopo(tmpEEG, [-200  500], [NaN], 'ERP data and scalp maps of left_check');
+%             
+%             timewin=input('type in the window(ms) to calculate min and max vals\n');
+%             close(h);
+%             
+%             if isempty(timewin)
+%                 
+%                 if strcmp(condnames{1},'face')
+%                     timewin=[150 180]; % for face house
+%                     
+%                 elseif strcmp(condnames{1},'Left')
+%                     timewin=[80 120]; % for left right checker
+%                 end
+%                 
+%             end
+%             
+%             MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+%             MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+%             
+%             % for each channel get max value within a window
+%             [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
+%             
+%             % then, get the index for the max channel
+%             [max_val_chan max_ind_chan]=max(max_val_time);
+%             
+%             % for each channel get min value within a window
+%             [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
+%             
+%             % then, get the index for the min channel
+%             [min_val_chan min_ind_chan]=min(min_val_time);
+%             
+%             clear tmpEEG
+%             
+%             % now we have max and min channel index, steal it from original
+%             % data, cond 2 is already loaded so take it from there.
+%             datamax=EEG.data(max_ind_chan,:,:);
+%             datamin=EEG.data(min_ind_chan,:,:);
+%             
+%             % create bipolar
+%             data=datamax-datamin;
+%             miscinfo{s+1,7}=max_ind_chan;
+%             miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
+%             miscinfo{s+1,9}=max_val_chan;
+%             
+%             % save it with original filename but get rid of original
+%             % extention (hence the 1:end-4)
+%             save([condfiles_subs{2}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+%             clear data datamax datamin
+%             
+%             % load cond 1 file
+%             EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+%             EEG = eeg_checkset(EEG);
+%             miscinfo{s+1,2}=min_ind_chan;
+%             miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
+%             miscinfo{s+1,4}=min_val_chan;
+%             
+%             % now we have max and min channel index, steal it from original
+%             % data, from cond1.
+%             datamax=EEG.data(max_ind_chan,:,:);
+%             datamin=EEG.data(min_ind_chan,:,:);
+%             
+%             % create bipolar
+%             data=datamax-datamin;
+%             
+%             % save it with original filename but get rid of original
+%             % extention (hence the 1:end-4)
+%             save([condfiles_subs{1}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+%             clear data datamax datamin
+%             
+%         end
+%         
+%         STATS.miscinfo=miscinfo;
+%         xtimes=EEG.times;
+%         disp(' ***** finished extracting the data array for bipolar analysis *****')
         
     case 'scalpchan'
         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
         
-        % FIX THIS SECTION, crashes on else if
-        % GUI, load file, or, neither
-        persubject=0;
-%         if strcmp(options.chans,'persubject')
-%             
-%             % GUI channel picker not written yet
-%             [okayhit, chanfile]=chanpick(condfiles_subs,numconds);
-%             persubject=1;
-%             
-%         elseif ~isempty(strfind(options.chans,'.mat'))
-%             
-%             % load a file
-%             tmp=load(options.chans);
-%             tmpfields=fieldnames(tmp);
-%             chanfile=tmp.(tmpfields{1});
-%             persubject=1;
-%         end
-        
-        if persubject==0;
-            for k=1:numconds;
+        for k=1:numconds;
+            
+            [rowcond colcond]=size(condfiles_subs{k});
+            
+            for s=1:rowcond; % scroll through subjects
                 
-                [rowcond colcond]=size(condfiles_subs{k});
+                % load file
+                EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+                EEG = eeg_checkset(EEG);
                 
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
+                if persubject==0;
                     
                     try
                         % scroll through chans the user wants and collect relavent indices
@@ -625,38 +578,11 @@ switch options.measure
                         end
                         
                     catch
-                        error(['One of the channels you want does not exist for some subjects. ' ...
-                            'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-                            'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-                            'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-                            'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
+                        error(['Channel ' options.chans{i}, 'does not exist for subject ', condfiles_subs{k}{s}]);
                     end
                     
-                    % steal data from the channels you are interested in
-                    data=EEG.data(chanind,:,:);
                     
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-            
-        elseif persubject==1;
-            
-            
-            for k=1:numconds;
-                
-                [rowcond colcond]=size(condfiles_subs{k});
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
+                elseif persubject==1;
                     
                     % when some option to select a channel is given
                     try
@@ -666,120 +592,117 @@ switch options.measure
                         end
                         
                     catch
-                        error(['Channel ' chanfile{s,k+k}{ii}, 'does not exist for subject ', condfiles_subs{k}{s}, ...
-                            'If the data are not interpolated, the channels you are looking for must exist for every subject.']);
+                        error(['Channel ' chanfile{s,k+k}{ii}, 'does not exist for subject ', condfiles_subs{k}{s}]);
                     end
                     
-                    % steal data from the channels you are interested in
-                    data=EEG.data(chanind,:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
                 end
                 
+                
+                % steal data from the channels you are interested in
+                data=EEG.data(chanind,:,:);
+                
+                % save it with original filename but get rid of original
+                % extention (hence the 1:end-4)
+                save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+                clear data
+                
             end
-   
         end
-
+        
         xtimes=EEG.times;
         disp('***** finished extracting selected channel(s) ***** ')
         
-    case 'scalpchansub'
-        disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
-        
-        
-        
-        for k=1:numconds;
-            
-            [rowcond colcond]=size(condfiles_subs{k});
-            
-            if k==1;
-                
-                miscinfo=cell(rowcond+1,4);
-                miscinfo(1,:)={'sub', 'ind', 'chan', 'val'};
-                miscinfo(2:end,1)=condfiles_subs{1}(:);
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file from first condition
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % determin the largest neg channel during window of interest
-                    h=figure; title(['condition as, subject ', num2str(s)]);
-                    pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
-                    
-                    timewin=input('type in timewindow around N170\n');
-                    close(h);
-                    
-                    MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-                    MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-                    
-                    % for each channel get min value within a window
-                    [val_time ind_time]=min(mean(EEG.data(:,MStoTF_min:MStoTF_max,:),3),[],2);
-                    
-                    % then, get the index for the min channel
-                    [val_chan(s) ind_chan(s)]=min(val_time);
-                    
-                    % add chanlabel to speadsheet
-                    miscinfo{s+1,2}=ind_chan(s);
-                    miscinfo{s+1,4}=val_chan(s);
-                    
-                    chanlab{s}=EEG.chanlocs(ind_chan(s)).labels;
-                    miscinfo{s+1,3}=chanlab{s};
-                    
-                    % steal data from the channels you are interested in
-                    data=EEG.data(ind_chan(s),:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-            if k>1;
-                
-                for s=1:rowcond; % scroll through subjects
-                    
-                    % load file from first condition
-                    EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
-                    EEG = eeg_checkset(EEG);
-                    
-                    % determin the largest neg channel during window of interest
-                    %figure; h=pop_timtopo(EEG, [-100 400], [NaN], 'ERP data and scalp maps of as','electrodes','on');
-                    
-                    %chanlab{s}=input('type in chanlabel you want');
-                    %close(h);
-                    
-                    % add chanlabel to speadsheet
-                    %miscinfo(s,3)=chanlab;
-                    
-                    %chanind(s)=find(strcmp({EEG.chanlocs.labels},chanlab));
-                    %miscinfo(s,2)=chanind;
-                    
-                    
-                    % steal data from the channels you are interested in
-                    data=EEG.data(ind_chan(s),:,:);
-                    
-                    % save it with original filename but get rid of original
-                    % extention (hence the 1:end-4)
-                    save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
-                    clear data
-                    
-                end
-                
-            end
-            
-        end
-        STATS.miscinfo=miscinfo;
-        xtimes=EEG.times;
-        disp('***** finished extracting selected channel(s) ***** ')
+%     case 'scalpchansub'
+%         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
+% 
+%         for k=1:numconds;
+%             
+%             [rowcond colcond]=size(condfiles_subs{k});
+%             
+%             if k==1;
+%                 
+%                 miscinfo=cell(rowcond+1,4);
+%                 miscinfo(1,:)={'sub', 'ind', 'chan', 'val'};
+%                 miscinfo(2:end,1)=condfiles_subs{1}(:);
+%                 
+%                 for s=1:rowcond; % scroll through subjects
+%                     
+%                     % load file from first condition
+%                     EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+%                     EEG = eeg_checkset(EEG);
+%                     
+%                     % determin the largest neg channel during window of interest
+%                     h=figure; title(['condition as, subject ', num2str(s)]);
+%                     pop_timtopo(EEG, [-100 400], [NaN], ['condition as, subject ', num2str(s)],'electrodes','on');
+%                     
+%                     timewin=input('type in timewindow around N170\n');
+%                     close(h);
+%                     
+%                     MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+%                     MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+%                     
+%                     % for each channel get min value within a window
+%                     [val_time ind_time]=min(mean(EEG.data(:,MStoTF_min:MStoTF_max,:),3),[],2);
+%                     
+%                     % then, get the index for the min channel
+%                     [val_chan(s) ind_chan(s)]=min(val_time);
+%                     
+%                     % add chanlabel to speadsheet
+%                     miscinfo{s+1,2}=ind_chan(s);
+%                     miscinfo{s+1,4}=val_chan(s);
+%                     
+%                     chanlab{s}=EEG.chanlocs(ind_chan(s)).labels;
+%                     miscinfo{s+1,3}=chanlab{s};
+%                     
+%                     % steal data from the channels you are interested in
+%                     data=EEG.data(ind_chan(s),:,:);
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
+%                     clear data
+%                     
+%                 end
+%                 
+%             end
+%             
+%             if k>1;
+%                 
+%                 for s=1:rowcond; % scroll through subjects
+%                     
+%                     % load file from first condition
+%                     EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
+%                     EEG = eeg_checkset(EEG);
+%                     
+%                     % determin the largest neg channel during window of interest
+%                     %figure; h=pop_timtopo(EEG, [-100 400], [NaN], 'ERP data and scalp maps of as','electrodes','on');
+%                     
+%                     %chanlab{s}=input('type in chanlabel you want');
+%                     %close(h);
+%                     
+%                     % add chanlabel to speadsheet
+%                     %miscinfo(s,3)=chanlab;
+%                     
+%                     %chanind(s)=find(strcmp({EEG.chanlocs.labels},chanlab));
+%                     %miscinfo(s,2)=chanind;
+%                     
+%                     
+%                     % steal data from the channels you are interested in
+%                     data=EEG.data(ind_chan(s),:,:);
+%                     
+%                     % save it with original filename but get rid of original
+%                     % extention (hence the 1:end-4)
+%                     save([condfiles_subs{k}{s}(1:end-4),'_',savestring,'_',options.measure,'_extracted.mat'],'data');
+%                     clear data
+%                     
+%                 end
+%                 
+%             end
+%             
+%         end
+%         STATS.miscinfo=miscinfo;
+%         xtimes=EEG.times;
+%         disp('***** finished extracting selected channel(s) ***** ')
         
         
     case 'scalpersp'
@@ -795,18 +718,33 @@ switch options.measure
                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
                 EEG = eeg_checkset(EEG);
                 
-                try
-                    % scroll through chans the user wants and collect relavent indices
-                    for i=1:length(options.chans)
-                        chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+                
+                 if persubject==0;
+                    
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for i=1:length(options.chans)
+                            chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+                        end
+                        
+                    catch
+                        error(['Channel ' options.chans{i}, 'does not exist for subject ', condfiles_subs{k}{s}]);
                     end
                     
-                catch
-                    error(['One of the channels you want does not exist for some subjects. ' ...
-                        'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-                        'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-                        'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-                        'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
+                    
+                elseif persubject==1;
+                    
+                    % when some option to select a channel is given
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for ii=1:length(chanfile{s,k+k})
+                            chanind(ii)=find(strcmp({EEG.chanlocs.labels},chanfile{s,k+k}{ii}));
+                        end
+                        
+                    catch
+                        error(['Channel ' chanfile{s,k+k}{ii}, 'does not exist for subject ', condfiles_subs{k}{s}]);
+                    end
+                    
                 end
                 
                 % steal data from the channels you are interested in
@@ -837,18 +775,32 @@ switch options.measure
                 EEG = pop_loadset('filename',condfiles_subs{k}{s},'filepath',pathtofiles{k});
                 EEG = eeg_checkset(EEG);
                 
-                try
-                    % scroll through chans the user wants and collect relavent indices
-                    for i=1:length(options.chans)
-                        chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+                if persubject==0;
+                    
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for i=1:length(options.chans)
+                            chanind(i)=find(strcmp({EEG.chanlocs.labels},options.chans{i}));
+                        end
+                        
+                    catch
+                        error(['Channel ' options.chans{i}, 'does not exist for subject ', condfiles_subs{k}{s}]);
                     end
                     
-                catch
-                    error(['One of the channels you want does not exist for some subjects. ' ...
-                        'If the files are interpolated, make sure they are all interpolated to the same montage. ' ...
-                        'If they are not interpolated, the channels you are looking for must exist for every subject. ' ...
-                        'You must have channel information loaded into the EEGLABs edit channel locations pane. ' ...
-                        'If you have not loaded channel information (see the blue EEGLAB pane for info), google how to do that.']);
+                    
+                elseif persubject==1;
+                    
+                    % when some option to select a channel is given
+                    try
+                        % scroll through chans the user wants and collect relavent indices
+                        for ii=1:length(chanfile{s,k+k})
+                            chanind(ii)=find(strcmp({EEG.chanlocs.labels},chanfile{s,k+k}{ii}));
+                        end
+                        
+                    catch
+                        error(['Channel ' chanfile{s,k+k}{ii}, 'does not exist for subject ', condfiles_subs{k}{s}]);
+                    end
+                    
                 end
                 
                 % steal data from the channels you are interested in

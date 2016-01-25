@@ -1274,10 +1274,16 @@ if ~strcmpi(STYLE,'grid')                     % if not plot grid only
             % 	     'set(gco, ''userdata'', get(gco, ''string''));' ...
             % 	     'set(gco, ''string'', tmpstr); clear tmpstr;'] );
             
+            
+            
+            
+            %%% ********************
+            %%% ALLAN HACK - strtrim was added to remove trailing spaces from label
             hh(i) = text(double(y(i)+0.01),double(x(i)),...
-                ELECTRODE_HEIGHT,labels(i,:),'HorizontalAlignment','left', 'FontName', 'Arial', ...
+                ELECTRODE_HEIGHT,strtrim(labels(i,:)),'HorizontalAlignment','left', 'FontName', 'Arial', ...
                 'VerticalAlignment','middle','Color', ECOLOR,'userdata', num2str(allchansind(i)), ...
                 'FontSize',EFSIZE, 'buttondownfcn', @clickchan);
+            %%% *******************
         end
         %
         %%%%%%%%%%%%%%%%%%%%%%% Mark electrode locations plus numbers %%%%%%%%%%%%%%%%%%%
