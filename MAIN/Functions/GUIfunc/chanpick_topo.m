@@ -194,6 +194,7 @@ while sel
         % set main output and exit
         chanchoices=data.chanarray;
         close(f);
+        %uiresume;
         return
         
     elseif strcmp(data.button, 'cancel')

@@ -69,6 +69,7 @@ if any(strcmp(varargin,'all'));
     
     if any(strcmp(varargin,'timeplot'));
         timems=find(strcmp(varargin,'timeplot'));
+        ms_input=[varargin{timems+1}(1) varargin{timems+1}(2)]; % get the ms values for setting xaxis later on
         MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         varargin{timems+1}=MStoTF_min:MStoTF_max;      
@@ -148,6 +149,7 @@ else
     
     if any(strcmp(varargin,'timeplot'));
         timems=find(strcmp(varargin,'timeplot'));
+        ms_input=[varargin{timems+1}(1) varargin{timems+1}(2)]; % get the ms values for setting xaxis later on
         MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         varargin{timems+1}=MStoTF_min:MStoTF_max;
@@ -285,6 +287,7 @@ switch STATS.design
                             end
                             
                             view(0,0)
+                            xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                             hold on
                             grid on
                         end
@@ -465,6 +468,7 @@ switch STATS.design
                             end
                             
                             view(0,0);
+                            xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                             hold on
                             grid on
                         end
@@ -637,6 +641,7 @@ switch STATS.design
                             end
                             
                             view(0,0)
+                            xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                             hold on
                             grid on
                         end
@@ -809,6 +814,7 @@ switch STATS.design
                             end
                             
                             view(0,0)
+                            xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                             hold on
                             grid on
                             
@@ -996,6 +1002,7 @@ switch STATS.design
                                 end
                                 
                                 view(0,0)
+                                xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                                 hold on
                                 grid on
                             end

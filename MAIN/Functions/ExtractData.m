@@ -141,7 +141,7 @@ function [STATS]=ExtractData(condnames,condfiles,levels,design,savestring,vararg
 %%%%% options %%%%%
 options.measure=[];
 options.chans='persubject'; % key word default, can be chan label -> 'Cz' or -> {'Fcz' 'Cz'}
-options.ICs='';
+options.ICs=NaN;
 options.tfcycles=[3 .5]; % spectral opts
 options.freqs=[3 30]; % spectral opts
 options.nfreqs=27;
@@ -243,7 +243,7 @@ if strcmp(options.ICs, 'persubject');
         return
     end
     
-else %~isempty(strfind(options.ICs{1},'.mat'))
+elseif ~any(isnan(options.ICs)) %&& strcmp(options.ICs(end-3:end), '.mat')
     
     % load a file
     tmp=load(options.ICs);
