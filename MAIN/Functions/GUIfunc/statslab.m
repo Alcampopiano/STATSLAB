@@ -64,12 +64,12 @@ clearvars -global STATSLAB_PROPERTIES
 if statslab_propgrid.logical_extract==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=ExtractData(statslab_propgrid.condnames,statslab_propgrid.condfiles_extract,'...
+    funcstr=['ExtractData(statslab_propgrid.condnames,statslab_propgrid.condfiles_extract,'...
         'statslab_propgrid.levels,statslab_propgrid.design,statslab_propgrid.savestring,'];
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_extract);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -77,11 +77,11 @@ end
 if statslab_propgrid.logical_resample==1;
     
     % initiate partial function string
-    funcstr='[STATS]=ResampleData([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_resample,statslab_propgrid.nboot,';
+    funcstr='ResampleData([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_resample,statslab_propgrid.nboot,';
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_resample);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -89,12 +89,12 @@ end
 if statslab_propgrid.logical_group==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=GroupStatistics([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_group,'...
+    funcstr=['GroupStatistics([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_group,'...
         'statslab_propgrid.alpha_group,statslab_propgrid.nsamp,'];
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_group);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -102,12 +102,12 @@ end
 if statslab_propgrid.logical_subject==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=SubjectStatistics([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_subject,'...
+    funcstr=['SubjectStatistics([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_subject,'...
         'statslab_propgrid.alpha_group,'];
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_subject);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -116,11 +116,11 @@ end
 if statslab_propgrid.logical_groupfig==1;
     
     % initiate partial function string
-    funcstr='[STATS]=GroupFigure_sample([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_group,';
+    funcstr='GroupFigure_sample([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_group,';
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_groupfig);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -128,11 +128,11 @@ end
 if statslab_propgrid.logical_subjectfig==1;
     
     % initiate partial function string
-    funcstr='[STATS]=SubjectFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_sub,';
+    funcstr='SubjectFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_sub,';
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_subjectfig);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
  
 end
 
@@ -140,12 +140,12 @@ end
 if statslab_propgrid.logical_cor==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=WinBootCor([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_cor,'...
+    funcstr=['WinBootCor([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_cor,'...
         'statslab_propgrid.nboot_cor, statslab_propgrid.tr, statslab_propgrid.Ylabel_cor,'];
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_cor);
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -154,10 +154,10 @@ if statslab_propgrid.logical_rw==1;
     
 
     % initiate partial function string
-    funcstr=['[STATS]=WinBootCorFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condition_label_rw,'...
+    funcstr=['WinBootCorFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condition_label_rw,'...
         'statslab_propgrid.Ylable_rw);'];
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -165,10 +165,10 @@ end
 if statslab_propgrid.logical_slope==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=SlopeCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
+    funcstr=['SlopeCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
         'statslab_propgrid.Ylable_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope);'];
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
@@ -176,10 +176,10 @@ end
 if statslab_propgrid.logical_lowess==1;
     
     % initiate partial function string
-    funcstr=['[STATS]=LowessCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_lowess, statslab_propgrid.condition_label_lowess,'...
+    funcstr=['LowessCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_lowess, statslab_propgrid.condition_label_lowess,'...
         'statslab_propgrid.Ylable_lowess, statslab_propgrid.msplot_lowess, statslab_propgrid.nboot_lowess, statslab_propgrid.span, statslab_propgrid.nbins);'];
     
-    eval(funcstr);
+    STATS=eval(funcstr);
     
 end
 
