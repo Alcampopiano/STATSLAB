@@ -1,4 +1,4 @@
-function [statslab_propgrid, okayhit, STATS]=statslab(nosplash)
+function [STATS]=statslab(nosplash)
 
 % version
 vercheck();
@@ -8,7 +8,7 @@ if nargin==1;
     splash_fade;
 end
     
-statslab_propgrid=''; % so cancel button can be hit
+% statslab_propgrid=''; % so cancel button can be hit
 STATS=''; % so cancel button can be hit
 
 PropGridStr=['global STATSLAB_PROPERTIES;' ...
@@ -133,7 +133,7 @@ if statslab_propgrid.logical_subjectfig==1;
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_subjectfig);
     
     eval(funcstr);
-    
+ 
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

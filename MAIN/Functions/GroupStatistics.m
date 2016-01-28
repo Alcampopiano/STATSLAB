@@ -90,6 +90,10 @@ else
     load(STATS);
 end
 
+% set history
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,alpha,nsamp,varargin);
+STATS.history.GroupStatistics=hist_str;
+
 % update STATS structure
 STATS.alpha=alpha;
 STATS.nsamp=nsamp;

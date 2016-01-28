@@ -12,12 +12,18 @@ function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
 % see documentation for detailed examples
 
 
+
 if isempty(STATS)
     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');
     load(fnamestats);
 else
     load(STATS);
 end
+
+% set history
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],infodisplay,varargin);
+STATS.history.SubjectFigure=hist_str;
+
 
 % special case where using 'all' plots all possible contrasts
 if any(strcmp(varargin,'all'));

@@ -86,6 +86,10 @@ else
     load(STATS);
 end
 
+% set history
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,alpha,varargin);
+STATS.history.SubjectStatistics=hist_str;
+
 % update STATS structure
 STATS.alpha=alpha;
 

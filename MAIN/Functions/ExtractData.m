@@ -145,6 +145,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [STATS]=ExtractData(condnames,condfiles,levels,design,savestring,varargin)
 
+% set history
+[hist_str]=statslab_history(condnames,condfiles,levels,design,savestring,varargin);
+STATS.history.ExtractData=hist_str;
+
 
 %%%%% options %%%%%
 options.measure=[];

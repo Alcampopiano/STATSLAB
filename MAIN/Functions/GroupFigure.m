@@ -15,6 +15,10 @@ else
     load(STATS);
 end
 
+% set history
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],infodisplay,varargin);
+STATS.history.GroupFigure=hist_str;
+
 % special case where using 'all' plots all possible contrasts
 if length(varargin)==1 && strcmp(varargin{1},'all');
     

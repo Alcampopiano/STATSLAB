@@ -61,6 +61,10 @@ else
     load(STATS);
 end
 
+% set history
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,nboot,varargin);
+STATS.history.ResampleData=hist_str;
+
 % add field to STATS
 STATS.nboot=nboot;
 
