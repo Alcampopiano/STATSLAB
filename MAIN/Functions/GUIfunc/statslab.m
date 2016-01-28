@@ -1,4 +1,4 @@
-function [STATS]=statslab(nosplash)
+function [varargout]=statslab(nosplash)
 
 % version
 vercheck();
@@ -7,9 +7,6 @@ vercheck();
 if nargin==1;
     splash_fade;
 end
-    
-% statslab_propgrid=''; % so cancel button can be hit
-STATS=''; % so cancel button can be hit
 
 PropGridStr=['global STATSLAB_PROPERTIES;' ...
     'properties=propgridbuild();' ...
@@ -17,6 +14,7 @@ PropGridStr=['global STATSLAB_PROPERTIES;' ...
     'STATSLAB_PROPERTIES = PropertyGrid(gcf,' ...
     '''Properties'', properties,' ...
     '''Position'', [.05 .10 .9 .80]);' ...
+    'clear ParamName ParamPath properties' ...
     ]; 
 
 PropGridStr2=['global STATSLAB_PROPERTIES;' ...
@@ -25,6 +23,7 @@ PropGridStr2=['global STATSLAB_PROPERTIES;' ...
     'STATSLAB_PROPERTIES = PropertyGrid(gcf,' ...
     '''Properties'', properties,' ...
     '''Position'', [.05 .10 .9 .80]);' ...
+    'clear ParamName ParamPath properties statslab_propgrid' ...
     ];
 
 [res, jnk, okayhit]=inputgui( ...
@@ -183,12 +182,10 @@ if statslab_propgrid.logical_lowess==1;
     
 end
 
-
-
-
-
-
-
+% gets rid of ans if no output is routed
+if nargout
+    varargout{1}=STATS;
+end
 
 
 
