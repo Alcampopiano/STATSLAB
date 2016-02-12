@@ -78,8 +78,13 @@ if any(strcmp(varargin,'all'));
         ms_input=[varargin{timems+1}(1) varargin{timems+1}(2)]; % get the ms values for setting xaxis later on
         MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
-        varargin{timems+1}=MStoTF_min:MStoTF_max;      
+        varargin{timems+1}=MStoTF_min:MStoTF_max;  
+        
+    else
+        ms_input(1)=min(STATS.xtimes);
+        ms_input(2)=max(STATS.xtimes);    
     end
+    
     
     
     % overwrite options with plot options
@@ -159,6 +164,10 @@ else
         MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         MStoTF_max=round((varargin{timems+1}(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
         varargin{timems+1}=MStoTF_min:MStoTF_max;
+        
+    else
+        ms_input(1)=min(STATS.xtimes);
+        ms_input(2)=max(STATS.xtimes);
     end
     
     % read the acceptable names

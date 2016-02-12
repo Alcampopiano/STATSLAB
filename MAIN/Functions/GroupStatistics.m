@@ -24,15 +24,15 @@ function [STATS]=GroupStatistics(STATS,condfiles,alpha,nsamp,varargin)
 % 	none  - no control for familywise error 
 % 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
 %  
-% ConA ->
+% conA ->
 %  
 % 	[numeric] - Contrast matrix for Factor A comparisons. 
 % 
-% ConB -> 
+% conB -> 
 % 
 % 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
 % 
-% ConAB -> 
+% conAB -> 
 % 
 % 	[numeric] - Contrast matrix for the interaction, if applicable. 
 % 
