@@ -41,6 +41,22 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
     
 elseif any(strcmp({'ersp' 'itc'},STATS.measure));
     
+    % convert ms to TFs for tfbsline
+%     if ~strcmp(STATS.tfbsline,'none');
+%         MStoTF(1)=round((STATS.tfbsline(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
+%         MStoTF(2)=round((STATS.tfbsline(2)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;  
+%     end
+%     TFmin=min(STATS.TF_times);
+%     TFmax=max(STATS.TF_times);
+%     
+%     
+%     
+
+% standard baseline
+[val ind]=min(abs(STATS.TF_times));
+MStoTF(1)=1;
+MStoTF(2)=ind;
+    
     for i=1:colfile;
         [subrow subcol]=size(condfiles_subs{i});
         
@@ -57,11 +73,8 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                 %%%%%%%%%%%%%%%%%%%%%%
                 meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
                 for pg=1:STATS.nboot;
-                    
-                    % need flexible inputs
-                    
-                    %meangather=mean(datamap.Data.dat(:,108:156,pg),2); % baseline period
-                    meangather=mean(datamap.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2);
+                   
+                    meangather=mean(datamap.Data.dat(:,MStoTF(1):MStoTF(2),pg),2);
                     meanrep=repmat(meangather,1,STATS.timesout);
                     meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
                 end
@@ -152,7 +165,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
             for pg=1:STATS.nboot;
                 
                 % need flexible inputs
-                meangather=mean(dat_avg.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2); % baseline period
+                meangather=mean(dat_avg.Data.dat(:,MStoTF(1):MStoTF(2),pg),2); % baseline period
                 meanrep=repmat(meangather,1,STATS.timesout);
                 meanrem(:,:,pg)=dat_avg.Data.dat(:,:,pg)-meanrep;
             end
@@ -185,12 +198,15 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
         
         
         % try to delete previous mapped files;
-        warning off
-        delete([tmpmeanrem1, '.map']);
-        delete([tmpmeanrem2, '.map']);
-        delete([tmpfname,'.map']);
-        delete([tmpfname_mean,'.map']);
-        warning on
+        try
+            warning off
+            delete([tmpmeanrem1, '.map']);
+            delete([tmpmeanrem2, '.map']);
+            delete([tmpfname,'.map']);
+            delete([tmpfname_mean,'.map']);
+            warning on
+        catch
+        end
         clear dat_avg
         
     end

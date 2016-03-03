@@ -225,14 +225,7 @@ for filecurrent=1:colfile;
             waitbar(filecurrent/colfile,h2,sprintf('%12s',[num2str(filecurrent),'/',num2str(colfile)]))
             
         case {'ersp', 'itc'}
-            
-            %%%% get freq bin length
-            %%%% probably a better way of doing this
-            %             junk=zeros(1,STATS.numpnts,1);
-            %             [ersp] = newtimef(junk, ...
-            %                 STATS.numpnts, [STATS.xmin STATS.xmax]*1000, ...
-            %                 STATS.srate, STATS.tfcycles,'freqs',STATS.freqs,'timesout',1,'plotersp','off','plotitc','off');
-            %             freqbins=length(ersp);
+           
             
             clear ersp
             
@@ -267,19 +260,41 @@ for filecurrent=1:colfile;
                                 STATS.TF_freqs=freqs;
                                 STATS.timesout=size(tfdata,2);
                                 clear ersp itc powbase times freqs erspboot itcboot
+                                
+                                % ERSP
+                                % compute and remove baseline as in the default newtimef way
+                                pow  = tfdata.*conj(tfdata); % power
+                                pow_avg=mean(pow,3);
+                                mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
+                                
+                                % remove (divide by) baseline vals
+                                pow = bsxfun(@rdivide, pow, mbase);
+                                
+                                % ITC
+                                itcdata = tfdata ./ sqrt(tfdata .* conj(tfdata)); % leaves 3 dims
+                                
                             end
-                            
                             
                             if strcmp(STATS.measure, 'ersp')
                                 %clear itc powbase times freqs erspboot itcboot
                                 
-                                mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring,'_tempbootstrapped.map'],'datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
+                                % rescale to dB
+                                pow_boot=trimmean(pow(:,:,bootvect),40,3);
+                                pow_boot = 10 * log10(pow_boot);
+                                
+                                % write to disk
+                                mapwrite(pow_boot,[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                                 
                             elseif strcmp(STATS.measure, 'itc')
                                 %clear itc powbase times freqs erspboot itcboot
                                 
-                                % no trimmed mean?
-                                mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring,'_tempbootstrapped.map'],'datsize',[freqbins,STATS.timesout,size(datacell{1},1)]);
+                                % havent tried yet
+                                itcboot = itcdata(:,:,bootvect); % leaves 3 dims
+                                itcboot=mean(itcboot,3);
+                                itcboot=abs(itcboot);
+                                
+                                % no trimmed mean
+                                mapwrite(itcboot,[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                                 
                             end
                             
@@ -314,34 +329,48 @@ for filecurrent=1:colfile;
                             STATS.TF_times=times;
                             STATS.TF_freqs=freqs;
                             STATS.timesout=size(tfdata,2);
+                            [val ind]=min(abs(STATS.TF_times));
                             clear ersp itc powbase times freqs erspboot itcboot
                             
+                            % ERSP                                                        
+                            % compute and remove baseline as in the default newtimef way
+                            pow  = tfdata.*conj(tfdata); % power
+                            pow_avg=mean(pow,3);
+                            mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
+                            
+                            % remove (divide by) baseline vals
+                            pow = bsxfun(@rdivide, pow, mbase);
+                            
+                            
+                            % ITC
+                            itcdata = tfdata ./ sqrt(tfdata .* conj(tfdata)); % leaves 3 dims
+                            
+                            
+                            
                         end
-                        
                         
                         if strcmp(STATS.measure, 'ersp')
                             %clear itc powbase times freqs erspboot itcboot
                             
-                            % get rid of previously mapped files
-                            %warning off
-                            %delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
-                            %warning on
+                            % rescale to dB                          
+                            pow_boot=trimmean(pow(:,:,bootvect),40,3);
+                            pow_boot = 10 * log10(pow_boot);
                             
-                            mapwrite(trimmean(abs(tfdata(:,:,bootvect)),40,3),[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
+                            % write to disk
+                            mapwrite(pow_boot,[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                             
                         elseif strcmp(STATS.measure, 'itc')
                             %clear itc powbase times freqs erspboot itcboot
                             
-                            % get rid of previously mapped files
-                            %warning off
-                            %delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
-                            %warning on
+                            % havent tried yet
+                             itcboot = itcdata(:,:,bootvect); % leaves 3 dims
+                             itcboot=mean(itcboot,3);
+                             itcboot=abs(itcboot);
                             
                             % no trimmed mean
-                            mapwrite(abs(mean(((tfdata(:,:,bootvect,:))./abs(tfdata(:,:,bootvect,:))),4)),[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
+                            mapwrite(itcboot,[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
                             
-                        end
-                        
+                        end     
                 end
                 
                 waitbar(bootcurrent/nboot,h3,sprintf('%12s',[num2str(bootcurrent),'/',num2str(nboot)]))
