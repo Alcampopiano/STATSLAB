@@ -76,7 +76,7 @@ conAB=options.conAB;
 % load all file names subs X conditions
 if isempty(condfiles) % allowing an input for file names
     for i=1:numconds
-        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        tempfname=uigetfile('*.map',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
         condfiles_subs{1,i}(:,1)=tempfname;
     end
     % save so one can load without gui

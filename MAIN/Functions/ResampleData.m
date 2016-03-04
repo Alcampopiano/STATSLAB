@@ -139,9 +139,10 @@ set(childh3, 'Position',[5 10 538 15]);
 
 
 % get rid of previously mapped bootstrapped files
+disp('deleting memory mapped files from the last time ResampleData was run for this analysis');
 for filecurrent=1:colfile;
     warning off
-    delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
+    delete([fnames{1,filecurrent}(1,1:end-4), '_',STATS.savestring, '_bootstrapped.map']);
     warning on
 end
 
@@ -151,9 +152,6 @@ for filecurrent=1:colfile;
     
     %datacell{1,filecurrent}=subdata.data;
     datacell{1}=subdata.data;
-    
-    
-    % data is set to zero and the size is taken at the start of each new file
     
     %[jnk numpnts pageEEG]=size(datacell{filecurrent});
     [jnk numpnts pageEEG]=size(datacell{1});
@@ -226,7 +224,6 @@ for filecurrent=1:colfile;
             
         case {'ersp', 'itc'}
            
-            
             clear ersp
             
             if size(datacell{1},1)>1;
@@ -259,16 +256,20 @@ for filecurrent=1:colfile;
                                 STATS.TF_times=times;
                                 STATS.TF_freqs=freqs;
                                 STATS.timesout=size(tfdata,2);
+                                [val ind]=min(abs(STATS.TF_times));
                                 clear ersp itc powbase times freqs erspboot itcboot
                                 
                                 % ERSP
                                 % compute and remove baseline as in the default newtimef way
                                 pow  = tfdata.*conj(tfdata); % power
-                                pow_avg=mean(pow,3);
+                                
+                                % baseline based on trimmed mean
+                                pow_avg=trimmean(pow,40,3);
                                 mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
                                 
                                 % remove (divide by) baseline vals
                                 pow = bsxfun(@rdivide, pow, mbase);
+                                
                                 
                                 % ITC
                                 itcdata = tfdata ./ sqrt(tfdata .* conj(tfdata)); % leaves 3 dims
@@ -302,11 +303,7 @@ for filecurrent=1:colfile;
                         
                         % this holds multiple channel spectral information
                         datamap=mapread([fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_tempbootstrapped.map'],'dat');
-                        
-                        % get rid of previously mapped files
-                        %warning off
-                        %delete([fnames{1,filecurrent}(1,1:end-4), '_bootstrapped.map']);
-                        %warning on
+                       
                         
                         % this is the avreage of the multi channel spectral information, like a spectral ROI
                         mapwrite(mean(datamap.Data.dat,3),[fnames{1,filecurrent}(1,1:end-4), '_', STATS.savestring, '_bootstrapped.map'],'datsize',[freqbins,STATS.timesout,STATS.nboot]);
@@ -335,17 +332,16 @@ for filecurrent=1:colfile;
                             % ERSP                                                        
                             % compute and remove baseline as in the default newtimef way
                             pow  = tfdata.*conj(tfdata); % power
-                            pow_avg=mean(pow,3);
+                            
+                            % baseline based on trimmed mean
+                            pow_avg=trimmean(pow,40,3);
                             mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
                             
                             % remove (divide by) baseline vals
                             pow = bsxfun(@rdivide, pow, mbase);
                             
-                            
                             % ITC
                             itcdata = tfdata ./ sqrt(tfdata .* conj(tfdata)); % leaves 3 dims
-                            
-                            
                             
                         end
                         

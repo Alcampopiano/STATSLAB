@@ -69,7 +69,7 @@ if isempty(condfiles)
     
     % load all file names subs X conditions
     for i=1:numconds
-        tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
+        tempfname=uigetfile('*.map',['Select all bootstrapped files in the ', condnames{i}, ' condition'], 'MultiSelect','on');
         if ~iscell(tempfname);
             tempfname={tempfname};
             condfiles(:,i)=tempfname;
@@ -226,7 +226,7 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.contrasts=conA;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
             
             
             for i=1:conAcol;
@@ -242,7 +242,7 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.contrasts=conB;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_statz;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
             
             
             for i=1:conBcol;
@@ -258,7 +258,7 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.contrasts=conAB;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_statz;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
             
             for i=1:conABcol;
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);

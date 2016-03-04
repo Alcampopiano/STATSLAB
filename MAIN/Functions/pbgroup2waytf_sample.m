@@ -153,7 +153,7 @@ for bandind=1:STATS.freqbins;
         results.(band_fields{bandind}).factor_A.contrasts=conA;
         results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
+        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
         
         for i=1:conAcol;
            results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
@@ -168,7 +168,7 @@ for bandind=1:STATS.freqbins;
         results.(band_fields{bandind}).factor_B.contrasts=conB;
         results.(band_fields{bandind}).factor_B.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_B.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_statz;
+        results.(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
         
         for i=1:conBcol;
             results.(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
@@ -183,7 +183,7 @@ for bandind=1:STATS.freqbins;
         results.(band_fields{bandind}).factor_AxB.contrasts=conAB;
         results.(band_fields{bandind}).factor_AxB.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_statz;
+        results.(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
         
         for i=1:conABcol;
             results.(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);

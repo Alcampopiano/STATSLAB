@@ -203,7 +203,7 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.contrasts=conA;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
+            results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
           
             
             for i=1:conAcol;

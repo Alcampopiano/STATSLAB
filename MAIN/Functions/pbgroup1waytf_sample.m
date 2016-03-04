@@ -127,7 +127,7 @@ for bandind=1:STATS.freqbins;
         results.(band_fields{bandind}).factor_A.contrasts=conA;
         results.(band_fields{bandind}).factor_A.pval(:,timecurrent)=pvalgen;
         results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
-        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_statz;
+        results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
         
         for i=1:conAcol;
             results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
