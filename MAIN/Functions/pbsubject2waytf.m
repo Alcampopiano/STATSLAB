@@ -157,38 +157,38 @@ for filecurrent=1:rowconds;
     
     for condcurrent=1:colconds;
         
-        warning off
-        try
-            for td=1:colconds;
-                delete([tmpmeanrem{td},'.map']);
-            end
-        catch
-        end
-        warning on
+%         warning off
+%         try
+%             for td=1:colconds;
+%                 delete([tmpmeanrem{td},'.map']);
+%             end
+%         catch
+%         end
+%         warning on
         %conds=load(condfiles{filecurrent,condcurrent});
         %datacell{1,condcurrent}=conds.data;
         
         % memory map load
         datamap=mapread(condfiles{filecurrent,condcurrent},'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
         
-        if ~strcmp(STATS.tfbsline,'none');
-            
-            %%% Remove baseline for each subject
-            %%%%%%%%%%%%%%%%%%%%%%
-            meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
-            for pg=1:STATS.nboot;
-                
-                % need flexible inputs
-                meangather=mean(datamap.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2); % baseline period
-                meanrep=repmat(meangather,1,STATS.timesout);
-                meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
-            end
-            
-            [~,tmpmeanrem{condcurrent}]=fileparts(tempname);
-            mapwrite(meanrem,[tmpmeanrem{condcurrent},'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
-            datamap=mapread([tmpmeanrem{condcurrent},'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
-            
-        end
+%         if ~strcmp(STATS.tfbsline,'none');
+%             
+%             %%% Remove baseline for each subject
+%             %%%%%%%%%%%%%%%%%%%%%%
+%             meanrem=zeros(STATS.freqbins,STATS.timesout, STATS.nboot);
+%             for pg=1:STATS.nboot;
+%                 
+%                 % need flexible inputs
+%                 meangather=mean(datamap.Data.dat(:,STATS.tfbsline(1):STATS.tfbsline(2),pg),2); % baseline period
+%                 meanrep=repmat(meangather,1,STATS.timesout);
+%                 meanrem(:,:,pg)=datamap.Data.dat(:,:,pg)-meanrep;
+%             end
+%             
+%             [~,tmpmeanrem{condcurrent}]=fileparts(tempname);
+%             mapwrite(meanrem,[tmpmeanrem{condcurrent},'.map'],'datsize',[STATS.freqbins STATS.timesout,STATS.nboot]);
+%             datamap=mapread([tmpmeanrem{condcurrent},'.map'],'dat','datsize',[STATS.freqbins,STATS.timesout,STATS.nboot]);
+%             
+%         end
         datacell{1,condcurrent}=datamap;
         clear datamap
         

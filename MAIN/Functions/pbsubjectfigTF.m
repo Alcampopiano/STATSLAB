@@ -1,7 +1,15 @@
-function [STATS]=pbgroupfigTF_sample(STATS,infodisplay,varargin)
+function [STATS]=pbsubjectfigTF(STATS,infodisplay,varargin)
+
+try
+    fields=fieldnames(STATS.sample_results);
+catch
+    error('you must run the same analysis at the group level, to single-subject plot time frequency results')
+end
 
 % freq band fields
-fields=fieldnames(STATS.sample_results);
+sub_fields=fieldnames(STATS.subject_results);
+band_fields=fieldnames(STATS.subject_results.(sub_fields{1}));
+
 ersp=0;
 itc=0;
 
@@ -10,27 +18,27 @@ if any(strcmp(varargin,'all'));
     
     % this finds out if the design was factorial or not and sets default
     % options accordingly
-    if size(fieldnames(STATS.sample_results.(fields{1})),1)==3;
+    if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
         isfactorial=1;
         
-        options = struct('FactorA', 1:size(STATS.sample_results.(fields{1}).factor_A.contrasts,2), ...
-            'FactorB', 1:size(STATS.sample_results.(fields{1}).factor_B.contrasts,2), ...
-            'FactorAB', 1:size(STATS.sample_results.(fields{1}).factor_AxB.contrasts,2));
+        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2), ...
+            'FactorB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts,2), ...
+            'FactorAB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts,2));
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.sample_results.(fields{1}).factor_A.contrasts)
-            disp('FactorB'); disp(STATS.sample_results.(fields{1}).factor_B.contrasts)
-            disp('FactorAB'); disp(STATS.sample_results.(fields{1}).factor_AxB.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+            disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
+            disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
         end
         
-    elseif size(fieldnames(STATS.sample_results.(fields{1})),1)==1;
+    elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
         isfactorial=0;
-        options = struct('FactorA', 1:size(STATS.sample_results.(fields{1}).factor_A.contrasts,2));
+        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2));
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.sample_results.(fields{1}).factor_A.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
         end
         
     end
@@ -80,24 +88,24 @@ else
     
     % this finds out if the design was factorial or not and sets default
     % options accordingly
-    if size(fieldnames(STATS.sample_results.(fields{1})),1)==3;
+    if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
         isfactorial=1;
         options = struct('FactorA', [],'FactorB', [], 'FactorAB', []);
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.sample_results.(fields{1}).factor_A.contrasts)
-            disp('FactorB'); disp(STATS.sample_results.(fields{1}).factor_B.contrasts)
-            disp('FactorAB'); disp(STATS.sample_results.(fields{1}).factor_AxB.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+            disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
+            disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
         end
         
-    elseif size(fieldnames(STATS.sample_results.(fields{1})),1)==1;
+    elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
         isfactorial=0;
         options = struct('FactorA', []);
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.sample_results.(fields{1}).factor_A.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
         end
         
         
@@ -136,6 +144,9 @@ end
 % update STATS structure
 STATS.plotoptions=options;
 
+% preallocate
+pval_gather=zeros(length(band_fields), length(STATS.TF_times));
+pval_tmp=zeros(length(band_fields), length(STATS.TF_times));
 
 % switch cases for factorial vs. single-factor
 switch isfactorial
@@ -147,10 +158,20 @@ switch isfactorial
             k=1;
             m=1;
 
-            % stats
-            for q=1:STATS.freqbins;
-                pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
+            % sub loop
+            for s=1:length(sub_fields);
+                
+                % stats
+                for q=1:STATS.freqbins;
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(i,:)<=.05);
+                end
+                
+                pval_gather=pval_gather+pval_tmp;
             end
+            
+            % pval proportions
+            pval_prop=pval_gather./length(sub_fields);
+            
             
             for j=1:length(STATS.condnames);
                 
@@ -217,8 +238,8 @@ switch isfactorial
             colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
             
             hsub(4)=subplot(4,1,4);
-            h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-            colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors; 
+            h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+            colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
             
             % add legend and font
             set(gca,'FontSize',20)
@@ -245,12 +266,18 @@ switch isfactorial
                 k=1;
                 m=1;
                 
+            for s=1:length(sub_fields);
+                
                 % stats
                 for q=1:STATS.freqbins;
-                    % diffsA1(i,:)=STATS.sample_results.(bands{i}).factor_A.test_stat(1,:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
-                    % pvalAB(i,:)=(STATS.sample_results.(bands{i}).factor_AxB.pval(1,:)>.05);
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(i,:)<=.05);
                 end
+                
+                pval_gather=pval_gather+pval_tmp;
+            end
+            
+            % pval proportions
+            pval_prop=pval_gather./length(sub_fields);
                 
                 for j=1:length(STATS.condnames);
                     
@@ -317,8 +344,8 @@ switch isfactorial
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                 
                 hsub(4)=subplot(4,1,4);
-                h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+                colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
                 
                 % add legend and font
                 set(gca,'FontSize',20);
@@ -345,11 +372,19 @@ switch isfactorial
                 m=1;
                 
                 
+            for s=1:length(sub_fields);
+                
                 % stats
                 for q=1:STATS.freqbins;
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.pval(i,:)>.05);
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(i,:)<=.05);
                 end
                 
+                pval_gather=pval_gather+pval_tmp;
+            end
+                
+            % pval proportions
+            pval_prop=pval_gather./length(sub_fields);
+            
                 for j=1:length(STATS.condnames);
                     
                     % get the condition waveforms
@@ -415,8 +450,8 @@ switch isfactorial
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                 
                 hsub(4)=subplot(4,1,4);
-                h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+                colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
                 
                 % add legend and font
                 set(gca,'FontSize',20)
@@ -440,12 +475,25 @@ switch isfactorial
             for i=1:numfigs
                 k=1;
                 m=1;
+                         
+                for s=1:length(sub_fields);
+                    
+                    % stats
+                    for q=1:STATS.freqbins;
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.pval(i,:)<=.05);
+                    end
+                    
+                    pval_gather=pval_gather+pval_tmp;
+                end
                 
-                % stats
+            % pval proportions
+            pval_prop=pval_gather./length(sub_fields);
+                
+                % group level interaction difference data
                 for q=1:STATS.freqbins;
                     plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(i,:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
                 end
+                
                 
                 for j=1:length(STATS.condnames);
                     
@@ -503,8 +551,8 @@ switch isfactorial
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                 
                 hsub(2)=subplot(2,1,2);
-                h(2)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                h(2)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+                colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
                 
                 % add legend and font
                 set(gca,'FontSize',20)
