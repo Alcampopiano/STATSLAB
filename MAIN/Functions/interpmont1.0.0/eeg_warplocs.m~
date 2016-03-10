@@ -1,0 +1,113 @@
+function EEG = eeg_warplocs(EEG,coord_fname,varargin)
+
+g=struct(varargin{:});
+
+try g.landmarks; catch, g.landmarks = {};end
+try g.transform; catch, g.transform = [0 0 0 0 0 0 1 1 1];end
+try g.manual; catch, g.maual = 'off';end
+
+
+if isempty(EEG.chanlocs.(1).X)
+    sprintf('%s\n','No coordinate information found in the current dataset... doing nothing'
+
+if ~isempty(g.landmarks);
+    eval(['landmarks=', g.landmarks,';' ]);
+else
+    landmarks={};
+end
+[newlocs] = coregister(EEG.chanlocs, ...
+    coord_fname, ...
+    'chaninfo1',EEG.chaninfo, ...
+    'warp', landmarks, ...
+    'manual', g.manual);
+
+ndatch=length(EEG.chanlocs);
+nndatch=size(newlocs.pnt,1)-ndatch;
+
+for i=1:ndatch;
+    EEG.chanlocs(i).X=newlocs.pnt(i,1);
+    EEG.chanlocs(i).Y=newlocs.pnt(i,2);
+    EEG.chanlocs(i).Z=newlocs.pnt(i,3);
+end
+
+for i=1:nndatch;
+    EEG.chaninfo.nodatchans(i).X=newlocs.pnt(ndatch+i,1);
+    EEG.chaninfo.nodatchans(i).Y=newlocs.pnt(ndatch+i,2);
+    EEG.chaninfo.nodatchans(i).Z=newlocs.pnt(ndatch+i,3);
+end
+
+EEG = pop_chanedit(EEG,'convert','cart2all');
+
+return
+
+
+
+
+
+
+chanlocs=EEG.chanlocs;
+nchan=length(chanlocs);
+
+for i=1:nchan
+    tmplocs(i).labels=chanlocs(i).labels;
+    tmplocs(i).X=chanlocs(i).X;
+    tmplocs(i).Y=chanlocs(i).Y;
+    tmplocs(i).Z=chanlocs(i).Z;
+    tmplocs(i).type=chanlocs(i).type;
+    tmplocs(i).sph_theta=chanlocs(i).sph_theta;
+    tmplocs(i).sph_phi=chanlocs(i).sph_phi;
+    tmplocs(i).sph_radius=chanlocs(i).sph_radius;
+    tmplocs(i).theta=chanlocs(i).theta;
+    tmplocs(i).radius=chanlocs(i).radius;
+end
+
+nodatchans=EEG.chaninfo.nodatchans;
+
+for i=1:length(nodatchans);
+    tmplocs(nchan+i).labels=nodatchans(i).labels;
+    tmplocs(nchan+i).X=nodatchans(i).X;
+    tmplocs(nchan+i).Y=nodatchans(i).Y;
+    tmplocs(nchan+i).Z=nodatchans(i).Z;
+    tmplocs(nchan+i).type=nodatchans(i).type;
+    tmplocs(nchan+i).sph_theta=nodatchans(i).sph_theta;
+    tmplocs(nchan+i).sph_phi=nodatchans(i).sph_phi;
+    tmplocs(nchan+i).sph_radius=nodatchans(i).sph_radius;
+    tmplocs(nchan+i).theta=nodatchans(i).theta;
+    tmplocs(nchan+i).radius=nodatchans(i).radius;
+end
+
+[new_locs,transform]=coregister(tmplocs,target_coord_file, ...
+				'transform',g.transform, ...
+                'manual','on');
+            
+for i=1:length(tmplocs);
+    tmplocs(i).X=new_locs.pnt(i,1);
+    tmplocs(i).Y=new_locs.pnt(i,2);
+    tmplocs(i).Z=new_locs.pnt(i,3);
+end          
+
+new_chanlocs=convertlocs(tmplocs,'cart2all');
+
+for i=1:nchan
+    EEG.chanlocs(i).X=new_chanlocs(i).X;
+    EEG.chanlocs(i).Y=new_chanlocs(i).Y;
+    EEG.chanlocs(i).Z=new_chanlocs(i).Z;
+    EEG.chanlocs(i).type=new_chanlocs(i).type;
+    EEG.chanlocs(i).sph_theta=new_chanlocs(i).sph_theta;
+    EEG.chanlocs(i).sph_phi=new_chanlocs(i).sph_phi;
+    EEG.chanlocs(i).sph_radius=new_chanlocs(i).sph_radius;
+    EEG.chanlocs(i).theta=new_chanlocs(i).theta;
+    EEG.chanlocs(i).radius=new_chanlocs(i).radius;
+end
+for i=1:length(nodatchans);
+    EEG.chaninfo.nodatchans(i).X=new_chanlocs(nchan+i).X;
+    EEG.chaninfo.nodatchans(i).Y=new_chanlocs(nchan+i).Y;
+    EEG.chaninfo.nodatchans(i).Z=new_chanlocs(nchan+i).Z;
+    EEG.chaninfo.nodatchans(i).type=new_chanlocs(nchan+i).type;
+    EEG.chaninfo.nodatchans(i).sph_theta=new_chanlocs(nchan+i).sph_theta;
+    EEG.chaninfo.nodatchans(i).sph_phi=new_chanlocs(nchan+i).sph_phi;
+    EEG.chaninfo.nodatchans(i).sph_radius=new_chanlocs(nchan+i).sph_radius;
+    EEG.chaninfo.nodatchans(i).theta=new_chanlocs(nchan+i).theta;
+    EEG.chaninfo.nodatchans(i).radius=new_chanlocs(nchan+i).radius;
+end
+            

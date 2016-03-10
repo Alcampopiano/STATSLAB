@@ -1,0 +1,117 @@
+% pop_intrpmont() - Interpolate the data in the current data set to the
+%               locations found in a coordinate file.
+%
+% Usage:
+%   >>  com= pop_intrpmont(EEG, coordfname, varargin);
+%
+% Inputs:
+%   EEG         - input EEG structure
+%   coordfname  - name of the file containing the new channel locations
+%   varargin    - string containing intrpmont key/val pairs. See Options.
+%
+% Options:
+%   coordfname  - Coordinate file name string. The file should contain the
+%               coordinates for the channels contained in the EEG structure.
+%               The EEG structure must contain channel labels that match
+%               channel names in the coordinate file. The channels in the
+%               EEG structure do not need to match the order of the
+%               channels in the coordinate file, nor does there need to be
+%               the same number of channels in the EEG structure and
+%               coordinate file. In order for this to be successful in
+%               sLORETA all channels in the EEG structure need to be
+%               represented in the coordinate file.
+%   yxzconst    - Vector contain values with which to multiply each
+%               dimmension of the .xyz file. Default = [1,1,1]. eg. If the
+%               y dimension needs to be inverted use: 'yxzconst', [-1,1,1].
+% Outputs:
+%   com         - writesLORcoord command string
+%
+% See also:
+%   writesLORdat, writesLORlndmrk 
+
+% Copyright (C) <2010>  <James Desjardins>
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+function [EEG com] = pop_intrpmont(EEG, coordfname, varargin)
+
+g = struct(varargin{:});
+
+if ~isempty(g)
+    optstr='';
+    try g.nfids;        catch, g.nfids      = 3;       end;
+    optstr=['''nfids'', ', num2str(g.nfids)];
+end
+
+% the command output is a hidden output that does not have to
+% be described in the header
+com = ''; % this initialization ensure that the function will return something
+          % if the user press the cancel button            
+
+% display help if not enough arguments
+% ------------------------------------
+if nargin < 1
+	help pop_intrpmont;
+	return;
+end;	
+
+% pop up window
+% -------------
+
+if nargin < 2
+    
+    results=inputgui( ...
+    {1 1 1 [8 1] 1 1 1}, ...
+    {...
+        {'Style', 'text', 'string', 'Select coordinate file containing new channel locations:.', 'FontWeight', 'bold'}, ...
+        {}, ...
+        {'Style', 'text', 'string', 'File:'}, ...
+        {'Style', 'edit', 'tag', 'fnameedt', 'string', ''}, ...
+        {'Style', 'pushbutton', 'string', '...', ...
+        'callback', '[fname,fpath] = uigetfile({''*.sfp'',''*.elp'',''*.loc''},''Select coordinate file:''); set(findobj(gcbf,''tag'', ''fnameedt''), ''string'', fullfile(fpath,fname));'}, ...
+        {'Style', 'text', 'string', 'Optional inputs:'}, ...
+        {'Style', 'edit', 'tag', 'optedt', 'string', ''}, ...
+        {} ...
+    }, ...   
+     'pophelp(''pop_intrpmont'');', 'Select sfp coordinate file containing target interpolation locations -- pop_intrpmont()' ...
+     );
+
+     if isempty(results);return;end;
+ 
+     coordfname        = results{1};
+     optstr            = results{2};
+end;
+
+
+% return the string command
+% -------------------------
+
+if isempty(optstr);
+    com = sprintf('EEG = pop_intrpmont( %s, ''%s'');', inputname(1), coordfname)
+else
+    com = sprintf('EEG = pop_intrpmont( %s, ''%s'', %s);', inputname(1), coordfname, optstr)
+end
+
+% call function sample either on raw data or ICA data
+% ---------------------------------------------------
+
+if isempty(optstr);
+    execcom = sprintf('EEG = intrpmont( %s, ''%s'');', inputname(1), coordfname);
+else
+    execcom = sprintf('EEG = intrpmont( %s, ''%s'', %s);', inputname(1), coordfname, optstr);
+end
+
+eval(execcom);
+

@@ -1,0 +1,158 @@
+% EEG = interpmont() - Interpolate current data to coordinates from a specified
+%               sfp file.
+%
+% Usage:
+%   >>  com= interpmont(EEG, coordfname, varargin);
+%
+% Inputs:
+%   EEG         - input EEG structure
+%   coordfname  - name of sfp file containing new channel coordinates.
+%   varargin    - key/val pairs. See Options.
+%
+% Options:
+%   nfids        - Number of coordinates at the begining of the sfp file that
+%                  should be treated as fiducials.
+%   coreglndmrks - Cell array of channel labels to be used as input to the
+%                  the 'warp' option in coregister.m. See help coregister.
+%   manual       - 
+% Outputs:
+%   EEG       - EEG structure updated with new coordinates.
+%
+% See also:
+%   pop_interpmont
+
+% Copyright (C) <2010>  <James Desjardins>
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+function EEG = intrpmont(EEG,coordfname,varargin)
+
+
+% Handle ooptional inputs.
+g = struct(varargin{:});
+
+try g.nfids;        catch, g.nfids        = 3;       end;
+try g.coreglndmrks; catch, g.coreglndmrks = [];      end;
+try g.manual;       catch, g.manual       = 'on';    end;
+
+
+% warp montage if coreglndmrks is specified.
+if ~isempty(g.coreglndmrks);
+    eval(['coreglndmrks=', g.coreglndmrks ]);
+    [newlocs transform] = coregister(EEG.chanlocs, ...
+				coordfname, ...
+				'chaninfo1',EEG.chaninfo, ...
+				'warp', coreglndmrks, ...
+                'manual', g.manual);
+            
+     ndatch=length(EEG.chanlocs);
+     nndatch=size(newlocs.pnt,1)-ndatch;
+     
+     for i=1:ndatch;
+         EEG.chanlocs(i).X=newlocs.pnt(i,1);
+         EEG.chanlocs(i).Y=newlocs.pnt(i,2);
+         EEG.chanlocs(i).Z=newlocs.pnt(i,3);
+     end
+     
+     for i=1:nndatch;
+         EEG.chaninfo.nodatchans(i).X=newlocs.pnt(ndatch+i,1);
+         EEG.chaninfo.nodatchans(i).Y=newlocs.pnt(ndatch+i,2);
+         EEG.chaninfo.nodatchans(i).Z=newlocs.pnt(ndatch+i,3);
+     end
+     
+     EEG = pop_chanedit(EEG,'convert','cart2all');
+end
+
+
+tmp.data=EEG.data;
+tmp.chanlocs=EEG.chanlocs;
+
+disp(['Reading locations from ', ...
+       coordfname ', assuming first ', ...
+       num2str(g.nfids) ' three coordinates are fiducials.']);
+intrplocs=readlocs(coordfname);
+
+nintrplocs=length(intrplocs)-g.nfids;
+
+EEG.nbchan=nintrplocs;
+EEG.data=[];
+EEG.data=zeros(EEG.nbchan,EEG.pnts,EEG.trials);
+
+fidstr='';
+for i=1:g.nfids;
+    if i==1;
+        fidstr=[', ''changefield'', {', num2str(i), ', ''datachan'', 0}'];
+    else
+        fidstr=[ fidstr, ', ''changefield'', {', num2str(i), ', ''datachan'', 0}'];
+    end
+end
+chanedit_cmd=['EEG=pop_chanedit(EEG,''load'',{coordfname,''filetype'',''autodetect''}',fidstr,');'];
+eval(chanedit_cmd);
+
+%check for channel name repetition...
+j=0;
+for i=1:length(EEG.chanlocs);
+    if ~isempty(strmatch(EEG.chanlocs(i).labels,{tmp.chanlocs.labels},'exact'));
+        j=j+1;
+        labrep{j,1}=i;
+        labrep{j,2}=EEG.chanlocs(i).labels;
+        EEG.chanlocs(i).labels=[EEG.chanlocs(i).labels,'_i'];
+    end
+end
+
+for i=1:length(tmp.chanlocs);
+    EEG.chanlocs(EEG.nbchan+i).labels=tmp.chanlocs(i).labels;
+    EEG.chanlocs(EEG.nbchan+i).X=tmp.chanlocs(i).X;
+    EEG.chanlocs(EEG.nbchan+i).Y=tmp.chanlocs(i).Y;
+    EEG.chanlocs(EEG.nbchan+i).Z=tmp.chanlocs(i).Z;
+    EEG.chanlocs(EEG.nbchan+i).sph_theta=tmp.chanlocs(i).sph_theta;
+    EEG.chanlocs(EEG.nbchan+i).sph_phi=tmp.chanlocs(i).sph_phi;
+    EEG.chanlocs(EEG.nbchan+i).sph_radius=tmp.chanlocs(i).sph_radius;
+    EEG.chanlocs(EEG.nbchan+i).theta=tmp.chanlocs(i).theta;
+    EEG.chanlocs(EEG.nbchan+i).radius=tmp.chanlocs(i).radius;
+    EEG.chanlocs(EEG.nbchan+i).type=tmp.chanlocs(i).type;
+    if isfield(EEG.chanlocs,'urchan')
+        if isfield(tmp.chanlocs,'urchan')
+            EEG.chanlocs(EEG.nbchan+i).urchan=tmp.chanlocs(i).urchan;
+        else
+            EEG.chanlocs(EEG.nbchan+i).urchan=[];
+        end
+    end
+    if isfield(EEG.chanlocs,'badchan')
+        if isfield(tmp.chanlocs,'badchan')
+            EEG.chanlocs(EEG.nbchan+i).badchan=tmp.chanlocs(i).badchan;
+        else
+            EEG.chanlocs.badchan=0;
+        end
+    end
+    
+    EEG.data(EEG.nbchan+i,:)=tmp.data(i,:);
+end
+%size(EEG.data)
+%nintrplocs
+EEG.nbchan=length(EEG.chanlocs);
+EEG = eeg_interp(EEG, [1:nintrplocs],'spherical');
+EEG = pop_select( EEG, 'channel',[1:nintrplocs] );
+
+if j>0
+    for i=size(labrep,1)
+        EEG.chanlocs(labrep{i,1}).labels=labrep{i,2};
+    end
+end
+
+%EEG.chaninfo.nodatchans(1)
+%figure; topoplot([],EEG.chanlocs, 'style', 'blank',  'electrodes', 'labelpoint', 'chaninfo', EEG.chaninfo,'nosedir','+Y');
+
+

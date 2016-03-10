@@ -7,17 +7,17 @@ function [STATS]=pbgroupfig_sample(STATS,infodisplay,varargin)
 % infodisplay is a flag 1 or 0 that will spit out the contrast matrices and condition lables for you to look at in the command window
 % infodisplay default is set to 0.
 
-
-if isempty(STATS)
-    [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');
-    load(fnamestats);
-else 
-    load(STATS);
-end
+% 
+% if isempty(STATS)
+%     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');
+%     load(fnamestats);
+% else 
+%     load(STATS);
+% end
 
 % set history
-[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],infodisplay,varargin);
-STATS.history.GroupFigure=hist_str;
+% [hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],infodisplay,varargin);
+% STATS.history.GroupFigure=hist_str;
 
 % special case where using 'all' plots all possible contrasts
 if any(strcmp(varargin,'all')); 
@@ -260,6 +260,9 @@ switch isfactorial
                 figure;
                 subplot(2,1,1)
                 h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
+                set(gca,'ButtonDownFcn', @mouseclick_callback)
+                set(get(gca,'Children'),'ButtonDownFcn', @mouseclick_callback)
+                
                 hold on
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
                 set(gca,'FontSize',20)
@@ -423,12 +426,35 @@ end
 disp('******* Saving STATS structure *******')
 save(['STATS_',STATS.savestring,'.mat'],'STATS');
 
-
-
-
-
-
-
+function mouseclick_callback(gcbo,eventdata)
+      % the arguments are not important here, they are simply required for
+      % a callback function. we don't even use them in the function,
+      % but Matlab will provide them to our function, we we have to
+      % include them.
+      %
+      % first we get the point that was clicked on
+      cP = get(gca,'Currentpoint');
+      x = cP(1,1);
+      y = cP(1,2);
+      % Now we find out which mouse button was clicked, and whether a
+      % keyboard modifier was used, e.g. shift or ctrl
+      %switch get(gcf,'SelectionType')
+          %case 'normal' % Click left mouse button.
+              s = sprintf('left: (%1.4g, %1.4g) level = %1.4g',x,y, x.*exp(-x.^2-y.^2));
+          %case 'alt'    % Control - click left mouse button or click right mouse button.
+          %   s = sprintf('right: (%1.4g, %1.4g level = %1.4g)',x,y, x.*exp(-x.^2-y.^2));
+          %case 'extend' % Shift - click left mouse button or click both left and right mouse buttons.
+          %    s = sprintf('2-click: (%1.4g, %1.4g level = %1.4g)',x,y, x.*exp(-x.^2-y.^2));
+          %case 'open'   % Double-click any mouse button.
+              %s = sprintf('double click: (%1.4g, %1.4g) level = %1.4g',x,y, x.*exp(-x.^2-y.^2));
+      %end
+      % get and set title handle
+      thandle = get(gca,'Title');
+      set(thandle,'String',s);
+      % finally change the position of our red plus, and make it
+      % visible.
+      %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
+end
 
 
 end

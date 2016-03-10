@@ -1,0 +1,68 @@
+function EEG = eeg_warp_locs(EEG,target_coord_file,varargin)
+
+g=struct(varargin{:});
+
+try g.transform, catch
+chanlocs=EEG.chanlocs;
+nchan=length(chanlocs);
+
+for i=1:nchan
+    tmplocs(i).labels=chanlocs(i).labels;
+    tmplocs(i).X=chanlocs(i).X;
+    tmplocs(i).Y=chanlocs(i).Y;
+    tmplocs(i).Z=chanlocs(i).Z;
+    tmplocs(i).type=chanlocs(i).type;
+    tmplocs(i).sph_theta=chanlocs(i).sph_theta;
+    tmplocs(i).sph_phi=chanlocs(i).sph_phi;
+    tmplocs(i).sph_radius=chanlocs(i).sph_radius;
+    tmplocs(i).theta=chanlocs(i).theta;
+    tmplocs(i).radius=chanlocs(i).radius;
+end
+
+nodatdatchans=EEG.chaninfo.nodatchans;
+
+for i=1:length(nodatchans);
+    tmplocs(nchan+i).labels=nodatchans(i).labels;
+    tmplocs(nchan+i).X=nodatchans(i).X;
+    tmplocs(nchan+i).Y=nodatchans(i).Y;
+    tmplocs(nchan+i).Z=nodatchans(i).Z;
+    tmplocs(nchan+i).type=nodatchans(i).type;
+    tmplocs(nchan+i).sph_theta=nodatchans(i).sph_theta;
+    tmplocs(nchan+i).sph_phi=nodatchans(i).sph_phi;
+    tmplocs(nchan+i).sph_radius=nodatchans(i).sph_radius;
+    tmplocs(nchan+i).theta=nodatchans(i).theta;
+    tmplocs(nchan+i).radius=nodatchans(i).radius;
+end
+
+[new_locs,transform]=coregister(tmplocs,target_coord_file, ...
+				'transform',['manual','on');
+
+
+            
+            
+            
+for i=1:nchan
+    EEG.chanlocs(i).labels=new_locs(i).labels;
+    EEG.chanlocs(i).X=new_locs(i).X;
+    EEG.chanlocs(i).Y=new_locs(i).Y;
+    EEG.chanlocs(i).Z=new_locs(i).Z;
+    EEG.chanlocs(i).type=new_locs(i).type;
+    EEG.chanlocs(i).sph_theta=new_locs(i).sph_theta;
+    EEG.chanlocs(i).sph_phi=new_locs(i).sph_phi;
+    EEG.chanlocs(i).sph_radius=new_locs(i).sph_radius;
+    EEG.chanlocs(i).theta=new_locs(i).theta;
+    EEG.chanlocs(i).radius=new_locs(i).radius;
+end
+for i=1:length(nodatchans);
+    EEG.chaninfo_nodatchans(i).labels=new_locs(nchan+i).labels;
+    EEG.chaninfo_nodatchans(i).X=new_locs(nchan+i).X;
+    EEG.chaninfo_nodatchans(i).Y=new_locs(nchan+i).Y;
+    EEG.chaninfo_nodatchans(i).Z=new_locs(nchan+i).Z;
+    EEG.chaninfo_nodatchans(i).type=new_locs(nchan+i).type;
+    EEG.chaninfo_nodatchans(i).sph_theta=new_locs(nchan+i).sph_theta;
+    EEG.chaninfo_nodatchans(i).sph_phi=new_locs(nchan+i).sph_phi;
+    EEG.chaninfo_nodatchans(i).sph_radius=new_locs(nchan+i).sph_radius;
+    EEG.chaninfo_nodatchans(i).theta=new_locs(nchan+i).theta;
+    EEG.chaninfo_nodatchans(i).radius=new_locs(nchan+i).radius;
+end
+            
