@@ -73,6 +73,8 @@ if any(strcmp(varargin,'all'));
     
     % add other options
     options.timeplot=1:length(STATS.xtimes);
+    options.topos='no';
+    options.maplim=[];
     
     % read the acceptable names
     optionNames = fieldnames(options);
@@ -124,6 +126,10 @@ else
     
    % add other options
    options.timeplot=1:length(STATS.xtimes);
+   options.topos='no';
+   options.maplim=[];
+   
+   
    if any(strcmp(varargin,'timeplot'));
        timems=find(strcmp(varargin,'timeplot'));
        MStoTF_min=round((varargin{timems+1}(1)/1000-STATS.xmin)/(STATS.xmax-STATS.xmin) * (STATS.numpnts-1))+1;
@@ -151,6 +157,15 @@ end
 
 % update STATS structure
 STATS.plotoptions=options;
+
+% interp for later topographies or not
+if ~strcmp(options.topos, 'no');
+    [STATS]=topobuild(STATS,options.topos);
+    disp('*** finished interpolating and computing topography files. This only needs to be done once ***');
+    save(['STATS_',STATS.savestring,'.mat'],'STATS');
+end
+
+
 
 
 % switch cases for factorial vs. single-factor
@@ -260,8 +275,8 @@ switch isfactorial
                 figure;
                 subplot(2,1,1)
                 h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
-                set(gca,'ButtonDownFcn', @mouseclick_callback)
-                set(get(gca,'Children'),'ButtonDownFcn', @mouseclick_callback)
+                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS})
+                set(get(gca,'Children'),'ButtonDownFcn', {@mouseclick_callback,STATS})
                 
                 hold on
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
@@ -426,34 +441,77 @@ end
 disp('******* Saving STATS structure *******')
 save(['STATS_',STATS.savestring,'.mat'],'STATS');
 
-function mouseclick_callback(gcbo,eventdata)
-      % the arguments are not important here, they are simply required for
-      % a callback function. we don't even use them in the function,
-      % but Matlab will provide them to our function, we we have to
-      % include them.
-      %
-      % first we get the point that was clicked on
-      cP = get(gca,'Currentpoint');
-      x = cP(1,1);
-      y = cP(1,2);
-      % Now we find out which mouse button was clicked, and whether a
-      % keyboard modifier was used, e.g. shift or ctrl
-      %switch get(gcf,'SelectionType')
-          %case 'normal' % Click left mouse button.
-              s = sprintf('left: (%1.4g, %1.4g) level = %1.4g',x,y, x.*exp(-x.^2-y.^2));
-          %case 'alt'    % Control - click left mouse button or click right mouse button.
-          %   s = sprintf('right: (%1.4g, %1.4g level = %1.4g)',x,y, x.*exp(-x.^2-y.^2));
-          %case 'extend' % Shift - click left mouse button or click both left and right mouse buttons.
-          %    s = sprintf('2-click: (%1.4g, %1.4g level = %1.4g)',x,y, x.*exp(-x.^2-y.^2));
-          %case 'open'   % Double-click any mouse button.
-              %s = sprintf('double click: (%1.4g, %1.4g) level = %1.4g',x,y, x.*exp(-x.^2-y.^2));
-      %end
-      % get and set title handle
-      thandle = get(gca,'Title');
-      set(thandle,'String',s);
-      % finally change the position of our red plus, and make it
-      % visible.
-      %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
+function mouseclick_callback(gcbo,eventdata,STATS)
+
+    
+    SIZEBOX=150; % some arbitrary size of some box
+    
+    
+    [row col]=size(STATS.grouptopofiles);
+    
+    % get dimensions.
+    rowcols(2) = ceil(sqrt(col)); % EEGpage is number of subjects/topos
+    rowcols(1) = ceil(col/rowcols(2));
+    
+    %get the point that was clicked on
+    cP = get(gca,'Currentpoint');
+    ms_plot = cP(1,1);
+    %y = cP(1,2);
+
+    for r=1:col % loop for each subject?
+        
+        if r==1
+            % build eventual destination figure
+            curfig = figure('paperpositionmode', 'auto');
+            pos = get(curfig,'Position');
+            posx = max(0, pos(1)+(pos(3)-SIZEBOX*rowcols(2))/2);
+            posy = pos(2)+pos(4)-SIZEBOX*rowcols(1);
+            set(curfig,'Position', [posx posy  SIZEBOX*rowcols(2)  SIZEBOX*rowcols(1)]);
+        end
+        curax = subplot( rowcols(1), rowcols(2), mod(r-1, rowcols(1)*rowcols(2))+1);
+        set(curax, 'visible', 'off')
+        
+        %maplim=[];
+        
+        data=load(STATS.grouptopofiles{r});
+        
+        MStoTF=round((ms_plot/1000-data.tmpEEG.xmin)/(data.tmpEEG.xmax-data.tmpEEG.xmin) * (data.tmpEEG.pnts-1))+1;
+        maplim=max(max(abs(data.tmpEEG.data(:,MStoTF))));
+
+        if isempty(maplim);
+            pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
+        else
+            pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
+        end
+        
+        oh=findobj(curax); % find and get rid of EEGLABs subplot titles
+        alltext=findall(oh,'Type','text');
+        delete(alltext);
+        text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized') % add subject numbers to bottom centre of subplots
+        
+        if isempty(maplim)
+            colorbar;
+        end
+        
+        if ~isempty(maplim)
+            if r==col % last subject
+                curax_pos=get(curax,'position');
+                colorbar('location','eastoutside');
+                set(curax,'position',curax_pos);
+            end
+        end
+
+    end % end of r loop
+    htit = axes('visible','off');
+    title([num2str(ms_plot),'ms'],'parent',htit,'visible','on');
+    %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
+    
+    % get and set title handle
+    %thandle = get(gca,'Title');
+    %set(thandle,'String',s);
+    % finally change the position of our red plus, and make it
+    % visible.
+    %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
 end
 
 
