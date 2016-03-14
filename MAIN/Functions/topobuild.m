@@ -16,6 +16,7 @@ for i=1:STATS.numconds;
     
 end
 
+res='';
 for i=1:STATS.numconds;
     
     [row col]=size(topocell{i});
@@ -25,14 +26,49 @@ for i=1:STATS.numconds;
         EEG=pop_loadset('filename', topocell{i}{j});
         EEG = eeg_checkset( EEG );
         
-            % do all the nasty stuff
-            EEG.data=mean(EEG.data,3); % making interpolating much faster
-            EEG.trials=1; % so interpolation will work
-            EEG=interpmont(EEG,locsfile);
-            EEG = eeg_checkset( EEG );
-            EEG=pop_chanedit(EEG, 'load',{locsfile 'filetype' 'autodetect'});
-            EEG = eeg_checkset( EEG );
+        % is this ICA data
+        if isfield(STATS, 'ICretain')
+            disp('assuming this is an analysis on IC data');
             
+            % get orignal IC inds
+            icorig=[1:min(size(EEG.icawinv))];
+
+            % just the numbers
+            ICinds=STATS.ICretain(:,2:2:end);
+            
+            % just names
+            ICfnames=STATS.ICretain(:,1:2:end);
+            
+            % find correct IC inds
+            ind=find(strcmp(topocell{i}{j}, ICfnames(:,i)));
+            compswant=ICinds(ind,i);
+            compswant=compswant{1};
+
+            % is it residual
+            if ~any(strfind(STATS.bootfiles{1}{1},[STATS.datatype, '_', 'RESextracted']));
+                
+                
+                % remove inds
+                icorig(compswant)=[];
+                EEG = pop_subcomp( EEG, icorig, 0);
+                EEG = eeg_checkset(EEG);
+            else
+                res='RES';
+                % remove inds
+                EEG = pop_subcomp( EEG, compswant, 0);
+                EEG = eeg_checkset(EEG);
+            end
+            
+        end
+        
+        % do all the nasty stuff
+        EEG.data=mean(EEG.data,3); % making interpolating much faster
+        EEG.trials=1; % so interpolation will work
+        EEG=interpmont(EEG,locsfile);
+        EEG = eeg_checkset( EEG );
+        EEG=pop_chanedit(EEG, 'load',{locsfile 'filetype' 'autodetect'});
+        EEG = eeg_checkset( EEG );
+        
         % take EEG fields you need for group topos
         if j==1 && i==1;
             tmpEEG.xmin=min(EEG.times/1000);
@@ -48,10 +84,10 @@ for i=1:STATS.numconds;
             EEGsubs=EEG.data;
             
             % save sub
-            save([topocell{i}{j}(1:end-4), '_subtopo_', STATS.savestring, '.mat'], 'EEG');
+            save([topocell{i}{j}(1:end-4), '_subtopo_', res, STATS.savestring, '.mat'], 'EEG');
             
             %populate array for stats struct
-            STATS.subtopofiles{i}{j}=[topocell{i}{j}(1:end-4), '_subtopo_', STATS.savestring, '.mat'];
+            STATS.subtopofiles{i}{j}=[topocell{i}{j}(1:end-4), '_subtopo_', res, STATS.savestring, '.mat'];
             clear EEG
             
         else
@@ -59,10 +95,10 @@ for i=1:STATS.numconds;
             EEGsubs=EEGsubs+EEG.data;
             
             % save sub
-            save([topocell{i}{j}(1:end-4), '_subtopo_', STATS.savestring, '.mat'], 'EEG');
+            save([topocell{i}{j}(1:end-4), '_subtopo_', res, STATS.savestring, '.mat'], 'EEG');
             
             %populate array for stats struct
-            STATS.subtopofiles{i}{j}=[topocell{i}{j}(1:end-4), '_subtopo_', STATS.savestring, '.mat'];
+            STATS.subtopofiles{i}{j}=[topocell{i}{j}(1:end-4), '_subtopo_', res, STATS.savestring, '.mat'];
             clear EEG
         end
         
@@ -71,10 +107,10 @@ for i=1:STATS.numconds;
     % mean
     EEGsubs=EEGsubs/row;
     tmpEEG.data=EEGsubs;
-    save(['grouptopo_', STATS.savestring, '_',STATS.condnames{i}, '.mat'], 'tmpEEG');
+    save(['grouptopo_', res, STATS.savestring, '_',STATS.condnames{i}, '.mat'], 'tmpEEG');
     
     % populate stats
-    STATS.grouptopofiles{i}=['grouptopo_', STATS.savestring, '_',STATS.condnames{i}, '.mat'];
+    STATS.grouptopofiles{i}=['grouptopo_', res, STATS.savestring, '_',STATS.condnames{i}, '.mat'];
     
 end
 
