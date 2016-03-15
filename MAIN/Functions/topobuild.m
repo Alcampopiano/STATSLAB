@@ -27,7 +27,7 @@ for i=1:STATS.numconds;
         EEG = eeg_checkset( EEG );
         
         % is this ICA data
-        if isfield(STATS, 'ICretain')
+        if isfield(STATS, 'ICretain') && any(strfind(STATS.datatype, 'ica'))
             disp('assuming this is an analysis on IC data');
             
             % get orignal IC inds

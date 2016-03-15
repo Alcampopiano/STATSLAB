@@ -484,8 +484,12 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 
                 if isempty(maplim);
                     pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
+                    htopo(r)=gca;
+                    ctopo(r,:)=caxis;
                 else
                     pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
+                    htopo(r)=gca;
+                    ctopo(r,:)=caxis;
                 end
                 
                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
@@ -497,11 +501,29 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                     colorbar;
                 end
                 
+                
+                
                 if ~isempty(maplim)
                     if r==col % last subject
-                        curax_pos=get(curax,'position');
-                        colorbar('location','eastoutside');
-                        set(curax,'position',curax_pos);
+                        
+                        maplim=max(max(abs(ctopo)));
+                        
+                        % set limits
+                        for q=1:r;
+                            caxis(htopo(q), [-maplim maplim])
+                        end
+                        
+                        
+                        ha=axes('visible', 'off');
+                        set(ha, 'Units', 'Normalized', 'Position', [.88, 0.25, .025, .5]);
+                        colorbar('FontSize',15);
+                        caxis([-maplim maplim]);
+                        
+                        
+                        
+%                         curax_pos=get(curax,'position');
+%                         colorbar('location','eastoutside');
+%                         set(curax,'position',curax_pos);
                     end
                 end
                 
