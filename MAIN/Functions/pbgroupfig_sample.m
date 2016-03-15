@@ -74,7 +74,7 @@ if any(strcmp(varargin,'all'));
     % add other options
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
-    options.maplim=[];
+    %options.maplim=[];
     
     % read the acceptable names
     optionNames = fieldnames(options);
@@ -127,7 +127,7 @@ else
     % add other options
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
-    options.maplim=[];
+    %options.maplim=[];
     
     
     if any(strcmp(varargin,'timeplot'));
@@ -160,7 +160,7 @@ STATS.plotoptions=options;
 
 % interp for later topographies or not
 if ~strcmp(options.topos, 'no');
-    [STATS]=topobuild(STATS,options.topos);
+    [STATS]=topobuild(STATS,options.topos, 'group');
     disp('*** finished interpolating and computing topography files. This only needs to be done once ***');
     save(['STATS_',STATS.savestring,'.mat'],'STATS');
 end
@@ -206,12 +206,12 @@ switch isfactorial
             figure(i);
             subplot(2,1,1)
             h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
-            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
-            
+
             hold on
             h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
+            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
+            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
             set(gca,'FontSize',20)
-            %title('CS vs CT')
             lh=legend(leg1st,leg2nd);
             % get rid of subscripts that occur when there are underscores
             set(lh,'Interpreter', 'none');
@@ -274,11 +274,11 @@ switch isfactorial
                 figure;
                 subplot(2,1,1)
                 h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
-                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
-                %set(get(gca,'Children'),'ButtonDownFcn', {@mouseclick_callback,STATS})
                 
                 hold on
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
+                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -289,13 +289,10 @@ switch isfactorial
                 
                 subplot(2,1,2)
                 h(3)=plot(STATS.xtimes(options.timeplot),plotdiff,'k');
-                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,options.timeplot);%USE_THIS
-                %CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,513:922);
-                
-                
-                
+                CIup=STATS.sample_results.factor_A.CI{options.FactorA(i)}(2,options.timeplot);
+
                 CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,options.timeplot);
-                %CIlow=STATS.sample_results.factor_A.CI{options.FactorA(i)}(1,513:922);
+               
                 
                 h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
@@ -347,10 +344,11 @@ switch isfactorial
                 figure;
                 subplot(2,1,1)
                 h(1)=plot(STATS.xtimes(options.timeplot),plot1st,'r', 'LineWidth',3);
-                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
-                
+
                 hold on
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
+                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -411,10 +409,11 @@ switch isfactorial
                 figure;
                 subplot(2,1,1)
                 h(1)=plot(STATS.xtimes(options.timeplot),plot1stdiff,'r', 'LineWidth',3);
-                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
-                
+
                 hold on
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nddiff,'b','LineWidth',3);
+                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
                 set(gca,'FontSize',20)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
@@ -475,8 +474,7 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 curax = subplot( rowcols(1), rowcols(2), mod(r-1, rowcols(1)*rowcols(2))+1);
                 set(curax, 'visible', 'off')
                 
-                %maplim=[];
-                
+                % loading group
                 data=load(STATS.grouptopofiles{r});
                 
                 MStoTF=round((ms_plot/1000-data.tmpEEG.xmin)/(data.tmpEEG.xmax-data.tmpEEG.xmin) * (data.tmpEEG.pnts-1))+1;

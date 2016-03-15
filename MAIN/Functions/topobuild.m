@@ -1,7 +1,19 @@
-function [STATS]=topobuild(STATS, locsfile)
+function [STATS]=topobuild(STATS, locsfile, figtype)
 
-% determine the set files that were used in the statistics
-topocell=STATS.bootfiles;
+% coming from subject figure, or group figure
+if strcmp(figtype, 'group')
+    
+    % determine the set files that were used in the statistics
+    topocell=STATS.bootfiles;
+    bootfiles=STATS.bootfiles;
+    
+elseif strcmp(figtype, 'subject')
+    % determine the set files that were used in the statistics
+    topocell=STATS.subject_bootfiles;
+    bootfiles=STATS.subject_bootfiles;
+    
+end
+
 STATS.subtopofiles=topocell;
 STATS.grouptopofiles=cell(1,length(STATS.condnames));
 
@@ -10,7 +22,7 @@ for i=1:STATS.numconds;
     [rowbt colbt]=size(STATS.bootfiles{i});
     for k=1:rowbt;
         
-        ind=strfind(STATS.bootfiles{i}{k},STATS.datatype);
+        ind=strfind(bootfiles{i}{k},STATS.datatype);
         topocell{i}{k}=[topocell{i}{k}(1:ind-2), '.set'];
     end
     
@@ -45,7 +57,7 @@ for i=1:STATS.numconds;
             compswant=compswant{1};
 
             % is it residual
-            if ~any(strfind(STATS.bootfiles{1}{1},[STATS.datatype, '_', 'RESextracted']));
+            if ~any(strfind(bootfiles{1}{1},[STATS.datatype, '_', 'RESextracted']));
                 
                 
                 % remove inds
