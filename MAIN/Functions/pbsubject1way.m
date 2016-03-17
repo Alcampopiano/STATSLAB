@@ -15,8 +15,13 @@ end
 
 % edited may1st/15
 % set default plot options
+%options.conB=[]; % here as a place holder for bw designs (which are done as seperate 1-ways)
 options.conA=conA;
 options.FWE='Rom';
+
+% for bw designs
+options.jlabels={};
+options.klabels={};
 
 % get field names
 optionnames = fieldnames(options);
@@ -44,6 +49,10 @@ for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
         error('%s is not a recognized parameter name',inpName)
     end
 end
+
+% move to STATS struct
+STATS.jlabels=options.jlabels;
+STATS.klabels=options.klabels;
 
 % extract from options structure
 conA=options.conA;

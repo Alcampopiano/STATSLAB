@@ -146,45 +146,16 @@ switch STATS.design
         
     case 'bw';
         
-        %         % handle varargin errors
-        %         if length(varargin)~=3;
-        %             error([' You must specify one contrast matrix for bw design when doing single-subject stats' ...
-        %                 ' Also, you also need to specify labels for factor A and B seperatley.' ...
-        %                 ' See documentation and function header for examples']);
-        %
-        %
-        %         elseif length(varargin)==3
-        %             if length(varargin{2})*length(varargin{3})~=STATS.levels(1)*STATS.levels(2)
-        %                 error([' The number of labels you''ve entered is incorrect for a', num2str(STATS.levels(1)), 'X', num2str(STATS.levels(2)), 'design', ...
-        %                     ' See documentation and function header for examples']);
-        %
-        %             else
-        %                 % parse trailing inputs from varargin into labels
-        %                 STATS.jlabels=varargin{2};
-        %                 STATS.klabels=varargin{3};
-        %
-        %             end
-        %         end
-        
+    
         % set default plot options
-        options.jlabels='no_jlabels';
-        options.klabels='no_klabels';
-        
+        options.jlabels={};
+        options.klabels={};
+        options.conA=[];
+        options.FWE='Rom';
+
         % get field names
         optionnames = fieldnames(options);
-        
-        % % check to see which optional args were used and deal with accordingly
-        % if isempty(varargin);
-        %     warning('MATLAB:stats',['Using default contrasts matrix. You must specify one if you want a custom contrast. ' ...
-        %         ' e.g., [1 -1 0; 1 0 -1]'''])
-        % else
-        %     % overwrite options stucture with varargin inputs if there are any
-        %
-        %     if ~isempty(varargin{1})
-        %         options.(optionnames{1})=varargin{1};
-        %     end
-        % end
-        
+            
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
             inpName = pair{1};
             
@@ -201,7 +172,7 @@ switch STATS.design
         STATS.jlabels=options.jlabels;
         STATS.klabels=options.klabels;
         
-        % basically, each level of factor A is run as a one way, within
+        % each level of factor A is run as a one way, within
         % subjects design
         
         % get field names for each level of factor A
@@ -210,37 +181,70 @@ switch STATS.design
         end
         
         % loop and gather the filenames for each level of Factor A separately
-        k=1;
-        for j=1:STATS.levels(1)
-            
-            % load all file names subs X conditions
-            for i=1:STATS.levels(2)
-                tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', STATS.condnames{k}, ' condition'], 'MultiSelect','on');
-                if ~iscell(tempfname);
-                    tempfname={tempfname};
-                    condfiles(:,i)=tempfname;
-                else
-                    condfiles(:,i)=tempfname;
+        %%%%
+        if isempty(condfiles);
+            k=1;
+            for j=1:STATS.levels(1)
+                
+                % load all file names subs X conditions
+                for i=1:STATS.levels(2)
+                    tempfname=uigetfile('*.mat',['Select all bootstrapped files in the ', STATS.condnames{k}, ' condition'], 'MultiSelect','on');
+                    
+                    if ~iscell(tempfname) && ~isnumeric(tempfname);
+                        tempfname={tempfname};
+                        condfiles(:,i)=tempfname;
+                        
+                    elseif isnumeric(tempfname)
+                        error('no files were chosen');
+                    else
+                        condfiles(:,i)=tempfname;
+                    end
+                    k=k+1;
                 end
-                k=k+1;
+                
+                % save files, file names, and update STATS structure
+                save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring, '_j',num2str(j),'.mat'],'condfiles');
+                STATS.jlvlfnames{j}=['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring, '_j',num2str(j),'.mat'];
+                STATS.subject_bootfiles{j}=condfiles;
+                clear condfiles
             end
             
+                % save filenames
+                condfiles=STATS.jlvlfnames;
+                save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles');
+                % redundant
+%                 condfiles=STATS.subject_bootfiles;
+
+        else
+            
+            % load a file name that was given that contains the filenames X condition cell array
+            condfiles_data=load(condfiles);
+            condfields=fieldnames(condfiles_data);
+            condfiles=condfiles_data.(condfields{1});
+            
             % update STATS structure
-            STATS.subject_bootfiles{j}=condfiles;
-            clear condfiles
+            STATS.jlvlfnames=condfiles;
+            
+            % just to populate subject_bootfiles in case it needs to be updated
+            for j=1:STATS.levels(1);
+                tmp=load(STATS.jlvlfnames{j});
+                tmpfields=fieldnames(tmp);
+                tmpdat=tmp.(tmpfields{1});
+                STATS.subject_bootfiles{j}=tmpdat;
+            end
         end
         
         for i=1:STATS.levels(1)
             
             if any(strcmp({'ersp' 'itc'},STATS.measure));
                 
-                [jnk, results]=pbsubject1waytf(STATS,STATS.subject_bootfiles{i},STATS.levels(2),STATS.nboot, ...
+                [jnk, results]=pbsubject1waytf(STATS,STATS.jlvlfnames{i},STATS.levels(2),STATS.nboot, ...
                     STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
                 
             elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
                 
                 % do something in a loop for factor A
-                [jnk, results]=pbsubject1way(STATS.subject_bootfiles{i},STATS.levels(2), STATS.numpnts, STATS.nboot, ...
+                [jnk, results]=pbsubject1way(STATS,STATS.jlvlfnames{i},STATS.levels(2), STATS.numpnts, STATS.nboot, ...
                     STATS.levels(1), STATS.alpha, STATS.condnames, varargin{:});
             end
             % update STATS structure

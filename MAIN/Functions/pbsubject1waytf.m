@@ -18,6 +18,10 @@ end
 options.conA=conA;
 options.FWE='Rom';
 
+% for bw designs
+options.jlabels={};
+options.klabels={};
+
 % get field names
 optionnames = fieldnames(options);
 
@@ -44,6 +48,10 @@ for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
         error('%s is not a recognized parameter name',inpName)
     end
 end
+
+% move to STATS struct
+STATS.jlabels=options.jlabels;
+STATS.klabels=options.klabels;
 
 % extract from options structure
 conA=options.conA;
