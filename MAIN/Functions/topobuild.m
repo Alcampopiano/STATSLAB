@@ -7,11 +7,24 @@ if strcmp(figtype, 'group')
     topocell=STATS.bootfiles;
     bootfiles=STATS.bootfiles;
     
-elseif strcmp(figtype, 'subject')
+elseif strcmp(figtype, 'subject') && ~strcmp(STATS.design, 'bw')
     % determine the set files that were used in the statistics
     topocell=STATS.subject_bootfiles;
     bootfiles=STATS.subject_bootfiles;
     
+elseif strcmp(figtype, 'subject') && strcmp(STATS.design, 'bw')
+    % determine the set files that were used in the statistics
+    
+    % unnest subject_bootfiles
+    topocell=cell(1,STATS.numconds);
+    q=1;
+    for j=1:STATS.levels(1);
+        for k=1:STATS.levels(2);
+            topocell{q}=STATS.subject_bootfiles{j}(:,k);
+            q=q+1;
+        end  
+    end
+    bootfiles=topocell;
 end
 
 STATS.subtopofiles=topocell;
@@ -19,7 +32,8 @@ STATS.grouptopofiles=cell(1,length(STATS.condnames));
 
 for i=1:STATS.numconds;
     
-    [rowbt colbt]=size(STATS.bootfiles{i});
+    [rowbt colbt]=size(bootfiles{i});
+    %[rowbt colbt]=size(STATS.bootfiles{i});
     for k=1:rowbt;
         
         ind=strfind(bootfiles{i}{k},STATS.datatype);

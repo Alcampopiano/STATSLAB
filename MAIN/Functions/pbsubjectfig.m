@@ -304,6 +304,9 @@ switch STATS.design
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
                             
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
+                            
                             
                             % give everyone a colorbar
                             if strcmp(options.caxis,'auto');
@@ -351,6 +354,9 @@ switch STATS.design
                             zeroplace=zeros(1,length(timelocs))+1.5;
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             
                             % give everyone a colorbar
@@ -441,6 +447,9 @@ switch STATS.design
                             % plot diff wave
                             plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
+                            
                             axis tight
                             ylim(gca,options.yaxis);
                             grid on
@@ -485,6 +494,9 @@ switch STATS.design
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             % give everyone a colorbar
                             if strcmp(options.caxis,'auto');
@@ -531,6 +543,9 @@ switch STATS.design
                             zeroplace=zeros(1,length(timelocs))+1.5;
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             % give everyone a colorbar
                             if strcmp(options.caxis,'auto');
@@ -614,6 +629,9 @@ switch STATS.design
                             % plot diff wave
                             plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
+                            
                             ylim(gca, options.yaxis);
                             grid on
                             
@@ -658,6 +676,9 @@ switch STATS.design
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             % give everyone a colorbar
                             if strcmp(options.caxis,'auto');
@@ -704,6 +725,9 @@ switch STATS.design
                             zeroplace=zeros(1,length(timelocs))+1.5;
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             
                             % give everyone a colorbar
@@ -789,6 +813,9 @@ switch STATS.design
                             % plot diff wave
                             plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
                             
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
+                            
                             ylim(gca, options.yaxis);
                             grid on
                             
@@ -831,6 +858,9 @@ switch STATS.design
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             Z=zeros(1,length(timevect));
                             scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             % give everyone a colorbar
                             if strcmp(options.caxis,'auto');
@@ -879,6 +909,9 @@ switch STATS.design
                             zeroplace=zeros(1,length(timelocs))+1.5;
                             timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                             scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
+                            
+                            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q});
+                            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q});
                             
                             
                             % give everyone a colorbar
@@ -980,6 +1013,9 @@ switch STATS.design
                                 ylim(gca,options.yaxis);
                                 grid on
                                 
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
+                                
                             end
                             
                         case 'CI_MOE'
@@ -1019,6 +1055,9 @@ switch STATS.design
                                 timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                                 Z=zeros(1,length(timevect));
                                 scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
+                                
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
                                 
                                 % give everyone a colorbar
                                 if strcmp(options.caxis,'auto');
@@ -1067,6 +1106,9 @@ switch STATS.design
                                 timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
                                 scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
                                 
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
+                                
                                 
                                 
                                 % give everyone a colorbar
@@ -1105,7 +1147,7 @@ end
 disp('******* Saving STATS structure *******')
 save(['STATS_',STATS.savestring,'.mat'],'STATS');
 
-function mouseclick_callback(gcbo,eventdata,STATS,sub)
+function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
         
         try
             
@@ -1162,9 +1204,7 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub)
                 if isempty(maplim)
                     colorbar;
                 end
-                
-                
-                
+
                 if ~isempty(maplim)
                     if r==col % last subject
                         

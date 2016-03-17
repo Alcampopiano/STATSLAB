@@ -194,7 +194,7 @@ switch STATS.design
                         tempfname={tempfname};
                         condfiles(:,i)=tempfname;
                         
-                    elseif isnumeric(tempfname)
+                    elseif isnumeric(tempfname) % if cancel was hit
                         error('no files were chosen');
                     else
                         condfiles(:,i)=tempfname;
