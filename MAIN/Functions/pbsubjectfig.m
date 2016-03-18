@@ -1244,6 +1244,7 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
 %                         set(curax,'position',curax_pos);
                     end
                 end
+                s=s+1;
                 
             end % end of r loop
             htit = axes('visible','off');
