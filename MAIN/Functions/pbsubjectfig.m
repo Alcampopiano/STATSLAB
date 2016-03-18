@@ -1150,35 +1150,51 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
 function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
         
         try
-            
+
             SIZEBOX=250; % some arbitrary size of some box
             
-            
-            [row col]=size(STATS.grouptopofiles);
-            
-            % get dimensions.
-            rowcols(2) = ceil(sqrt(col)); % EEGpage is number of subjects/topos
-            rowcols(1) = ceil(col/rowcols(2));
+            if strcmp(STATS.design, 'bw')
+                
+                atcond=(atjlvl-1)*STATS.levels(2)+1; % to determine which cell to start from
+                col=atcond+STATS.levels(2)-1; % the last cell to plot
+                col_size=STATS.levels(2);
+                
+                % get dimensions.
+                rowcols(2) = ceil(sqrt(col_size)); % EEGpage is number of subjects/topos
+                rowcols(1) = ceil(col_size/rowcols(2));
+                
+            else
+                
+                [row col]=size(STATS.grouptopofiles);
+                atcond=1;
+                
+                % get dimensions.
+                rowcols(2) = ceil(sqrt(col)); % EEGpage is number of subjects/topos
+                rowcols(1) = ceil(col/rowcols(2));
+                
+            end
+
             
             %get the point that was clicked on
             cP = get(gca,'Currentpoint');
             ms_plot = cP(1,1);
             %y = cP(1,2);
             
-            for r=1:col % loop for each subject?
+            s=1;
+            for r=atcond:col % loop for each subject?
                 
-                if r==1
+                if r==atcond;
                     % build eventual destination figure
-                    curfig = figure('paperpositionmode', 'auto');
+                    curfig = figure('paperpositionmode', 'auto', 'visible', 'off');
                     pos = get(curfig,'Position');
                     posx = max(0, pos(1)+(pos(3)-SIZEBOX*rowcols(2))/2);
                     posy = pos(2)+pos(4)-SIZEBOX*rowcols(1);
                     set(curfig,'Position', [posx posy  SIZEBOX*rowcols(2)  SIZEBOX*rowcols(1)]);
+                    
                 end
                 curax = subplot( rowcols(1), rowcols(2), mod(r-1, rowcols(1)*rowcols(2))+1);
                 set(curax, 'visible', 'off')
                 
-               
                 % loading subject
                 data=load(STATS.subtopofiles{r}{sub});
                 disp(STATS.subtopofiles{r}{sub});
@@ -1188,18 +1204,20 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
                 
                 if isempty(maplim);
                     pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
-                    htopo(r)=gca;
-                    ctopo(r,:)=caxis;
+                    %set(gcf, 'visible','off');
+                    htopo(s)=gca;
+                    ctopo(s,:)=caxis;
                 else
                     pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
-                    htopo(r)=gca;
-                    ctopo(r,:)=caxis;
+                    %set(gcf, 'visible','off');
+                    htopo(s)=gca;
+                    ctopo(s,:)=caxis;
                 end
                 
                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
                 alltext=findall(oh,'Type','text');
                 delete(alltext);
-                text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized') % add subject numbers to bottom centre of subplots
+                text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized','Interpreter', 'none'); % add subject numbers to bottom centre of subplots
                 
                 if isempty(maplim)
                     colorbar;
@@ -1211,7 +1229,7 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
                         maplim=max(max(abs(ctopo)));
                         
                         % set limits
-                        for qq=1:r;
+                        for qq=1:length(htopo);
                             caxis(htopo(qq), [-maplim maplim])
                         end
                         
@@ -1230,6 +1248,7 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
             end % end of r loop
             htit = axes('visible','off');
             title(['Subject #', num2str(sub), ' at ', num2str(ms_plot),'ms'],'parent',htit,'visible','on');
+            
             %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
             
             % get and set title handle
@@ -1241,6 +1260,7 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
         catch
             disp('no topographies available at this time');
         end
+        
     end
 
 
