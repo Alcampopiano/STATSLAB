@@ -237,6 +237,8 @@ switch isfactorial
             h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
             colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
             
+            set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [leg1st,'-',leg2nd], options.timeplot, options.FactorA(i), 'A'});
+            
             hsub(4)=subplot(4,1,4);
             h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
             colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
@@ -342,6 +344,8 @@ switch isfactorial
                 hsub(3)=subplot(4,1,3);
                 h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
+                
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [leg1st,'-',leg2nd], options.timeplot, options.FactorA(i), 'A'});
                 
                 hsub(4)=subplot(4,1,4);
                 h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
@@ -449,6 +453,8 @@ switch isfactorial
                 h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                 
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [leg1st,'-',leg2nd], options.timeplot, options.FactorB(i), 'B'});
+                
                 hsub(4)=subplot(4,1,4);
                 h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                 colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
@@ -550,6 +556,8 @@ switch isfactorial
                 h(1)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                 colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                 
+                set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, ['(',leg1st,')','-','(',leg2nd,')'], options.timeplot, options.FactorAB(i), 'AxB'});
+                
                 hsub(2)=subplot(2,1,2);
                 h(2)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                 colormap(flipud(hot)); caxis([0 1]); hb=cbfreeze(colorbar);  freezeColors; %set(hb,'YTick',[0 1]);
@@ -572,6 +580,53 @@ end
 
 disp('******* Saving STATS structure *******')
 save(['STATS_',STATS.savestring,'.mat'],'STATS');
+
+
+
+    function mouseclick_callback(gcbo, eventdata, STATS, titl, timeplot, oncon, onfact)
+        
+        diffcol=[0 0 0];
+        CIcol=[.5 .5 .5];
+        
+        flds=fieldnames(STATS.sample_results);
+        subflds=fieldnames(STATS.subject_results);
+        %get the point that was clicked on
+        cP = get(gca,'Currentpoint');
+        % ms_plot = cP(1,1);
+        freqclick = cP(1,2);
+        [V I]=min(abs(STATS.TF_freqs-freqclick));
+        fact=['factor_', onfact];
+        
+        figure;
+        for qq=1:length(subflds);
+            
+            % extract CI
+            CI_low(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(1,timeplot);
+            CI_up(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(2,timeplot);
+            
+            % extract difference wave
+            pdiff=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).test_stat(oncon,timeplot);
+            
+            % begin plotting
+            
+            subplot(length(subflds),1,qq);
+            % plot zeroline
+            plot(STATS.TF_times(timeplot),zeros(1,length(STATS.TF_times(timeplot))),'r','LineWidth',1);
+            hold on
+            
+            % plot CI
+            jbfill(STATS.TF_times(timeplot),CI_up,CI_low,CIcol,CIcol,1,1);
+            hold on
+            
+            % plot diff wave
+            plot(STATS.TF_times(timeplot),pdiff,'Color',diffcol);
+            axis tight
+            grid on
+        end
+        
+        htit = axes('visible','off');
+        title([titl, ' at ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');
+    end
 
 end
 
