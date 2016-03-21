@@ -3,7 +3,7 @@ function [STATS]=pbsubjectfigTF(STATS,infodisplay,varargin)
 try
     fields=fieldnames(STATS.sample_results);
 catch
-    error('you must run the same analysis at the group level, to single-subject plot time frequency results')
+    error('you must run the same analysis at the group level, to plot single-subject time frequency results')
 end
 
 % freq band fields
@@ -163,7 +163,7 @@ switch isfactorial
                 
                 % stats
                 for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(i,:)<=.05);
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
                 end
                 
                 pval_gather=pval_gather+pval_tmp;
@@ -270,7 +270,7 @@ switch isfactorial
                 
                 % stats
                 for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(i,:)<=.05);
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
                 end
                 
                 pval_gather=pval_gather+pval_tmp;
@@ -366,7 +366,7 @@ switch isfactorial
         
         if ~isempty(options.FactorB);
             numfigs=size(options.FactorB,2);
- 
+            
             for i=1:numfigs
                 k=1;
                 m=1;
@@ -376,7 +376,7 @@ switch isfactorial
                 
                 % stats
                 for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(i,:)<=.05);
+                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(options.FactorB(i),:)<=.05);
                 end
                 
                 pval_gather=pval_gather+pval_tmp;
@@ -480,7 +480,7 @@ switch isfactorial
                     
                     % stats
                     for q=1:STATS.freqbins;
-                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.pval(i,:)<=.05);
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.pval(options.FactorAB(i),:)<=.05);
                     end
                     
                     pval_gather=pval_gather+pval_tmp;
@@ -491,7 +491,7 @@ switch isfactorial
                 
                 % group level interaction difference data
                 for q=1:STATS.freqbins;
-                    plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(i,:);
+                    plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(options.FactorAB(i),:);
                 end
                 
                 

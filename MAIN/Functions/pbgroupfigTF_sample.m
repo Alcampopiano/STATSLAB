@@ -149,7 +149,7 @@ switch isfactorial
 
             % stats
             for q=1:STATS.freqbins;
-                pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
+                pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
             end
             
             for j=1:length(STATS.condnames);
@@ -201,7 +201,7 @@ switch isfactorial
             conds_axdiff=[-conds_axdiff conds_axdiff];
             
             % begin plotting
-            figure(i);
+            figure;
             hsub(1)=subplot(4,1,1);
             h(1)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plot1st(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
             if ersp==1; colormap(jet); caxis(conds_ax); cbfreeze(colorbar); freezeColors; end
@@ -215,6 +215,9 @@ switch isfactorial
             hsub(3)=subplot(4,1,3);
             h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
             colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
+            
+            set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
+            set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS, [leg1st,'-',leg2nd], options.timeplot});
             
             hsub(4)=subplot(4,1,4);
             h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
@@ -248,7 +251,7 @@ switch isfactorial
                 % stats
                 for q=1:STATS.freqbins;
                     % diffsA1(i,:)=STATS.sample_results.(bands{i}).factor_A.test_stat(1,:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
                     % pvalAB(i,:)=(STATS.sample_results.(bands{i}).factor_AxB.pval(1,:)>.05);
                 end
                 
@@ -347,7 +350,7 @@ switch isfactorial
                 
                 % stats
                 for q=1:STATS.freqbins;
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.pval(i,:)>.05);
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.pval(options.FactorB(i),:)>.05);
                 end
                 
                 for j=1:length(STATS.condnames);
@@ -443,8 +446,8 @@ switch isfactorial
                 
                 % stats
                 for q=1:STATS.freqbins;
-                    plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(i,:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(i,:)>.05);
+                    plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(options.FactorAB(i),:);
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_AxB.pval(options.FactorAB(i),:)>.05);
                 end
                 
                 for j=1:length(STATS.condnames);
@@ -524,6 +527,128 @@ end
 
 disp('******* Saving STATS structure *******')
 save(['STATS_',STATS.savestring,'.mat'],'STATS');
+
+function mouseclick_callback(gcbo,eventdata,STATS, titl, timeplot)
+        
+        try
+
+            %SIZEBOX=250; % some arbitrary size of some box
+            
+%             if strcmp(STATS.design, 'bw')
+%                 
+%                 atcond=(atjlvl-1)*STATS.levels(2)+1; % to determine which cell to start from
+%                 col=atcond+STATS.levels(2)-1; % the last cell to plot
+%                 col_size=STATS.levels(2);
+%                 
+%                 % get dimensions.
+%                 rowcols(2) = ceil(sqrt(col_size)); % EEGpage is number of subjects/topos
+%                 rowcols(1) = ceil(col_size/rowcols(2));
+%                 
+%             else
+%                 
+%                 [row col]=size(STATS.grouptopofiles);
+%                 atcond=1;
+%                 
+%                 % get dimensions.
+%                 rowcols(2) = ceil(sqrt(col)); % EEGpage is number of subjects/topos
+%                 rowcols(1) = ceil(col/rowcols(2));
+%                 
+%             end
+
+            %flds=fieldnames(STATS.sample_results);
+            %get the point that was clicked on
+            cP = get(gca,'Currentpoint');
+            % ms_plot = cP(1,1);
+            freqclick = cP(1,2);
+            [V I]=min(abs(STATS.TF_freqs-freqclick));
+            
+          
+            
+            
+%             s=1;
+%             for r=atcond:col % loop for each subject?
+%                 
+%                 if r==atcond;
+%                     % build eventual destination figure
+%                     curfig = figure('paperpositionmode', 'auto', 'visible', 'off');
+%                     pos = get(curfig,'Position');
+%                     posx = max(0, pos(1)+(pos(3)-SIZEBOX*rowcols(2))/2);
+%                     posy = pos(2)+pos(4)-SIZEBOX*rowcols(1);
+%                     set(curfig,'Position', [posx posy  SIZEBOX*rowcols(2)  SIZEBOX*rowcols(1)]);
+%                     
+%                 end
+%                 curax = subplot( rowcols(1), rowcols(2), mod(r-1, rowcols(1)*rowcols(2))+1);
+%                 set(curax, 'visible', 'off')
+%                 
+%                 % loading subject
+%                 data=load(STATS.subtopofiles{r}{sub});
+%                 disp(STATS.subtopofiles{r}{sub});
+%                 
+%                 MStoTF=round((ms_plot/1000-data.EEG.xmin)/(data.EEG.xmax-data.EEG.xmin) * (data.EEG.pnts-1))+1;
+%                 maplim=max(max(abs(data.EEG.data(:,MStoTF))));
+%                 
+%                 if isempty(maplim);
+%                     pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
+%                     %set(gcf, 'visible','off');
+%                     htopo(s)=gca;
+%                     ctopo(s,:)=caxis;
+%                 else
+%                     pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
+%                     %set(gcf, 'visible','off');
+%                     htopo(s)=gca;
+%                     ctopo(s,:)=caxis;
+%                 end
+%                 
+%                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
+%                 alltext=findall(oh,'Type','text');
+%                 delete(alltext);
+%                 text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized','Interpreter', 'none'); % add subject numbers to bottom centre of subplots
+%                 
+%                 if isempty(maplim)
+%                     colorbar;
+%                 end
+% 
+%                 if ~isempty(maplim)
+%                     if r==col % last subject
+%                         
+%                         maplim=max(max(abs(ctopo)));
+%                         
+%                         % set limits
+%                         for qq=1:length(htopo);
+%                             caxis(htopo(qq), [-maplim maplim])
+%                         end
+%                         
+%                         
+%                         hax=axes('visible', 'off');
+%                         set(hax, 'Units', 'Normalized', 'Position', [.88, 0.25, .025, .5]);
+%                         colorbar('FontSize',15);
+%                         caxis([-maplim maplim]);
+%        
+% %                         curax_pos=get(curax,'position');
+% %                         colorbar('location','eastoutside');
+% %                         set(curax,'position',curax_pos);
+%                     end
+%                 end
+%                 s=s+1;
+%                 
+%             end % end of r loop
+            htit = axes('visible','off');
+            %title(['Freq', num2str(freqclick)],'parent',htit,'visible','on');
+            
+            %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
+            
+            % get and set title handle
+            %thandle = get(gca,'Title');
+            %set(thandle,'String',s);
+            % finally change the position of our red plus, and make it
+            % visible.
+            %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
+        catch
+            disp('no topographies available at this time');
+        end
+        
+    end
+
 
 end
 
