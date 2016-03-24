@@ -18,31 +18,67 @@ if any(strcmp(varargin,'all'));
     
     % this finds out if the design was factorial or not and sets default
     % options accordingly
-    if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
-        isfactorial=1;
+    %     if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
+    %         isfactorial=1;
+    %
+    %         options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2), ...
+    %             'FactorB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts,2), ...
+    %             'FactorAB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts,2));
+    %
+    %         if infodisplay
+    %             disp('Condition names'); disp(STATS.condnames)
+    %             disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+    %             disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
+    %             disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
+    %         end
+    %
+    %     elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
+    %         isfactorial=0;
+    %         options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2));
+    %
+    %         if infodisplay
+    %             disp('Condition names'); disp(STATS.condnames)
+    %             disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+    %         end
+    %
+    %     end
+    
+    
+    % this finds out if the design was factorial or not and sets default
+    % options accordingly
+    if strcmp(STATS.design,'ww');
         
-        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2), ...
-            'FactorB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts,2), ...
-            'FactorAB', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts,2));
+        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.factor_A.contrasts,2), ...
+            'FactorB', 1:size(STATS.subject_results.subject_1.factor_B.contrasts,2), ...
+            'FactorAB', 1:size(STATS.subject_results.subject_1.factor_AxB.contrasts,2));
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
-            disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
-            disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.factor_A.contrasts)
+            disp('FactorB'); disp(STATS.subject_results.subject_1.factor_B.contrasts)
+            disp('FactorAB'); disp(STATS.subject_results.subject_1.factor_AxB.contrasts)
         end
         
-    elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
-        isfactorial=0;
-        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts,2));
+    elseif strcmp(STATS.design,'w');
+        
+        options = struct('FactorA', 1:size(STATS.subject_results.subject_1.factor_A.contrasts,2));
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.factor_A.contrasts)
+        end
+        
+    elseif strcmp(STATS.design,'bw'); % considered not factorial in single-subject cases
+        
+        options = struct('FactorA', 1:size(STATS.subject_results.Factor_A1.subject_1.factor_A.contrasts,2));
+        
+        if infodisplay
+            disp('j level labels'); disp(STATS.jlabels)
+            disp('k level labels'); disp(STATS.klabels)
+            disp('contrasts'); disp(STATS.subject_results.Factor_A1.subject_1.factor_A.contrasts)
         end
         
     end
-    
     
     % get rid of 'all' in varargin option and convert ms entries into TFs
     remall=strcmp(varargin,'all');
@@ -86,31 +122,65 @@ else
         error('need propertyName/propertyValue pairs for optional inputs')
     end
     
+    %     % this finds out if the design was factorial or not and sets default
+    %     % options accordingly
+    %     if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
+    %         isfactorial=1;
+    %         options = struct('FactorA', [],'FactorB', [], 'FactorAB', []);
+    %
+    %         if infodisplay
+    %             disp('Condition names'); disp(STATS.condnames)
+    %             disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+    %             disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
+    %             disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
+    %         end
+    %
+    %     elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
+    %         isfactorial=0;
+    %         options = struct('FactorA', []);
+    %
+    %         if infodisplay
+    %             disp('Condition names'); disp(STATS.condnames)
+    %             disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+    %         end
+    %
+    %
+    %     end
+    %
+    
     % this finds out if the design was factorial or not and sets default
     % options accordingly
-    if size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==3;
-        isfactorial=1;
+    if strcmp(STATS.design,'ww');
+        
         options = struct('FactorA', [],'FactorB', [], 'FactorAB', []);
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
-            disp('FactorB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_B.contrasts)
-            disp('FactorAB'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_AxB.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.factor_A.contrasts)
+            disp('FactorB'); disp(STATS.subject_results.subject_1.factor_B.contrasts)
+            disp('FactorAB'); disp(STATS.subject_results.subject_1.factor_AxB.contrasts)
         end
         
-    elseif size(fieldnames(STATS.subject_results.subject_1.(band_fields{1})),1)==1;
-        isfactorial=0;
+    elseif strcmp(STATS.design,'w');
+        
         options = struct('FactorA', []);
         
         if infodisplay
             disp('Condition names'); disp(STATS.condnames)
-            disp('FactorA'); disp(STATS.subject_results.subject_1.(band_fields{1}).factor_A.contrasts)
+            disp('FactorA'); disp(STATS.subject_results.subject_1.factor_A.contrasts)
         end
         
+    elseif strcmp(STATS.design,'bw'); % considered not factorial in single-subject cases
+        
+        options = struct('FactorA', []);
+        
+        if infodisplay
+            disp('j level labels'); disp(STATS.jlabels)
+            disp('k level labels'); disp(STATS.klabels)
+            disp('contrasts'); disp(STATS.subject_results.Factor_A1.subject_1.factor_A.contrasts)
+        end
         
     end
-    
     
     % add other options
     options.timeplot=1:length(STATS.TF_times);
@@ -149,15 +219,15 @@ pval_gather=zeros(length(band_fields), length(STATS.TF_times));
 pval_tmp=zeros(length(band_fields), length(STATS.TF_times));
 
 % switch cases for factorial vs. single-factor
-switch isfactorial
-    case 0
+switch STATS.design
+    case 'w'
         
         numfigs=size(options.FactorA,2);
         
         for i=1:numfigs
             k=1;
             m=1;
-
+            
             % sub loop
             for s=1:length(sub_fields);
                 
@@ -259,27 +329,27 @@ switch isfactorial
         end
         
         
-    case 1
+    case 'ww'
         
         if ~isempty(options.FactorA);
             numfigs=size(options.FactorA,2);
-
+            
             for i=1:numfigs
                 k=1;
                 m=1;
                 
-            for s=1:length(sub_fields);
-                
-                % stats
-                for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
+                for s=1:length(sub_fields);
+                    
+                    % stats
+                    for q=1:STATS.freqbins;
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
+                    end
+                    
+                    pval_gather=pval_gather+pval_tmp;
                 end
                 
-                pval_gather=pval_gather+pval_tmp;
-            end
-            
-            % pval proportions
-            pval_prop=pval_gather./length(sub_fields);
+                % pval proportions
+                pval_prop=pval_gather./length(sub_fields);
                 
                 for j=1:length(STATS.condnames);
                     
@@ -364,7 +434,7 @@ switch isfactorial
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
                 
-              
+                
             end
         end
         
@@ -376,19 +446,19 @@ switch isfactorial
                 m=1;
                 
                 
-            for s=1:length(sub_fields);
-                
-                % stats
-                for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(options.FactorB(i),:)<=.05);
+                for s=1:length(sub_fields);
+                    
+                    % stats
+                    for q=1:STATS.freqbins;
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(options.FactorB(i),:)<=.05);
+                    end
+                    
+                    pval_gather=pval_gather+pval_tmp;
                 end
                 
-                pval_gather=pval_gather+pval_tmp;
-            end
+                % pval proportions
+                pval_prop=pval_gather./length(sub_fields);
                 
-            % pval proportions
-            pval_prop=pval_gather./length(sub_fields);
-            
                 for j=1:length(STATS.condnames);
                     
                     % get the condition waveforms
@@ -481,7 +551,7 @@ switch isfactorial
             for i=1:numfigs
                 k=1;
                 m=1;
-                         
+                
                 for s=1:length(sub_fields);
                     
                     % stats
@@ -492,8 +562,8 @@ switch isfactorial
                     pval_gather=pval_gather+pval_tmp;
                 end
                 
-            % pval proportions
-            pval_prop=pval_gather./length(sub_fields);
+                % pval proportions
+                pval_prop=pval_gather./length(sub_fields);
                 
                 % group level interaction difference data
                 for q=1:STATS.freqbins;
@@ -517,7 +587,7 @@ switch isfactorial
                         plot2nd(:,:,m)=c.condition;
                         leg2ndlist{m}=STATS.condnames{j};
                         m=m+1;
-                    end 
+                    end
                     
                 end
                 
@@ -573,9 +643,216 @@ switch isfactorial
                 
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
-               
+                
             end
-        end       
+        end
+        
+        
+        % work from here
+    case 'bw' % series of 1-ways
+        
+        if ~isempty(options.FactorA);
+            
+            % get factor fields
+            factnames = fieldnames(STATS.subject_results);
+            
+            % loop through levels of factor A
+            y=1;
+            for v=1:length(factnames);
+                
+                % get subject fields
+                subnames = fieldnames(STATS.subject_results.(factnames{v}));
+                
+                numfigs=size(options.FactorA,2);
+                
+                for i=1:numfigs
+                    k=1;
+                    m=1;
+                    
+                    for j=1:length(STATS.klabels);
+                        
+                        % get the condition waveforms
+                        if STATS.subject_results.(factnames{v}).subject_1.factor_A.contrasts(j,options.FactorA(i))==1
+                            %plot1st(k,:)=STATS.condwaves_trim(j,:);
+                            lab1stlist{k}=STATS.klabels{j};
+                            k=k+1;
+                        elseif STATS.subject_results.(factnames{v}).subject_1.factor_A.contrasts(j,options.FactorA(i))==-1
+                            %plot2nd(m,:)=STATS.condwaves_trim(j,:);
+                            lab2ndlist{m}=STATS.klabels{j};
+                            m=m+1;
+                        end
+                        
+                    end
+                    
+                    
+                    % concatenate, if needed, the legend lables
+                    lab1st=strjoin_statslab(lab1stlist,'+');
+                    lab2nd=strjoin_statslab(lab2ndlist,'+');
+                    titlestr=[STATS.jlabels{v},' @ ',lab1st,' - ',lab2nd];
+                    
+                    switch options.plottype
+                        
+                        case 'wave'
+                            
+                            for q=1:length(subnames);
+                                
+                                % extract CI
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
+                                %CI_diffup=CI_up-CI_low;
+                                %CI_difflow=CI_diffup*-1;
+                                
+                                % extract difference wave
+                                plotdiff=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
+                                %test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),:);
+                                
+                                % begin plotting
+                                figure(y);
+                                subplot(length(subnames),1,q);
+                                
+                                % plot zeroline
+                                plot(STATS.xtimes(options.timeplot),zeros(1,length(STATS.xtimes(options.timeplot))),'r','LineWidth',1);
+                                axis tight
+                                hold on
+                                
+                                % plot CI
+                                jbfill(STATS.xtimes(options.timeplot),CI_up,CI_low,options.CIcol,options.CIcol,1,1);
+                                hold on
+                                
+                                % plot diff wave
+                                plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
+                                ylim(gca,options.yaxis);
+                                grid on
+                                
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
+                                
+                            end
+                            
+                        case 'CI_MOE'
+                            
+                            
+                            for q=1:length(subnames);
+                                
+                                % extract MOE
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
+                                CI_diffup=(CI_up-CI_low)/2;
+                                
+                                % extract difference wave
+                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
+                                
+                                % begin plotting
+                                figure(y);
+                                subplot(length(subnames),1,q);
+                                surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                                axis tight
+                                zlim(gca,options.zaxis);
+                                hold on
+                                
+                                % find where CI includes zero
+                                sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                                
+                                for m=1:length(sigvect);
+                                    
+                                    if CI_low(m)<=0 && CI_up(m)>=0
+                                        sigvect(m)=0;
+                                    end
+                                    
+                                end
+                                
+                                timelocs=find(sigvect>0);
+                                zeroplace=zeros(1,length(timelocs));
+                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
+                                Z=zeros(1,length(timevect));
+                                scatter3(timevect,zeroplace,Z,10,'s','filled','MarkerEdgeColor', 'k','MarkerFaceColor', 'k')
+                                
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
+                                
+                                % give everyone a colorbar
+                                if strcmp(options.caxis,'auto');
+                                    colorbar;
+                                    
+                                else
+                                    caxis(options.caxis);
+                                end
+                                
+                                view(0,0)
+                                xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim
+                                hold on
+                                grid on
+                            end
+                            
+                        case 'diff'
+                            
+                            X=linspace(min(STATS.xtimes(options.timeplot)),max(STATS.xtimes(options.timeplot)),length(STATS.xtimes(options.timeplot)));
+                            for q=1:length(subnames);
+                                
+                                % extract difference wave
+                                test_stat=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.test_stat(options.FactorA(i),options.timeplot);
+                                
+                                % begin plotting
+                                figure(y);
+                                subplot(length(subnames),1,q);
+                                imagesc(X,[],test_stat(1,:))
+                                hold on
+                                set(gca,'YTickLabel',[]);
+                                
+                                % find where CI includes zero
+                                sigvect=ones(1,length(STATS.xtimes(options.timeplot)));
+                                CI_low(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(1,options.timeplot);
+                                CI_up(1,:)=STATS.subject_results.(factnames{v}).(subnames{q}).factor_A.CI{options.FactorA(i),1}(2,options.timeplot);
+                                
+                                for m=1:length(sigvect);
+                                    
+                                    if CI_low(m)<=0 && CI_up(m)>=0
+                                        sigvect(m)=0;
+                                    end
+                                    
+                                end
+                                
+                                timelocs=find(sigvect>0);
+                                zeroplace=zeros(1,length(timelocs))+1.5;
+                                timevect=(timelocs*(1000/STATS.srate))-abs(STATS.xtimes(options.timeplot(1)));
+                                scatter(timevect,zeroplace,10, 'k', 'MarkerFaceColor', 'k')
+                                
+                                set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS,q,v});
+                                set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS,q,v});
+                                
+                                
+                                
+                                % give everyone a colorbar
+                                if strcmp(options.caxis,'auto');
+                                    colorbar;
+                                    
+                                else
+                                    caxis(options.caxis);
+                                end
+                                
+                            end
+                    end
+                    
+                    % add a title and colorbar to the parent figure, and control its position
+                    
+                    if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
+                        ha=axes('visible', 'off');
+                        set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
+                        colorbar('FontSize',15);
+                        caxis(options.caxis)
+                    end
+                    
+                    h = axes('visible','off');
+                    ht=title(titlestr,'parent',h,'visible','on','Position',[.5 1.05 0]);
+                    set(ht,'Interpreter', 'none');
+                    y=y+1;
+                    clear lab1st lab2nd titlestr lab1stlist lab2ndlist
+                end
+                
+                
+            end
+            
+        end    
 end
 
 disp('******* Saving STATS structure *******')
@@ -601,8 +878,8 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
         for qq=1:length(subflds);
             
             % extract CI
-            CI_low(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(1,timeplot);
-            CI_up(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(2,timeplot);
+            CI_lower(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(1,timeplot);
+            CI_upper(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(2,timeplot);
             
             % extract difference wave
             pdiff=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).test_stat(oncon,timeplot);
@@ -615,7 +892,7 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
             hold on
             
             % plot CI
-            jbfill(STATS.TF_times(timeplot),CI_up,CI_low,CIcol,CIcol,1,1);
+            jbfill(STATS.TF_times(timeplot),CI_upper,CI_lower,CIcol,CIcol,1,1);
             hold on
             
             % plot diff wave

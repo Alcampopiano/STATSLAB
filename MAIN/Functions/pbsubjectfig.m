@@ -389,7 +389,6 @@ switch STATS.design
         numfigsA=size(options.FactorA,2);
         numfigsB=size(options.FactorB,2);
         
-        
         if ~isempty(options.FactorA);
             
             % get subject fields

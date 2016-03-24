@@ -183,6 +183,10 @@ switch STATS.design
         % loop and gather the filenames for each level of Factor A separately
         %%%%
         if isempty(condfiles);
+            
+            % stop being an empty character
+            clear condfiles;
+            
             k=1;
             for j=1:STATS.levels(1)
                 

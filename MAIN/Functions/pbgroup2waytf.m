@@ -453,18 +453,18 @@ CIupbootAB=cell(conABcol,1);
 
 % edit may 8th/15
 % clean temporary mapped files
-try
-    if iscell(tmpfname)
-        for i=1:length(tempfname);
-            delete(tempfname{i});
-        end
-        
-    else
-        delete(tempfname);
-    end
-catch
-    
-end
+% try
+%     if iscell(tmpfname)
+%         for i=1:length(tempfname);
+%             delete(tempfname{i});
+%         end
+%         
+%     else
+%         delete(tempfname);
+%     end
+% catch
+%     
+% end
 
 %close(h3)
 end
