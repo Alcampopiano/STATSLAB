@@ -172,7 +172,7 @@ else
         end
         
     elseif strcmp(STATS.design,'bw'); % considered not factorial in single-subject cases
-         band_fields=fieldnames(STATS.subject_results.Factor_A1.subject_1);
+        band_fields=fieldnames(STATS.subject_results.Factor_A1.subject_1);
         
         options = struct('FactorA', []);
         
@@ -686,7 +686,7 @@ switch STATS.design
                     pval_prop=pval_gather./length(subnames);
                     
                     for j=1:STATS.levels(2);
-
+                        
                         % get the condition waveforms
                         if STATS.subject_results.(factnames{1}).subject_1.(fields{1}).factor_A.contrasts(j,options.FactorA(i))==1
                             %plot1st(k,:)=STATS.condwaves_trim(j,:);
@@ -705,7 +705,7 @@ switch STATS.design
                             m=m+1;
                         end
                         
-
+                        
                         
                         y=y+1;
                     end
@@ -754,7 +754,7 @@ switch STATS.design
                     h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
                     colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
                     
-                    set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [leg1st,'-',leg2nd], options.timeplot, options.FactorA(i), 'A'});
+                    set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [STATS.jlabels{v},' @ ',leg1st,' - ',leg2nd], options.timeplot, options.FactorA(i), ['A', num2str(v)]});
                     
                     hsub(4)=subplot(4,1,4);
                     h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pval_prop(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
@@ -777,13 +777,13 @@ switch STATS.design
                     
                     % clear variables before next iteration
                     clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
-                 end
+                end
                 
-               %y=y+STATS.levels(2)-1; 
-               
+                %y=y+STATS.levels(2)-1;
+                
             end
             
-        end    
+        end
 end
 
 disp('******* Saving STATS structure *******')
@@ -795,45 +795,94 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
         
         diffcol=[0 0 0];
         CIcol=[.5 .5 .5];
-        
-        flds=fieldnames(STATS.sample_results);
-        subflds=fieldnames(STATS.subject_results);
         %get the point that was clicked on
         cP = get(gca,'Currentpoint');
         % ms_plot = cP(1,1);
         freqclick = cP(1,2);
         [V I]=min(abs(STATS.TF_freqs-freqclick));
-        fact=['factor_', onfact];
         
-        figure;
-        for qq=1:length(subflds);
+        
+        if ~strcmp(STATS.design, 'bw')
+            flds=fieldnames(STATS.sample_results);
+            subflds=fieldnames(STATS.subject_results);
             
-            % extract CI
-            CI_lower(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(1,timeplot);
-            CI_upper(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(2,timeplot);
+            fact=['factor_', onfact];
             
-            % extract difference wave
-            pdiff=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).test_stat(oncon,timeplot);
+            figure;
+            for qq=1:length(subflds);
+                
+                % extract CI
+                CI_lower(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(1,timeplot);
+                CI_upper(1,:)=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).CI{oncon,1}(2,timeplot);
+                
+                % extract difference wave
+                pdiff=STATS.subject_results.(subflds{qq}).(flds{I}).(fact).test_stat(oncon,timeplot);
+                
+                % begin plotting
+                
+                subplot(length(subflds),1,qq);
+                % plot zeroline
+                plot(STATS.TF_times(timeplot),zeros(1,length(STATS.TF_times(timeplot))),'r','LineWidth',1);
+                hold on
+                
+                % plot CI
+                jbfill(STATS.TF_times(timeplot),CI_upper,CI_lower,CIcol,CIcol,1,1);
+                hold on
+                
+                % plot diff wave
+                plot(STATS.TF_times(timeplot),pdiff,'Color',diffcol);
+                axis tight
+                grid on
+            end
             
-            % begin plotting
-            
-            subplot(length(subflds),1,qq);
-            % plot zeroline
-            plot(STATS.TF_times(timeplot),zeros(1,length(STATS.TF_times(timeplot))),'r','LineWidth',1);
-            hold on
-            
-            % plot CI
-            jbfill(STATS.TF_times(timeplot),CI_upper,CI_lower,CIcol,CIcol,1,1);
-            hold on
-            
-            % plot diff wave
-            plot(STATS.TF_times(timeplot),pdiff,'Color',diffcol);
+            htit = axes('visible','off');
+            tit=title([titl, ' -> ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');
+            % get rid of subscripts that occur when there are underscores
+            set(tit,'Interpreter', 'none');
             axis tight
             grid on
+            
+        elseif strcmp(STATS.design, 'bw')
+            
+            fact=['Factor_', onfact];
+            flds=fieldnames(STATS.sample_results);
+            subflds=fieldnames(STATS.subject_results.(fact));
+            
+            figure;
+            for qq=1:length(subflds);
+                
+                % extract CI
+                CI_lower(1,:)=STATS.subject_results.(fact).(subflds{qq}).(flds{I}).factor_A.CI{oncon,1}(1,timeplot);
+                CI_upper(1,:)=STATS.subject_results.(fact).(subflds{qq}).(flds{I}).factor_A.CI{oncon,1}(2,timeplot);
+                
+                % extract difference wave
+                pdiff=STATS.subject_results.(fact).(subflds{qq}).(flds{I}).factor_A.test_stat(oncon,timeplot);
+                
+                % begin plotting
+                subplot(length(subflds),1,qq);
+                % plot zeroline
+                plot(STATS.TF_times(timeplot),zeros(1,length(STATS.TF_times(timeplot))),'r','LineWidth',1);
+                hold on
+                
+                % plot CI
+                jbfill(STATS.TF_times(timeplot),CI_upper,CI_lower,CIcol,CIcol,1,1);
+                hold on
+                
+                % plot diff wave
+                plot(STATS.TF_times(timeplot),pdiff,'Color',diffcol);
+                axis tight
+                grid on
+            end
+            
+            htit = axes('visible','off');
+            tit=title([titl, ' -> ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');  
+            % get rid of subscripts that occur when there are underscores
+            set(tit,'Interpreter', 'none');
+            axis tight
+            grid on
+            
+
         end
-        
-        htit = axes('visible','off');
-        title([titl, ' at ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');
     end
 
 end
