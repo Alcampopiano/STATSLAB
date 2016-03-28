@@ -34,11 +34,11 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 
 % jlables -> 
 % 
-% 	For between-within designs only. Name of the general within-subjects conditions. 
+% 	For between-within designs only. Name of the general within-subjects conditions separated by a space on the same line
 % 
 % klabels ->
 % 
-% 	For between-within designs only. Name of the general between-subjects conditions.
+% 	For between-within designs only. Name of the general between-subjects conditions separated by a space on the same line
 % 
 % For example,
 % 
@@ -59,9 +59,9 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % ConA
 % 1 -1 0
 % klabels
-% face, house, butterfly
+% face house butterfly
 % jlabels
-% male, female
+% male female
 % 
 % No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics. 
 % 
