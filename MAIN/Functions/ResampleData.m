@@ -69,7 +69,7 @@ STATS.history.ResampleData=hist_str;
 STATS.nboot=nboot;
 
 % set defaults, with only one option this makes no sense, but if more get
-% added it is exandable in this for
+% added it is exandable 
 options.trialcap='none';
 
 

@@ -32,6 +32,14 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 
 % 	[numeric] - Contrast matrix for the interaction, if applicable. 
 % 
+% jlables -> 
+% 
+% 	For between-within designs only. Name of the general within-subjects conditions. 
+% 
+% klabels ->
+% 
+% 	For between-within designs only. Name of the general between-subjects conditions.
+% 
 % For example,
 % 
 % FWE
@@ -44,7 +52,18 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 1 -1 -1 1
 % 
 % 
-% Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 - 4]).
+% Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 – 4]).
+% 
+% FWE
+% none
+% ConA
+% 1 -1 0
+% klabels
+% face, house, butterfly
+% jlabels
+% male, female
+% 
+% No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics. 
 % 
 % Using SubjectStatistics at the commandline:
 %  
@@ -56,6 +75,9 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 
 % For a 1-way design with 3 conditions:
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
+% 
+% For a 2-way between-within design with 3 conditions for each level of Factor A:
+% [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]', 'jlabels', {'male', 'female'}, 'klabels', {'face', 'house', 'butterfly'});
 % 
 % ***end***
 % 

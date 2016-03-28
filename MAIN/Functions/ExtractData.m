@@ -1,3 +1,4 @@
+%                                                                                          
 % This function extracts various dependent measures (e.g., ICs, gfa, microvolts) from EEGLAB's .set files. The output files are then used in the subsequent module ResampleData.m
 %                                                                                          
 % 
@@ -57,31 +58,34 @@
 % 
 % Options are specified in pairs (key -> val)
 % 
+% Trimval ->
+% 
+% 	proportion	[numeric] The proportion from each tail you would like to trim (default is .2). Value is between 0 - 1.
+%
 % Measure ->
 % 		
-% 	icamax      project IC to channel with max weight
+% 	icamax		project IC to channel with max weight
 % 		
-% 	icagfa      project IC to scalp and measure scalp GFA
+% 	icagfa		project IC to scalp and measure scalp GFA
 % 		
-% 	icaitc      project IC to selected channel and calculate inter-trial coherence
+% 	icaitc		project IC to selected channel and calculate inter-trial coherence
 % 		
-% 	icaersp     project IC to selected channel and calculate event-related spectral perturbation
+% 	icaersp		project IC to selected channel and calculate event-related spectral perturbation
 % 		
-% 	icascalp    project IC to selected channel and measure microvolt
+% 	icascalp	project IC to selected channel and measure microvolt
 % 		
-% 	scalpitc    inter-trial coherence for selected channel
+% 	scalpitc	inter-trial coherence for selected channel
 % 		
-% 	scalpersp   event-related spectral perturbation for selected channel
+% 	scalpersp	event-related spectral perturbation for selected channel
 % 		
-% 	scalpgfa    global field power for scalp
+% 	scalpgfa	global field power for scalp
 % 		
-% 	scalpchan   measure microvolts for selected scalp channel
+% 	scalpchan	measure microvolts for selected scalp channel
 % 		
-% ICs ->	
-%
-% 	persubject      bring up GUI to enter IC indexes for each subject and condition
+% ICs ->		
+% 	persubject		bring up GUI to enter IC indexes for each subject and condition
 % 
-% 	your_IC_file.mat        name of file that hold IC indexes (you can make file using the “persubject” option first
+% 	your_IC_file.mat	name of file that hold IC indexes (you can make file using the 					“persubject” option first
 % 		
 % 		
 % Chans ->		
@@ -93,7 +97,7 @@
 % 	
 % 
 % 		
-% tfcycles,freqs,nfreqs,tfbsline -> 		
+% tfcycles,freqs,nfreqs -> 		
 % 		
 % 	see EEGLAB's newtimef for these key & val options	
 % 		
@@ -158,7 +162,7 @@ options.tfcycles=[3 .5]; % spectral opts
 options.freqs=[3 30]; % spectral opts
 options.nfreqs=27;
 %options.timesout=600; % spectral opts
-options.tfbsline='none'; % TF baseline default
+%options.tfbsline='none'; % TF baseline default
 
 
 % get field names

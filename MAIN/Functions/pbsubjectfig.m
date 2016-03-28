@@ -1,28 +1,5 @@
 function [STATS]=pbsubjectfig(STATS,infodisplay,varargin)
-% build figure for group results
-% varargin can be 'all' which plots all contrasts for all factors, or
-% specify what you want with name/val pairs:
-% ...'FactorA', [1 2 3], 'FactorB', [1], 'FactorAB', [1])
-% Defaults for contrasts to use are empty, so ommiting one of the factors will not produce any plot for that one.
-% infodisplay is a flag 1 or 0 that will spit out the contrast matrices and condition lables for you to look at in the command window
-% infodisplay default is set to 0.
 
-% varargin also specifies a plot type with key/pair terms:
-% e.g., 'plottype', ->> 'wave', 'diff', or 'CI_MOE', (default is 'CI_MOE')
-% see documentation for detailed examples
-
-% 
-% 
-% if isempty(STATS)
-%     [fnamestats]=uigetfile('*.mat','Select the STATS structure for this analysis');
-%     load(fnamestats);
-% else
-%     load(STATS);
-% end
-% 
-% % set history
-% [hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],infodisplay,varargin);
-% STATS.history.SubjectFigure=hist_str;
 
 
 % special case where using 'all' plots all possible contrasts
