@@ -10,6 +10,11 @@
 % 
 % ***nboot*** 
 % number of resamples you wish to take from the single-trials ***end***
+%
+% ***trim*** 
+% Percent of data to trim from each tail of the distribution. Single-trial data is trimmed at each time point 
+% for each subject prior to calculating channel ERPs or spectral measures. 
+% The 20% trimmed mean is a good choice in general (Wilcox, 2012) ***end***
 % 
 % ***varargin***
 % Options are specified in pairs (key -> val)
@@ -29,7 +34,7 @@
 % 
 % Using ResampleData at the commandline:
 % 
-% ResampleData(STATS, [], 1000, 'trialcap', 'none');
+% ResampleData(STATS, [], 1000, 20, 'trialcap', 'none');
 % ***end***
 %
 % Copyright (C) <2015>  <Allan Campopiano>
@@ -51,7 +56,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-function [STATS]=ResampleData(STATS,condfiles,nboot,varargin)
+function [STATS]=ResampleData(STATS,condfiles,nboot,trim,varargin)
 
 % bring in STATS stucture
 if isempty(STATS)
@@ -62,11 +67,15 @@ else
 end
 
 % set history
-[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,nboot,varargin);
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,nboot,trim,varargin);
 STATS.history.ResampleData=hist_str;
 
 % add field to STATS
 STATS.nboot=nboot;
+STATS.trim=trim;
+
+% convert trim value to something matlab will understand
+trim=trim*2;
 
 % set defaults, with only one option this makes no sense, but if more get
 % added it is exandable 
@@ -196,7 +205,7 @@ for filecurrent=1:colfile;
                 bootcell=datacell{1}(:,:,bootvect);
                 
                 % trimmed channel ERPs
-                chan_erps=trimmean(bootcell,40,3);
+                chan_erps=trimmean(bootcell,trim,3);
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
@@ -264,7 +273,7 @@ for filecurrent=1:colfile;
                                 pow  = tfdata.*conj(tfdata); % power
                                 
                                 % baseline based on trimmed mean
-                                pow_avg=trimmean(pow,40,3);
+                                pow_avg=trimmean(pow,trim,3);
                                 mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
                                 
                                 % remove (divide by) baseline vals
@@ -280,7 +289,7 @@ for filecurrent=1:colfile;
                                 %clear itc powbase times freqs erspboot itcboot
                                 
                                 % rescale to dB
-                                pow_boot=trimmean(pow(:,:,bootvect),40,3);
+                                pow_boot=trimmean(pow(:,:,bootvect),trim,3);
                                 pow_boot = 10 * log10(pow_boot);
                                 
                                 % write to disk
@@ -334,7 +343,7 @@ for filecurrent=1:colfile;
                             pow  = tfdata.*conj(tfdata); % power
                             
                             % baseline based on trimmed mean
-                            pow_avg=trimmean(pow,40,3);
+                            pow_avg=trimmean(pow,trim,3);
                             mbase = mean(pow_avg(:,1:ind-1),2); % baseline vals
                             
                             % remove (divide by) baseline vals
@@ -349,7 +358,7 @@ for filecurrent=1:colfile;
                             %clear itc powbase times freqs erspboot itcboot
                             
                             % rescale to dB                          
-                            pow_boot=trimmean(pow(:,:,bootvect),40,3);
+                            pow_boot=trimmean(pow(:,:,bootvect),trim,3);
                             pow_boot = 10 * log10(pow_boot);
                             
                             % write to disk

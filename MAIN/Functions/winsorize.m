@@ -1,6 +1,9 @@
 function [windata] = winsorize(data,tr)
 % winsorize columns of input matrix or vector (data)
-% 20% winsorising (.2) is usually recommended, however, you must specify this in the input
+% 20% winsorising is usually recommended, however, you must specify this in the input
+
+% make tr a proportion (so the toolbox is consistent with how one specifies trimming throughout)
+tr=tr/100;
 
 % winsorize data
 [rows cols]=size(data);

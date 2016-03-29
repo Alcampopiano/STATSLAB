@@ -76,7 +76,7 @@ end
 if statslab_propgrid.logical_resample==1;
     
     % initiate partial function string
-    funcstr='ResampleData([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_resample,statslab_propgrid.nboot,';
+    funcstr='ResampleData([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_resample,statslab_propgrid.nboot,statslab_propgrid.trim,';
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_resample);
     

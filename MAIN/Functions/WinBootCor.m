@@ -16,8 +16,8 @@ function [STATS]=WinBootCor(STATS,infodisplay,nboot,tr,Ylabel,varargin)
 % 
 %     nboot = Number of bootstrap samples to take from the paired X and Y data.
 % 
-%     tr = percentage to winsorize from the X and Y data. Keep as decimal
-%          place (e.g., .2 for 20%, .5 for 50% etc). Recommendation is usually .2
+%     tr = percentage to winsorize from the X and Y data. Recommendation is
+%           usually 20
 % 
 %     Ylabel = A string, or cell array of strings, indicating your Y variable(s) (correltaes) that will each be correlated, one by one,
 %             with your EEG waveform (X variable). For example, {'RTs','accuracy', 'perfectionism_scores'}.
@@ -36,15 +36,15 @@ function [STATS]=WinBootCor(STATS,infodisplay,nboot,tr,Ylabel,varargin)
 % Examples (these are just examples. For large designs, the number of possible pariwise or pooled comparisons increases exponentially,
 % and the ability to interpet anything decreases exponentially):
 % 
-% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RT','Condition',3)
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,'RT','Condition',3)
 % 
-% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'Condition',1)
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy'},'Condition',1)
 % 
-% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy'},'FactorAB',1, 'interaction')
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy'},'FactorAB',1, 'interaction')
 % 
-% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,{'RTs', 'accuracy', 'shyness_scores'},'FactorB',2,'Easy_vs_hard_SLEEPY')
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy', 'shyness_scores'},'FactorB',2,'Easy_vs_hard_SLEEPY')
 % 
-% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,.2,'RTs','FactorA2',2,'Easy_vs_hard_SLEEPY') % for 'bw' designs
+% [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,'RTs','FactorA2',2,'Easy_vs_hard_SLEEPY') % for 'bw' designs
 % 
 % To plot:
 % simply use the below and after "corr_results", change to your condition/factor label (type STATS.condnames for a reminder of condition names) followed by Y label:

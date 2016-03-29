@@ -57,10 +57,6 @@
 % ***varargin***
 % 
 % Options are specified in pairs (key -> val)
-% 
-% Trimval ->
-% 
-% 	proportion	[numeric] The proportion from each tail you would like to trim (default is .2). Value is between 0 - 1.
 %
 % Measure ->
 % 		
@@ -85,7 +81,7 @@
 % ICs ->		
 % 	persubject		bring up GUI to enter IC indexes for each subject and condition
 % 
-% 	your_IC_file.mat	name of file that hold IC indexes (you can make file using the 					“persubject” option first
+% 	your_IC_file.mat	name of file that hold IC indexes (you can make file using the “persubject” option first
 % 		
 % 		
 % Chans ->		
@@ -94,12 +90,10 @@
 % 
 % 	chanlabels 	The channel labels for electrodes you are analyzing (applied to all subjects)
 % 
-% 	
-% 
 % 		
 % tfcycles,freqs,nfreqs -> 		
 % 		
-% 	see EEGLAB's newtimef for these key & val options	
+%       To be used with the itc and ersp options. See EEGLAB's newtimef.m for information on these key & val options	
 % 		
 % For example,
 % 		

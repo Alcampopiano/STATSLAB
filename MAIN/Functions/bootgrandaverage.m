@@ -25,7 +25,8 @@ if length(design)~=length(varargin);
         'For example, for a 1-way design with 3 levels the last input would be 3']);
 end
 
-
+% make trim value understandable to matlab
+trim=STATS.trim*2;
 
 
 if any(strcmp({'chanclust' 'gfa'},STATS.measure));
@@ -54,7 +55,7 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
                         subdata_gather(:,:,h)=tmpdata.data;
                     end
                     
-                    datacell{1,q}=trimmean(subdata_gather,40,3);
+                    datacell{1,q}=trimmean(subdata_gather,trim,3);
                     
                     q=q+1;
                 end
@@ -74,7 +75,7 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
                     subdata_gather(:,:,h)=tmpdata.data;
                 end
                 
-                datacell{1,q}=trimmean(subdata_gather,40,3);
+                datacell{1,q}=trimmean(subdata_gather,trim,3);
                 
             end
             
@@ -92,7 +93,7 @@ if any(strcmp({'chanclust' 'gfa'},STATS.measure));
                     subdata_gather(:,:,h)=tmpdata.data;
                 end
                 
-                datacell{1,j}=trimmean(subdata_gather,40,3);
+                datacell{1,j}=trimmean(subdata_gather,trim,3);
             end
             
             clear subdata_gather tmpdata
@@ -128,7 +129,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                             
                         end
                         
-                        mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
+                        mapwrite(trimmean(subdata_gather,trim,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
                         clear subdata_gather
                     end
                     
@@ -160,7 +161,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                     end
                     
-                    mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
+                    mapwrite(trimmean(subdata_gather,trim,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
                     clear subdata_gather
                 end
                 
@@ -193,7 +194,7 @@ elseif any(strcmp({'ersp' 'itc'},STATS.measure));
                         
                     end
                     
-                    mapwrite(trimmean(subdata_gather,40,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
+                    mapwrite(trimmean(subdata_gather,trim,3),['temp_groupboots_',STATS.savestring,'_',STATS.condnames{q},'.map'],'datsize',[STATS.nboot STATS.timesout STATS.freqbins]);
                     
                 end
                 
