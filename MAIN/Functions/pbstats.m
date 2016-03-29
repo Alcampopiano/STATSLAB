@@ -90,6 +90,25 @@ switch FWE
             confup(i,1)=temp(CIup);
         end
         
+    case 'Bon'
+        
+        % FWE corrections to p values
+        dvec=alpha./(2*(1:connum));
+        dvec=2*dvec;
+        zvec=dvec(1:connum);
+        %[~, pvalgen_inds]=sort(0-pvalgen);
+        pcrit=zvec;
+        
+        %CIs around contrast differences
+        CIlow=round(dvec(connum)*nboot/2)+1;
+        CIup=nboot-CIlow-1;
+        
+        for i=1:connum;
+            temp=sort(psihat(i,:));
+            conflow(i,1)=temp(CIlow);
+            confup(i,1)=temp(CIup);
+        end
+        
     case 'none'
         
         dvec=zeros(1:connum);

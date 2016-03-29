@@ -19,6 +19,7 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 	
 % 	none  - no control for familywise error 
 % 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
+%   Bon - use Bonferroni method to correct for FWE
 %  
 % ConA ->
 %  
