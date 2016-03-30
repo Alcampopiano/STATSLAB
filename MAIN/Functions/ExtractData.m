@@ -847,7 +847,7 @@ STATS.tfcycles=options.tfcycles;
 STATS.freqs=options.freqs;
 STATS.nfreqs=options.nfreqs;
 %STATS.timesout=options.timesout;
-STATS.tfbsline=options.tfbsline;
+%STATS.tfbsline=options.tfbsline;
 STATS.chanlabels=options.chans;
 
 
