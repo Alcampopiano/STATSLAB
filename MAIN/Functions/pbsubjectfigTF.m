@@ -328,6 +328,8 @@ switch STATS.design
             % clear variables before next iteration
             clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
             
+            % reset
+            pval_gather=zeros(length(band_fields), length(STATS.TF_times));
         end
         
         
@@ -436,7 +438,9 @@ switch STATS.design
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
                 
-                
+                % reset
+                pval_gather=zeros(length(band_fields), length(STATS.TF_times));
+
             end
         end
         
@@ -544,6 +548,9 @@ switch STATS.design
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
                 
+                % reset
+                pval_gather=zeros(length(band_fields), length(STATS.TF_times));
+                
             end
         end
         
@@ -645,6 +652,9 @@ switch STATS.design
                 
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
+                
+                % reset
+                pval_gather=zeros(length(band_fields), length(STATS.TF_times));
                 
             end
         end
@@ -777,10 +787,12 @@ switch STATS.design
                     
                     % clear variables before next iteration
                     clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
+                    
+                    % reset
+                    pval_gather=zeros(length(band_fields), length(STATS.TF_times));
                 end
                 
                 %y=y+STATS.levels(2)-1;
-                
             end
             
         end
