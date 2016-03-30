@@ -1,4 +1,4 @@
-function [sample_results condwaves condfiles_subs] = pbgroup2waytf(STATS, condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, nsamp, design, condnames, varargin)
+function [sample_results condwaves condfiles_subs] = pbgroup2waytf(STATS, condfiles, numconds, numpnts, nboot, jlvls, klvls, alpha, design, condnames, varargin)
 tic
 %{
 
@@ -130,7 +130,7 @@ end
 
 % this function builds bootstrap inds and writes them to the drive instead
 % of holding them in RAM, which makes it scalable (e.g., for 100,000 resamples!)
-[rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nsamp,design,jlvls,klvls);
+[rowfile cond_bootvect tmpfname]=bootinds(condfiles_subs,nboot,design,jlvls,klvls);
 
 % preallocate cell arrays used to accumulate the nsamp CIs
 CIlowbootA=cell(conAcol,1);

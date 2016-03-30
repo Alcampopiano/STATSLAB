@@ -1,4 +1,4 @@
-function [STATS]=GroupStatistics(STATS,condfiles,alpha,nsamp,varargin)
+function [STATS]=GroupStatistics(STATS,condfiles,alpha,varargin)
 
 % Calculates group-level statistics for any number of levels, and up to two-way designs of any type (between subjects, withing subjects, mixed).
 %  
