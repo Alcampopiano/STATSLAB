@@ -426,7 +426,8 @@ data=guidata(gcf);
 data.chanarray{data.subind,data.condind*2}=labs;
 
 % gather edit box entry and set new inds in data struct
-newinds = str2double(get(object_handle, 'string'));
+%newinds = str2double(get(object_handle, 'string'));
+newinds = str2num(get(object_handle, 'string'));
 
 % clear box
 set(object_handle, 'string', '')
