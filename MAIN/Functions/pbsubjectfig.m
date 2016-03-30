@@ -234,6 +234,7 @@ switch STATS.design
                             
                             % plot diff wave
                             plot(STATS.xtimes(options.timeplot),plotdiff,'Color',options.diffcol);
+                            axis tight
                             ylim(gca,options.yaxis);
                             grid on
                             
