@@ -509,7 +509,8 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 
             end % end of r loop
             htit = axes('visible','off');
-            title([num2str(ms_plot),'ms'],'parent',htit,'visible','on');
+            tit=title([num2str(ms_plot),'ms'],'parent',htit,'visible','on');
+            set(tit,'Interpreter', 'none');
             %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
             
             % get and set title handle

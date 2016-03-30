@@ -569,7 +569,8 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
         axis tight
         grid on
         
-        title([titl, ' at ', num2str(STATS.TF_freqs(I)), ' Hz']);
+        tit=title([titl, ' at ', num2str(STATS.TF_freqs(I)), ' Hz']);
+        set(tit,'Interpreter', 'none');
     end
 
 
