@@ -89,7 +89,7 @@ if statslab_propgrid.logical_group==1;
     
     % initiate partial function string
     funcstr=['GroupStatistics([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condfiles_group,'...
-        'statslab_propgrid.alpha_group,statslab_propgrid.nsamp,'];
+        'statslab_propgrid.alpha_group,'];
     
     [funcstr]=varargin_spilt(funcstr,statslab_propgrid.varargin_group);
     

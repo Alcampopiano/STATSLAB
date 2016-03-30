@@ -54,13 +54,13 @@ function [STATS]=GroupStatistics(STATS,condfiles,alpha,nsamp,varargin)
 % Using GroupStatistics at the commandline:
 %  
 % For a 1-way design with 2 conditions (like a t-test):
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'none', 'conA', [1 -1]');
+% [STATS]=GroupStatistics(STATS,.05,'FWE', 'none', 'conA', [1 -1]');
 %  
 % For a 2-way design with 4 conditions (2x2):
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
+% [STATS]=GroupStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
 % 
 % For a 1-way design with 3 conditions:
-% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
+% [STATS]=GroupStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
 % 
 % ***end***
 %
@@ -92,12 +92,12 @@ else
 end
 
 % set history
-[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,alpha,nsamp,varargin);
+[hist_str]=statslab_history(['STATS_', STATS.savestring, '.mat'],condfiles,alpha,varargin);
 STATS.history.GroupStatistics=hist_str;
 
 % update STATS structure
 STATS.alpha=alpha;
-STATS.nsamp=nsamp;
+%STATS.nsamp=nsamp;
 
 % call appropriate stats functions based on input arguments
 switch STATS.design
@@ -108,12 +108,12 @@ switch STATS.design
         if any(strcmp({'ersp' 'itc'},STATS.measure));
             
             [sample_results condwaves condfiles_subs] = pbgroup2waytf(STATS, condfiles, STATS.numconds, STATS.timesout, STATS.nboot, ...
-                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
+                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.design, STATS.condnames, varargin{:});
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
             [sample_results condwaves condfiles_subs condwaves_trim]=pbgroup2way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
-                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
+                STATS.levels(1), STATS.levels(2), STATS.alpha, STATS.design, STATS.condnames, varargin{:});
                       
         end
         
@@ -137,12 +137,12 @@ switch STATS.design
         if any(strcmp({'ersp' 'itc'},STATS.measure));
             
             [sample_results condwaves condfiles_subs] = pbgroup1waytf(STATS, condfiles, STATS.numconds, STATS.timesout, STATS.nboot, ...
-                STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
+                STATS.levels(1), STATS.alpha, STATS.design, STATS.condnames, varargin{:});
             
         elseif any(strcmp({'chanclust' 'gfa'},STATS.measure));
             
             [sample_results condwaves condfiles_subs condwaves_trim]=pbgroup1way(STATS,condfiles, STATS.numconds, STATS.numpnts, STATS.nboot, ...
-                STATS.levels(1), STATS.alpha, STATS.nsamp, STATS.design, STATS.condnames, varargin{:});
+                STATS.levels(1), STATS.alpha, STATS.design, STATS.condnames, varargin{:});
             
         end
         
