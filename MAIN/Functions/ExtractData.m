@@ -302,6 +302,9 @@ switch options.measure
             
             for j=1:rowcond;
                 
+                % clear chanind so mistakes don't happen in life
+                clear chanind
+                
                 % load file
                 EEG = pop_loadset('filename',condfiles_subs{i}{j},'filepath',pathtofiles{i});
                 EEG = eeg_checkset(EEG);
