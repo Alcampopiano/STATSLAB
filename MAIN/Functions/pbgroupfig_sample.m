@@ -475,7 +475,7 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
                 alltext=findall(oh,'Type','text');
                 delete(alltext);
-                text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized') % add subject numbers to bottom centre of subplots
+                text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized', 'interpreter', 'none') % add subject numbers to bottom centre of subplots
                 
                 if isempty(maplim)
                     colorbar;

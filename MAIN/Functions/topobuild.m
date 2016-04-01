@@ -9,8 +9,15 @@ if strcmp(figtype, 'group')
     
 elseif strcmp(figtype, 'subject') && ~strcmp(STATS.design, 'bw')
     % determine the set files that were used in the statistics
-    topocell=STATS.subject_bootfiles;
-    bootfiles=STATS.subject_bootfiles;
+    %topocell=STATS.subject_bootfiles;
+    %bootfiles=STATS.subject_bootfiles;
+    
+    topocell=cell(1,STATS.numconds);
+    for k=1:STATS.levels(1);
+        topocell{k}(:,1)=STATS.subject_bootfiles(:,k)';
+        
+    end
+    bootfiles=topocell;
     
 elseif strcmp(figtype, 'subject') && strcmp(STATS.design, 'bw')
     % determine the set files that were used in the statistics
