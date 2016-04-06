@@ -58,7 +58,7 @@
 % 
 % Options are specified in pairs (key -> val)
 %
-% Measure ->
+% measure ->
 % 		
 % 	icamax		project IC to channel with max weight
 % 		
@@ -84,7 +84,7 @@
 % 	your_IC_file.mat	name of file that hold IC indexes (you can make file using the “persubject” option first
 % 		
 % 		
-% Chans ->		
+% chans ->		
 % 
 % 	persubject	bring up montage GUI to select channels for each subject and condition
 % 

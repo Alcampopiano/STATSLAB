@@ -53,6 +53,6 @@ for i=1:numconds;
     j=j+2;
 end
 IC_choices=ICCHOICES;
-clearvars -global ICCHOICES
+clear -global ICCHOICES
 
 

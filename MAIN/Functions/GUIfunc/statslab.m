@@ -50,11 +50,11 @@ PropGridStr2=['global STATSLAB_PROPERTIES;' ...
     'eval',PropGridStr ...
     );
 
-if isempty(okayhit);clearvars -global STATSLAB_PROPERTIES;return;end
+if isempty(okayhit);clear -global STATSLAB_PROPERTIES;return;end
 
 global STATSLAB_PROPERTIES;
 statslab_propgrid=propgrid2struct(STATSLAB_PROPERTIES);
-clearvars -global STATSLAB_PROPERTIES
+clear -global STATSLAB_PROPERTIES
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pass GUI inputs into stats functions

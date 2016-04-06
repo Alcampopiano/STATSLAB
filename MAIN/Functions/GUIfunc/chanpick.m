@@ -5,7 +5,7 @@ tabsize=max(cell2mat(cellfun(@length,fnames,'un',0)));
 
 evstring='chantable;';
 
-clearvars -global CHANCHOICES
+clear -global CHANCHOICES
 
 global CHANCHOICES; 
 CHANCHOICES=cell(tabsize,numconds*2);
@@ -53,5 +53,5 @@ for i=1:numconds;
     j=j+2;
 end
 chan_choices=CHANCHOICES;
-clearvars -global CHANCHOICES
+clear -global CHANCHOICES
 
