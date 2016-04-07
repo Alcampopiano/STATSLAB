@@ -17,3 +17,6 @@ How to:
 
 STATSLAB wiki page:
 https://github.com/Alcampopiano/STATSLAB/wiki
+
+STATSLAB youtube tutorial:
+https://www.youtube.com/watch?v=U0lukdtVDvY
