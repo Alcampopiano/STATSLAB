@@ -34,14 +34,20 @@ ndatch=length(EEG.chanlocs);
 nndatch=size(newlocs.pnt,1)-ndatch;
 
 for i=1:ndatch;
-    EEG.chanlocs(i).X=newlocs.pnt(i,1);
-    EEG.chanlocs(i).Y=newlocs.pnt(i,2);
+    
+    % al hack to force the directions
+    % X and Y were switched and Y was made negative (-newlocs)
+    EEG.chanlocs(i).Y=-newlocs.pnt(i,1);
+    EEG.chanlocs(i).X=newlocs.pnt(i,2);
     EEG.chanlocs(i).Z=newlocs.pnt(i,3);
 end
 
 for i=1:nndatch;
-    EEG.chaninfo.nodatchans(i).X=newlocs.pnt(ndatch+i,1);
-    EEG.chaninfo.nodatchans(i).Y=newlocs.pnt(ndatch+i,2);
+    
+    % al hack to force the directions
+    % X and Y were switched and Y was made negative (-newlocs)
+    EEG.chaninfo.nodatchans(i).Y=-newlocs.pnt(ndatch+i,1);
+    EEG.chaninfo.nodatchans(i).X=newlocs.pnt(ndatch+i,2);
     EEG.chaninfo.nodatchans(i).Z=newlocs.pnt(ndatch+i,3);
 end
 

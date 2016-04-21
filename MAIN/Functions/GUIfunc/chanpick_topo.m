@@ -99,6 +99,13 @@ while sel
         % get string of current subject
         cursub=condfiles_subs{data.condind}{data.subind};
         tmpEEG = pop_loadset('filename',cursub,'filepath',pathtofiles{data.condind}, 'loadmode','info');
+        
+        % warp
+        tmpEEG = eeg_warplocs(tmpEEG, 'standard_1020.elc', ...
+            'landmarks',{'Nz','LPA','RPA'}, ...
+            'transform',[1 -21 -48.01 -0.075 0.005 -1.58 1065 1140 1105], ...
+            'manual','off');
+        
         tmpEEGlocs=tmpEEG.chanlocs;
         tmpEEGinfo=tmpEEG.chaninfo;
         %tmpEEG=load('-mat', [pathtofiles{data.condind} cursub]);
