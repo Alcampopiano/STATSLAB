@@ -1,12 +1,22 @@
-function [varargout]=statslab(nosplash)
+function [varargout]=statslab(opt)
 
-% version
-vercheck();
 
-% splash or no splash
 if nargin==1;
-    splash_fade;
+    % vercheck or no vercheck, splash or no splash
+    if strcmp(opt,'nover');
+        disp('not checking version');
+        
+    else
+        % version
+        vercheck();
+    end
+    
+    
+    if strcmp(opt,'splash');
+        splash_fade;
+    end
 end
+
 
 PropGridStr=['global STATSLAB_PROPERTIES;' ...
     'properties=propgridbuild();' ...

@@ -220,10 +220,10 @@ switch isfactorial
             
             hsub(4)=subplot(4,1,4);
             h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-            colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+            colormap(hsub(4),bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); %freezeColors;
             
             % add legend and font
-            set(gca,'FontSize',20)
+            set(gca,'FontSize',10)
             h=axes('visible','off');
             lh=title([leg1st,'-',leg2nd],'parent',h,'visible','on','Position',[.5 1.05 0]);
             
@@ -322,10 +322,10 @@ switch isfactorial
                 
                 hsub(4)=subplot(4,1,4);
                 h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                colormap(hsub(4),bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); %freezeColors;
                 
                 % add legend and font
-                set(gca,'FontSize',20);
+                set(gca,'FontSize',10);
                 h=axes('visible','off');
                 lh=title([leg1st,'-',leg2nd],'parent',h,'visible','on','Position',[.5 1.05 0]);
                 
@@ -422,10 +422,10 @@ switch isfactorial
                 
                 hsub(4)=subplot(4,1,4);
                 h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                colormap(hsub(4),bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); %freezeColors;
                 
                 % add legend and font
-                set(gca,'FontSize',20)
+                set(gca,'FontSize',10)
                 h=axes('visible','off');
                 lh=title([leg1st,'-',leg2nd],'parent',h,'visible','on','Position',[.5 1.05 0]);
                 
@@ -512,10 +512,10 @@ switch isfactorial
                 
                 hsub(2)=subplot(2,1,2);
                 h(2)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
-                colormap(bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); freezeColors;
+                colormap(hsub(2),bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); %freezeColors;
                 
                 % add legend and font
-                set(gca,'FontSize',20)
+                set(gca,'FontSize',10)
                 h=axes('visible','off');
                 lh=title(['(',leg1st,')','-','(',leg2nd,')'],'parent',h,'visible','on','Position',[.5 1.05 0]);
                 % get rid of subscripts that occur when there are underscores

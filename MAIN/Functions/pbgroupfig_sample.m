@@ -193,7 +193,7 @@ switch isfactorial
             h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
             set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
             set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
-            set(gca,'FontSize',20)
+            set(gca,'FontSize',10)
             lh=legend(leg1st,leg2nd);
             % get rid of subscripts that occur when there are underscores
             set(lh,'Interpreter', 'none');
@@ -261,7 +261,7 @@ switch isfactorial
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
                 set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
                 set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
-                set(gca,'FontSize',20)
+                set(gca,'FontSize',10)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
                 % get rid of subscripts that occur when there are underscores
@@ -331,7 +331,7 @@ switch isfactorial
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nd,'b','LineWidth',3);
                 set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
                 set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
-                set(gca,'FontSize',20)
+                set(gca,'FontSize',10)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
                 % get rid of subscripts that occur when there are underscores
@@ -396,7 +396,7 @@ switch isfactorial
                 h(2)=plot(STATS.xtimes(options.timeplot),plot2nddiff,'b','LineWidth',3);
                 set(gca,'ButtonDownFcn', {@mouseclick_callback,STATS});
                 set(allchild(gca),'buttondownfcn',{@mouseclick_callback,STATS});
-                set(gca,'FontSize',20)
+                set(gca,'FontSize',10)
                 %title('CS vs CT')
                 lh=legend(leg1st,leg2nd);
                 % get rid of subscripts that occur when there are underscores

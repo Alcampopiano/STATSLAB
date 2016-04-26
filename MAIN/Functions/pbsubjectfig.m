@@ -351,7 +351,7 @@ switch STATS.design
                 if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
-                    colorbar('FontSize',15);
+                    colorbar('FontSize',10);
                     caxis(options.caxis)
                 end
                 
@@ -537,7 +537,7 @@ switch STATS.design
                 if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
-                    colorbar('FontSize',15);
+                    colorbar('FontSize',10);
                     caxis(options.caxis)
                 end
                 
@@ -721,7 +721,7 @@ switch STATS.design
                 if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
-                    colorbar('FontSize',15);
+                    colorbar('FontSize',10);
                     caxis(options.caxis)
                 end
                 
@@ -904,7 +904,7 @@ switch STATS.design
                 if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                     ha=axes('visible', 'off');
                     set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
-                    colorbar('FontSize',15);
+                    colorbar('FontSize',10);
                     caxis(options.caxis)
                 end
                 
@@ -1104,7 +1104,7 @@ switch STATS.design
                     if ~strcmp(options.plottype,'wave') && ~strcmp(options.caxis,'auto')
                         ha=axes('visible', 'off');
                         set(ha, 'Units', 'Normalized', 'Position', [.9, 0.05, .015, .9]);
-                        colorbar('FontSize',15);
+                        colorbar('FontSize',10);
                         caxis(options.caxis)
                     end
                     

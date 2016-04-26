@@ -12,6 +12,9 @@
 % Copyright 2009-2010 Levente Hunyadi
 function jclass = javaclass(mtype, ndims)
 
+warning off MATLAB:subscripting:noSubscriptsSpecified
+warning off MATLAB:nargchk:deprecated
+
 validateattributes(mtype, {'char'}, {'nonempty','row'});
 if nargin < 2
     ndims = 0;
