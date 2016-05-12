@@ -1,20 +1,19 @@
 function [varargout]=statslab(opt)
 
+disp('to disable version checking (not recommended), use: statslab(''nover'')');
 
 if nargin==1;
     % vercheck or no vercheck, splash or no splash
     if strcmp(opt,'nover');
         disp('not checking version');
-        
-    else
-        % version
-        vercheck();
-    end
-    
-    
-    if strcmp(opt,'splash');
+
+    elseif strcmp(opt,'splash');
         splash_fade;
     end
+    
+    
+else
+    vercheck();
 end
 
 
