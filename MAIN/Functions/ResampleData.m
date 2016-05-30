@@ -363,6 +363,8 @@ for filecurrent=1:colfile;
                     
                     for bootcurrent=1:nboot;
                         
+                        bootvect=randi(pageEEG,1,trialEEG);
+                        
                         if bootcurrent==1;
                             
                             % compute TF info to get coeficients
