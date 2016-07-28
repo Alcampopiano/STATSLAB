@@ -617,7 +617,7 @@ switch options.measure
                 % save it with original filename but get rid of original
                 % extention (hence the 1:end-4)
                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                clear data
+                clear data chanind
                 
             end
         end
@@ -766,7 +766,7 @@ switch options.measure
                 % save it with original filename but get rid of original
                 % extention (hence the 1:end-4)
                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                clear data
+                clear data chanind
                 
             end
             
@@ -822,7 +822,7 @@ switch options.measure
                 % save it with original filename but get rid of original
                 % extention (hence the 1:end-4)
                 save([condfiles_subs{k}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-                clear data
+                clear data chanind
                 
             end
             
