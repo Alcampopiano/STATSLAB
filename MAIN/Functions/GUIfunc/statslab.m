@@ -163,7 +163,7 @@ if statslab_propgrid.logical_rw==1;
 
     % initiate partial function string
     funcstr=['WinBootCorFigure([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.condition_label_rw,'...
-        'statslab_propgrid.Ylable_rw);'];
+        'statslab_propgrid.Ylabel_rw);'];
     
     STATS=eval(funcstr);
     
@@ -174,7 +174,7 @@ if statslab_propgrid.logical_slope==1;
     
     % initiate partial function string
     funcstr=['SlopeCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
-        'statslab_propgrid.Ylable_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope);'];
+        'statslab_propgrid.Ylabel_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope);'];
     
     STATS=eval(funcstr);
     
@@ -185,7 +185,7 @@ if statslab_propgrid.logical_lowess==1;
     
     % initiate partial function string
     funcstr=['LowessCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_lowess, statslab_propgrid.condition_label_lowess,'...
-        'statslab_propgrid.Ylable_lowess, statslab_propgrid.msplot_lowess, statslab_propgrid.nboot_lowess, statslab_propgrid.span, statslab_propgrid.nbins);'];
+        'statslab_propgrid.Ylabel_lowess, statslab_propgrid.msplot_lowess, statslab_propgrid.nboot_lowess, statslab_propgrid.span, statslab_propgrid.nbins);'];
     
     STATS=eval(funcstr);
     

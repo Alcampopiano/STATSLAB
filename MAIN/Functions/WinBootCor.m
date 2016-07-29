@@ -264,9 +264,10 @@ else
 end
 
 % rename fields to Ylabels
-if ncols(Ydata)>1
+if size(Ydata,2)>1
+%if ncols(Ydata)>1
     
-    for i=1:ncols(Ydata)
+    for i=1:size(Ydata,2)
         oldfield=['Y',num2str(i)];
         [results.(Ylabel{i})] = results.(oldfield);
         results = rmfield(results,oldfield);
@@ -278,12 +279,12 @@ if ncols(Ydata)>1
     
 else % if Ydata is only one col
     oldfield='Y1';
-    [results.(Ylabel)] = results.(oldfield);
+    [results.(Ylabel{1})] = results.(oldfield);
     results = rmfield(results,oldfield);
     
     % add a number to tell me which y coloumn each label is associated
     % with, makes subsequent plotting functions easier to call
-    results.(Ylabel).ycol=1;
+    results.(Ylabel{1}).ycol=1;
 end
 
 % create corr_results structure in main STATS structure and give label

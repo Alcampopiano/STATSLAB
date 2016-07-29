@@ -58,6 +58,9 @@ end
 x_min=min(STATS.xtimes)/1000;
 x_max=max(STATS.xtimes)/1000;
 
+% make copy of ms to plot -> becasue I'm lazy
+myms=msplot;
+
 % this eqauls the TF to plot at NOT the ms
 msplot=round((msplot/1000-x_min)/(x_max-x_min) * (STATS.numpnts-1))+1;
 
@@ -65,7 +68,7 @@ if infodisplay
     disp('Winsorized/bootstrapped r value'); disp(STATS.corr_results.(Xlabel).(Ylabel).rw(msplot))
     disp('CI around rw'); disp(STATS.corr_results.(Xlabel).(Ylabel).CI(1:2,msplot));
     disp('p  value'); disp(STATS.corr_results.(Xlabel).(Ylabel).p(msplot))
-    disp('Time (ms)'); disp(msplot)
+    disp('Time (ms)'); disp(myms)
 end
 
 if strcmp(STATS.design,'ww');
