@@ -48,7 +48,7 @@ for i=1:length(infield)
         if i>1
             
             % check varargin for contrast keywords and add transpose operator
-            if strcmp(infield{i-1},'conA') || strcmp(infield{i-1},'conB') || strcmp(infield{i-1},'conAB')
+            if strcmpi(infield{i-1},'conA') || strcmpi(infield{i-1},'conB') || strcmpi(infield{i-1},'conAB')
                 
                 % entry should be numeric, so build appropriate string
                 % with transpose

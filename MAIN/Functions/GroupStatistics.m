@@ -41,11 +41,11 @@ function [STATS]=GroupStatistics(STATS,condfiles,alpha,varargin)
 % 
 % FWE
 % Rom
-% ConA
+% conA
 % 1 0 -1 0; 0 1 0 -1
-% ConB
+% conB
 % 1 -1 0 0; 0 0 1 -1
-% ConAB
+% conAB
 % 1 -1 -1 1
 % 
 % 

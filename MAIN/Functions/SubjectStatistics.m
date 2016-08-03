@@ -21,15 +21,15 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
 %   Bon - use Bonferroni method to correct for FWE
 %  
-% ConA ->
+% conA ->
 %  
 % 	[numeric] - Contrast matrix for Factor A comparisons. 
 % 
-% ConB -> 
+% conB -> 
 % 
 % 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
 % 
-% ConAB -> 
+% conAB -> 
 % 
 % 	[numeric] - Contrast matrix for the interaction, if applicable. 
 % 
@@ -45,11 +45,11 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 
 % FWE
 % Rom
-% ConA
+% conA
 % 1 0 -1 0; 0 1 0 -1
-% ConB
+% conB
 % 1 -1 0 0; 0 0 1 -1
-% ConAB
+% conAB
 % 1 -1 -1 1
 % 
 % 
@@ -57,7 +57,7 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 
 % FWE
 % none
-% ConA
+% conA
 % 1 -1 0
 % klabels
 % face house butterfly
