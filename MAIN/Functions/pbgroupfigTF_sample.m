@@ -55,6 +55,7 @@ if any(strcmp(varargin,'all'));
     
     % add other options
     options.timeplot=1:length(STATS.TF_times);
+    options.savesvg='no';
     
     % read the acceptable names
     optionNames = fieldnames(options);
@@ -106,6 +107,7 @@ else
     
     % add other options
     options.timeplot=1:length(STATS.TF_times);
+    options.savesvg='no';
     
     if any(strcmp(varargin,'timeplot'));
         timems=find(strcmp(varargin,'timeplot'));
@@ -200,26 +202,44 @@ switch isfactorial
             conds_axdiff=max(max(abs(plotdiff)));
             conds_axdiff=[-conds_axdiff conds_axdiff];
             
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%5
             % begin plotting
             figure;
             hsub(1)=subplot(4,1,1);
             h(1)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plot1st(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+            
+            %svg
+            if strcmp(options.savesvg,'yes'); buildsvg(h(1),conds_ax,STATS,'ersp_group_subplot_1.svg','jet',options.timeplot); end
+            
             if ersp==1; colormap(jet); caxis(conds_ax); cbfreeze(colorbar); freezeColors; end
             if itc==1; colormap(flipud(hot)); caxis(conds_ax); cbfreeze(colorbar); freezeColors; end
             
             hsub(2)=subplot(4,1,2);
             h(2)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plot2nd(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+            
+            %svg
+            if strcmp(options.savesvg,'yes'); buildsvg(h(2),conds_ax,STATS,'ersp_group_subplot_2.svg','jet',options.timeplot); end
+            
             if ersp==1; colormap(jet); caxis(conds_ax); cbfreeze(colorbar); freezeColors; end
             if itc==1; colormap(flipud(hot)); caxis(conds_ax); cbfreeze(colorbar); freezeColors; end
             
             hsub(3)=subplot(4,1,3);
             h(3)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(plotdiff(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+            
+            %svg
+            if strcmp(options.savesvg,'yes'); buildsvg(h(3),conds_axdiff,STATS,'ersp_group_subplot_3.svg','jet',options.timeplot); end
+            
             colormap(jet); caxis(conds_axdiff); cbfreeze(colorbar); freezeColors;
             
             set(allchild(gca),'buttondownfcn',{@mouseclick_callback, STATS, [leg1st,'-',leg2nd], options.timeplot, options.FactorA(i), 'A'});
             
             hsub(4)=subplot(4,1,4);
             h(4)=surf(STATS.TF_times(options.timeplot),STATS.TF_freqs,double(pvals(:,options.timeplot)),'facecolor','interp','linestyle','none'); axis tight; view(0,90);
+            
+            %svg
+            if strcmp(options.savesvg,'yes'); buildsvg(h(4),[0 1],STATS,'ersp_group_subplot_4.svg','bone',options.timeplot); end
+            
             colormap(hsub(4),bone(2)); caxis([0 1]); hb=cbfreeze(colorbar); set(hb,'YTick',[0 1]); %freezeColors;
             
             % add legend and font

@@ -50,6 +50,7 @@ if any(strcmp(varargin,'all'));
     options.zaxis=[0 inf];
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
+    options.savesvg='no'; % prototype 
     
     if any(strcmp(varargin,'timeplot'));
         timems=find(strcmp(varargin,'timeplot'));
@@ -136,6 +137,7 @@ else
     options.zaxis=[0 inf];
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
+    options.savesvg='no'; % prototype 
     
     if any(strcmp(varargin,'timeplot'));
         timems=find(strcmp(varargin,'timeplot'));
@@ -259,7 +261,7 @@ switch STATS.design
                             % begin plotting
                             figure(i);
                             subplot(length(subnames),1,q);
-                            surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
+                            h(q)=surf([STATS.xtimes(options.timeplot);STATS.xtimes(options.timeplot)], ones(2,length(STATS.xtimes(options.timeplot))), [zeros(1,length(CI_diffup));CI_diffup],[test_stat;test_stat], 'LineStyle', 'none', 'FaceColor', 'interp');
                             zlim(gca,options.zaxis);
                             hold on
                             
@@ -298,6 +300,12 @@ switch STATS.design
                             xlim([ms_input(1) ms_input(2)]); % took these values at the start so that I could force the proper Xlim 
                             hold on
                             grid on
+                            
+                            % prototype option
+                            if strcmp(options.savesvg,'yes')
+                                buildsvg_subject(STATS,options,test_stat,CI_diffup,sigvect,[STATS.savestring, '_subjectfig_', num2str(q),'.svg']);
+                            end
+                              
                         end
                         
                     case 'diff'
@@ -1180,12 +1188,12 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
                 maplim=max(max(abs(data.EEG.data(:,MStoTF))));
                 
                 if isempty(maplim);
-                    pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
+                    pop_topoplot(data.EEG, 1, ms_plot, [], 0,'style','map','shading','interp','colorbar','off');
                     %set(gcf, 'visible','off');
                     htopo(s)=gca;
                     ctopo(s,:)=caxis;
                 else
-                    pop_topoplot(data.EEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
+                    pop_topoplot(data.EEG, 1, ms_plot, [], 0,'style','map','shading','interp','colorbar','off','maplimits', [-maplim maplim]);
                     %set(gcf, 'visible','off');
                     htopo(s)=gca;
                     ctopo(s,:)=caxis;
@@ -1194,6 +1202,8 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
                 alltext=findall(oh,'Type','text');
                 delete(alltext);
+                
+                
                 text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized','Interpreter', 'none'); % add subject numbers to bottom centre of subplots
                 
                 if isempty(maplim)
@@ -1216,25 +1226,24 @@ function mouseclick_callback(gcbo,eventdata,STATS,sub,atjlvl)
                         colorbar('FontSize',15);
                         caxis([-maplim maplim]);
        
-%                         curax_pos=get(curax,'position');
-%                         colorbar('location','eastoutside');
-%                         set(curax,'position',curax_pos);
                     end
                 end
                 s=s+1;
                 
             end % end of r loop
             htit = axes('visible','off');
+            
+            
+            %%%%%%%%%%
+            % temp hack
             title(['Subject #', num2str(sub), ' at ', num2str(ms_plot),'ms'],'parent',htit,'visible','on');
+            %set(gcf, 'Color',[1 1 1]);
+            %set(gcf,'Position', [1921 1 1920 1001]);
+            %saveas(gcf,['Subject_', num2str(sub), '_at_ ', num2str(ms_plot),'ms.tif']);
             
-            %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
             
-            % get and set title handle
-            %thandle = get(gca,'Title');
-            %set(thandle,'String',s);
-            % finally change the position of our red plus, and make it
-            % visible.
-            %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
+            %%%%%%%%%
+
         catch
             disp('no topographies available at this time');
         end

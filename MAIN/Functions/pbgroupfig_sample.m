@@ -208,6 +208,9 @@ switch isfactorial
             axis tight
             grid on
             
+            plot2svg([STATS.savestring, '_groupfig.svg']);
+            
+            
             % clear variables before next iteration
             clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist lh
             
@@ -463,11 +466,11 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 maplim=max(max(abs(data.tmpEEG.data(:,MStoTF))));
                 
                 if isempty(maplim);
-                    pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off');
+                    pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'style','map','shading','interp','colorbar','off');
                     htopo(r)=gca;
                     ctopo(r,:)=caxis;
                 else
-                    pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'shading','interp','colorbar','off','maplimits', [-maplim maplim]);
+                    pop_topoplot(data.tmpEEG, 1, ms_plot, [], 0,'style','map','shading','interp','colorbar','off','maplimits', [-maplim maplim]);
                     htopo(r)=gca;
                     ctopo(r,:)=caxis;
                 end
@@ -475,6 +478,8 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                 oh=findobj(curax); % find and get rid of EEGLABs subplot titles
                 alltext=findall(oh,'Type','text');
                 delete(alltext);
+                
+                
                 text(.5,-.1,num2str(STATS.condnames{r}),'Units','normalized', 'interpreter', 'none') % add subject numbers to bottom centre of subplots
                 
                 if isempty(maplim)
@@ -499,26 +504,23 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
                         colorbar('FontSize',15);
                         caxis([-maplim maplim]);
                         
-                        
-                        
-%                         curax_pos=get(curax,'position');
-%                         colorbar('location','eastoutside');
-%                         set(curax,'position',curax_pos);
+
                     end
                 end
                 
             end % end of r loop
             htit = axes('visible','off');
+            
+            %%%%%%%%
             tit=title([num2str(ms_plot),'ms'],'parent',htit,'visible','on');
             set(tit,'Interpreter', 'none');
-            %title([condlabs{i}, ' from ', num2str(ms_plot),'ms'],'parent',h,'visible','on');
             
-            % get and set title handle
-            %thandle = get(gca,'Title');
-            %set(thandle,'String',s);
-            % finally change the position of our red plus, and make it
-            % visible.
-            %set(cursor_handle,'Xdata',x,'Ydata',y,'visible','on')
+            %set(gcf, 'Color',[1 1 1]);
+            %set(gcf,'Position', [1921 1 1920 1001]);
+            %saveas(gcf,['group_at_ ', num2str(ms_plot),'ms.tif']);
+            %%%%%%%%
+            
+
         catch
             disp('no topographies available at this time');
         end
