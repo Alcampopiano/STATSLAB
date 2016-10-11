@@ -1,4 +1,4 @@
-function lowess_kd(XdataIn,YdataIn,nboot,span,nbins)
+function linearCI_kd(XdataIn,YdataIn,nboot,span,nbins)
 
 
 if isempty(XdataIn) && isempty(YdataIn)
@@ -30,9 +30,9 @@ xspag=zeros(nboot,length(x));
 yspag=zeros(nboot,length(x));
 
 % preallocate new grid system for single surface plot
-%ygrid=linspace(min(y),max(y),100);
-%[colygrid]=size(ygrid,2);
-%gridsystem=zeros(colygrid,nbins+1);
+ygrid=linspace(min(y),max(y),1000);
+[colygrid]=size(ygrid,2);
+gridsystem=zeros(colygrid,nbins+1);
 
 % there are many curve types
 curve_type='lowess';
@@ -56,14 +56,42 @@ for i=1:nboot;
     yboot=y(bootvect);
     
     % calculate smoother, sort x and get indices
-    smoother_boot = smoother(xboot,yboot,span,curve_type);
-    [xboot_sort,xboot_inds] = sort(xboot);
-    smoother_boot_sort=smoother_boot(xboot_inds);
+    %smoother_boot = smooth(xboot,yboot,span,curve_type);
+    
+    %[row_dat col_dat]=size(xboot);
+    %n=row_dat;
+    %meanx=mean(xboot);
+    %meany=mean(y);
+    %stdx=std(xboot);
+    %stdy=std(y);
+    
+    % get some stats that you need
+    stats_reg=regstats(yboot,xboot,'linear',{'beta', 'mse'});
+    
+    %standard error of residual
+    %SE_resid=sqrt(stats_reg.mse);
+    
+    %critical tvalue (alpha = .05)
+    %tcrit=tinv(1-0.05/2,n-2);
+    
+    %xval = min(xboot):0.01:max(xboot);
+    xval=linspace(min(xboot),max(xboot),length(xboot));
+    yhat = stats_reg.beta(1)+stats_reg.beta(2)*xval;
+    %yhat=linspace(min(yhat),max(yhat),length(xboot));
+    %xval=linspace(min(xboot),max(xboot),length(xboot));
+    smoother_boot=yhat';
+    xboot_sort=xval';
+    
+    
+    %[xboot_sort,xboot_inds] = sort(xboot);
+    %smoother_boot_sort=smoother_boot(xboot_inds);
+    smoother_boot_sort=smoother_boot;
     gather_xy_boot=[xboot_sort smoother_boot_sort];
     
     % gather up the original data, in case you want a spagetti plot
     xspag(i,:)=xboot_sort;
-    yspag(i,:)=smoother_boot(xboot_inds);
+    %yspag(i,:)=smoother_boot(xboot_inds);
+    yspag(i,:)=smoother_boot_sort';
     
     % interpolate
     distance = sqrt(sum(diff(gather_xy_boot,1,1).^2,2));  % Distance between subsequent points
@@ -150,62 +178,32 @@ end
 % doesn't suffer from this as the data is independant of the figure's
 % backround. Anyway, the below chunck of code can be ignored if you wish.
 % Separate plot options are below for downsampled and non-downsampled data.
-
-% for i=1:rowbin;
-%     
-%     % find nearest ygrid vals
-%     lowval = min(kd_inds(i,:)); %value to find
-%     highval= max(kd_inds(i,:));
-%     tmplow = abs(ygrid-lowval);
-%     tmphigh = abs(ygrid-highval);
-%     [jnk idxlow] = min(tmplow); %index of closest value
-%     [jnk idxhigh] = min(tmphigh); %index of closest value
-%     new_length=idxhigh-idxlow+1;
-%     disp(['newlen=', num2str(new_length)]);
-%     
-%     % build single surface by downsampling
-%     dec_factor=(2^14)/new_length;
-%     down_samp_array=decimate(kd_array(i,:),round(dec_factor))'; % DIFFERENT ON A MAC, IT IS A COLUMN VECTOR THERE.
-%     [down_samp_col]=length(down_samp_array); % SO THIS NEEDS TO BE GETTING THE LENGTH
-%     disp(['downsamp cols=', num2str(down_samp_col)]);
-%     
-%     from=colygrid-((idxlow-1)+(down_samp_col-1));
-%     to=colygrid-(idxlow-1);
-%     if from<1; disp(num2str(from)); trm=abs(from); from=1; down_samp_array(end-trm:end)=[]; disp(['from<1 i=', num2str(i)]);end
-%     %if to>length(ygrid);  trm=to-(length(ygrid)); down_samp_array(end-trm:end)=[]; disp(['to>ygrid leng i=', num2str(i)]); end
-%     gridsystem(from:to,i)=flipud(down_samp_array);
-%     
-%    %gridsystem2(idxlow:idxhigh,i)=down_samp_array;
-%     
-% end
-
-
-% xc=linspace(min(x), max(x), size(gridsystem,2));
-% yc=linspace(min(y), max(y), size(gridsystem,1));
-% % CODE to plot on downsampled surface
-% figure;surf(xc,yc,flipud(gridsystem), 'LineStyle','none'); shading interp;
-% axis tight
-% view(0,90)
-% colormap(flipud(gray))
-% 
-% % plot data on top
-% zz=max(max(kd_array));
-% zz=zeros(1,size(x,1))+zz;
-% hold on
-% 
-% % smoother on original data
-% hold on
-% smootherline = smoother(x,y,span,curve_type);
-% [xsort,indx] = sort(x);
-% plot3(xsort,smootherline(indx),zz,'Color',[1 1 1],'LineWidth',1);
-% % %hold on
-% % 
-% % 
-% % set data color and other properties
-% hp=plot3(x,y,zz,'bo','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize', 5);
-% hold on;
-% %grid on
-% axis tight
+%{
+for i=1:rowbin;
+    
+    % find nearest ygrid vals
+    lowval = min(kd_inds(i,:)); %value to find
+    highval= max(kd_inds(i,:));
+    tmplow = abs(ygrid-lowval);
+    tmphigh = abs(ygrid-highval);
+    [jnk idxlow] = min(tmplow); %index of closest value
+    [jnk idxhigh] = min(tmphigh); %index of closest value
+    new_length=idxhigh-idxlow+1;
+    
+    % build single surface by downsampling
+    dec_factor=(2^14)/new_length;
+    down_samp_array=decimate(kd_array(i,:),round(dec_factor));
+    [down_samp_col]=size(down_samp_array,1);
+    gridsystem(colygrid-((idxlow-1)+(down_samp_col-1)):colygrid-(idxlow-1),i)=down_samp_array;
+    
+end
+%}
+%{
+% CODE to plot on downsampled surface
+surf(gridsystem, 'LineStyle','none');
+axis tight
+view(0,90)
+%}
 
 
 
@@ -220,10 +218,6 @@ end
 axis tight
 grid on
 %}
-
-% if you want to change the backround of the figure (inside the axes)
-% use...set(gca,'Color',[0 0 0]);
-
 
 % gather indices which limit the kernal density measure
 kdiCI=cell(1,rowbin);
@@ -262,11 +256,15 @@ for i=1:rowbin;
 
 end
 
+
+% if you want to change the backround of the figure (inside the axes)
+% use...set(gca,'Color',[0 0 0]);
+
 % GENERAL PLOT CODE for data not downsampled
 % will likely casue overhang in the figure
 % so tidy up with ...xlim([9 50]) or whatever, query with -> xlim
-%hold on
-% figure;
+% hold on
+% %figure;
 % set(gca,'Color',[1 1 1]);
 % for i=2:(size(kd_array,1)-2);
 %     ycoord=kd_inds(i,:);
@@ -278,9 +276,8 @@ end
 %         'edgecol','interp',...
 %         'linew',2);
 % end
-% 
 % axis tight
-% colormap(flipud(gray))
+% colormap(flipud(gray));
 
 figure;
 set(gca,'Color',[1 1 1]);
@@ -301,24 +298,33 @@ end
 axis tight
 colormap(flipud(gray))
 
+
 % plot data on top
 zz=max(max(kd_array));
 zz=zeros(1,size(x,1))+zz;
 hold on
 
-% smoother on original data
-hold on
-smootherline = smoother(x,y,span,curve_type);
-[xsort,indx] = sort(x);
-plot3(xsort,smootherline(indx),zz,'Color',[1 1 1],'LineWidth',1);
-% %hold on
-% 
-% 
+% regression line on figure
+stats_reg=regstats(YdataIn,XdataIn,'linear',{'beta', 'mse'});
+xval=linspace(min(xboot),max(xboot),length(xboot));
+yhat = stats_reg.beta(1)+stats_reg.beta(2)*xval;
+plot3(xval,yhat,zz,'Color',[1 1 1],'LineWidth',1);
+
 % set data color and other properties
-hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 4);
+hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 5);
 hold on;
 %grid on
 axis tight
+
+
+%{
+% smoother on original data
+hold on
+smoother = smooth(x,y,span,curve_type);
+[xsort,indx] = sort(x);
+plot3(xsort,smoother(indx),zz,'Color',[.5 .5 .5],'LineWidth',1);
+%hold on
+%}
 
 %plot(x_new,y_new,'k*'); % Plot interpolated bound
 
