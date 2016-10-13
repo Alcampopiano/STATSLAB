@@ -222,7 +222,13 @@ X=Xdata(:,msplot);
 Y=Ydata;
 
 % plot slope with CI and prediction band (and weighted fill)
-CI_PB_slope(X,Y,CI_color,colorlimit,Xlabel,Ylabel);
+
+% this line calls CI_PB_slope which does not use bootstrapping for the
+% slope but instead computes a parametric slope and CI
+%CI_PB_slope(X,Y,CI_color,colorlimit,Xlabel,Ylabel);
+
+% this line uses the kernal density to estimate CIs
+linearCI_kd(X,Y,1000,1000) % set nboot and nbins in parent functions and GUI eventually
 
 end
 

@@ -32,20 +32,20 @@ classdef PropertyGridField < hgsetget
             
             %%%%%%%%%
             % al hack to set fontsizes
-            ind=find(strcmp(varargin,'DisplayName'));
-            varargin{ind+1}=['<html><font size=4>', varargin{ind+1}];
+            %ind=find(strcmp(varargin,'DisplayName'));
+            %varargin{ind+1}=['<html><font size=40>', varargin{ind+1}];
             %%%%%%%%
             
 %             %%%%%%%%%
 %             % al hack to set fontsizes
-%             ind=find(strcmp(varargin,'Category'));
-%             varargin{ind+1}=['<html><font size=4>', varargin{ind+1}];
+             %ind=find(strcmp(varargin,'Category'));
+            %varargin{ind+1}=['<html><font size+40>', varargin{ind+1}];
 %             %%%%%%%%
             
 %             %%%%%%%%%
 %             % al hack to set fontsizes
-%             ind=find(strcmp(varargin,'Description'));
-%             varargin{ind+1}=['<html><font size=4>', varargin{ind+1}];
+            %ind=find(strcmp(varargin,'Description'));
+             %varargin{ind+1}=['<html><font size+40>', varargin{ind+1}];
 %             %%%%%%%%
             
             self.Name = name;

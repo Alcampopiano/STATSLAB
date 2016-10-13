@@ -5,6 +5,11 @@
 % Copyright 2010 Levente Hunyadi
 function example_propertygrid
 
+set(0, 'defaultAxesFontSize', 18);
+set(0, 'defaultTextFontSize', 18);
+set(0, 'DefaultUIControlFontSize', 18);
+
+
 properties = [ ...
     PropertyGridField('double', pi, ...
         'Category', 'Primitive types', ...

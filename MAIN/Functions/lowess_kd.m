@@ -310,14 +310,23 @@ hold on
 hold on
 smootherline = smoother(x,y,span,curve_type);
 [xsort,indx] = sort(x);
-plot3(xsort,smootherline(indx),zz,'Color',[1 1 1],'LineWidth',1);
-% %hold on
-% 
-% 
+% smoother_boot_sort=smootherline(indx);
+% gather_xy_boot=[xsort smoother_boot_sort];
+% distance = sqrt(sum(diff(gather_xy_boot,1,1).^2,2));  % Distance between subsequent points
+% paracoord = [0; cumsum(distance)];               % Parametric coordinate
+% coordnew = linspace(0,paracoord(end),1000).';   % 1000 evenly spaced points from 0 to s(end)
+% x_new = interp1q(paracoord,gather_xy_boot(:,1),coordnew);     % Interpolate new x values
+% y_new = interp1q(paracoord,gather_xy_boot(:,2),coordnew);     % Interpolate new y values
+% xdata_orig(1,:)=x_new;
+% ydata_orig(1,:)=y_new;
+% zzz=zeros(1,size(xdata_orig,2));
+% zzz=zzz+max(max(kd_array));
+%plot3(xdata_orig(1,:),ydata_orig(1,:),zzz,'Color',[.8 0 0],'LineWidth',1);
+plot3(xsort,smootherline(indx),zz,'Color',[.8 0 0],'LineWidth',3);
+
 % set data color and other properties
-hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 4);
+hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 7);
 hold on;
-%grid on
 axis tight
 
 %plot(x_new,y_new,'k*'); % Plot interpolated bound

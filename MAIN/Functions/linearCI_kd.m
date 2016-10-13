@@ -1,4 +1,4 @@
-function linearCI_kd(XdataIn,YdataIn,nboot,span,nbins)
+function linearCI_kd(XdataIn,YdataIn,nboot,nbins)
 
 
 if isempty(XdataIn) && isempty(YdataIn)
@@ -308,10 +308,10 @@ hold on
 stats_reg=regstats(YdataIn,XdataIn,'linear',{'beta', 'mse'});
 xval=linspace(min(xboot),max(xboot),length(xboot));
 yhat = stats_reg.beta(1)+stats_reg.beta(2)*xval;
-plot3(xval,yhat,zz,'Color',[1 1 1],'LineWidth',1);
+plot3(xval,yhat,zz,'Color',[.8 0 0],'LineWidth',3);
 
 % set data color and other properties
-hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 5);
+hp=plot3(x,y,zz,'o','MarkerEdgeColor',[0 0 .8],'MarkerFaceColor',[0 0 .8],'MarkerSize', 7);
 hold on;
 %grid on
 axis tight
