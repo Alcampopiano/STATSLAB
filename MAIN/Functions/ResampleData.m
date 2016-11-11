@@ -80,6 +80,7 @@ trim=trim*2;
 % set defaults, with only one option this makes no sense, but if more get
 % added it is exandable 
 options.trialcap='none';
+options.baseline='none';
 
 
 % get field names
@@ -102,6 +103,9 @@ for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
         error('%s is not a recognized parameter name',inpName)
     end
 end
+
+% populate STATS with options
+STATS.baseline=options.baseline;
 
 if strcmp(options.trialcap,'none') || isempty(varargin);
     disp('***** not using trial cap *****');
@@ -216,8 +220,32 @@ for filecurrent=1:colfile;
                 
                 %store bootstrap surrogates
                 data(bootcurrent,:)=user_measure;
-                
+
                 waitbar(bootcurrent/nboot,h3,sprintf('%12s',[num2str(bootcurrent),'/',num2str(nboot)]))
+            end
+            
+            % surrogate baseline correction
+            if ~strcmp(options.baseline,'none') && strcmp(STATS.measure,'chanclust');
+                disp('surrogate baseline correction');
+                
+                % matlab doesn't like when you overwrite a double to a
+                % structure but I do not want to duplicate the data array.
+                warning off;
+                data.data=data;
+                data.pnts=STATS.numpnts;
+                data.xmin=STATS.xmin;
+                data.xmax=STATS.xmax;
+                data.nbchan=STATS.nboot;
+                data.event.type='junk';
+                data.srate=STATS.srate;
+                data.trials=1;
+                warning on;
+                
+                % call standard baseline correction for all surrogates
+                data=pop_rmbase(data,[options.baseline(1) options.baseline(2)]);
+                
+                % pull out of structure
+                data=data.data;   
             end
             
             if capflag % this can probably be taken out after system comparison
