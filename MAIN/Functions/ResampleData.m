@@ -25,11 +25,14 @@
 % 
 % 	none - sample a new set of trials that is equal in size to the original set 
 % 
-% baseline ->
+%   baseline ->
 % 
-% 	[min  max] – specify the baseline correction period in milliseconds to be applied to each bootstrap surrogate (in milliseconds). This option only applies to microvolt measures (e.g., 	scalpchan, icascalp) when the trimmed mean is used. In that case, a baseline correction will 	ensure that a zero-sum baseline period is maintained for each bootstrap surrogate. 
+% 	[min  max] – specify the baseline correction period in milliseconds to be applied to each bootstrap surrogate (in milliseconds). 
+%                   This option only applies to microvolt measures (e.g., scalpchan, icascalp) when the trimmed mean is used. 
+%                   In that case, a baseline correction will ensure that a zero-sum baseline period is maintained for each bootstrap surrogate. 
 % 
-% 	none – do not baseline correct (default). Note that time-frequency analyses currently perform baseline corrections using the default method in EEGLAB (see newtimef.m)
+% 	none – do not baseline correct (default). 
+%            Note that time-frequency analyses currently perform baseline corrections using the default method in EEGLAB (see newtimef.m)
 % 
 % For example,
 % 
