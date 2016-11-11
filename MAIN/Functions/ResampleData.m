@@ -24,17 +24,25 @@
 % 	[numeric] - the trialcap option limits the # of trials used in each resample to the specified value
 % 
 % 	none - sample a new set of trials that is equal in size to the original set 
-% 	
+% 
+% baseline ->
+% 
+% 	[min  max] – specify the baseline correction period in milliseconds to be applied to each bootstrap surrogate (in milliseconds). This option only applies to microvolt measures (e.g., 	scalpchan, icascalp) when the trimmed mean is used. In that case, a baseline correction will 	ensure that a zero-sum baseline period is maintained for each bootstrap surrogate. 
+% 
+% 	none – do not baseline correct (default). Note that time-frequency analyses currently perform baseline corrections using the default method in EEGLAB (see newtimef.m)
+% 
 % For example,
 % 
 % trialcap
 % 100
+% baseline
+% -200 0
 % 
-% will resample from the single-trial data, randomly choosing with replacement 100 trials.
+% will resample from the single-trial data, randomly choosing with replacement 100 trials. Each bootstrap surrogate is baseline corrected using the specified time period.
 % 
 % Using ResampleData at the commandline:
 % 
-% ResampleData(STATS, [], 1000, 20, 'trialcap', 'none');
+% ResampleData(STATS, [], 1000, 20,  'trialcap', 'none', 'baseline', [-200 0]);
 % ***end***
 %
 % Copyright (C) <2015>  <Allan Campopiano>
