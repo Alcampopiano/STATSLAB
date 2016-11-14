@@ -208,7 +208,7 @@ switch isfactorial
             axis tight
             grid on
             
-            plot2svg([STATS.savestring, '_groupfig.svg']);
+            %plot2svg([STATS.savestring, '_groupfig.svg']);
             
             
             % clear variables before next iteration

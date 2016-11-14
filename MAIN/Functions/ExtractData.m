@@ -270,25 +270,28 @@ elseif ~any(isnan(options.ICs)) %&& strcmp(options.ICs(end-3:end), '.mat')
 end
 
 %%
-% GUI for channel selections
-
+% GUI for channel selections for all measures except gfa types
 persubject=0;
-if strcmp(options.chans,'persubject')
-    persubject=1;
-    
-    % GUI channel picker not written yet
-    [cancel_hit chanfile]=chanpick_topo(condfiles_subs, pathtofiles, numconds);
-    
-    if cancel_hit
-        STATS=[]; % to exit cleanly
-        return
+if ~any(strcmp(options.measure,{'scalpgfa', 'icagfa'}));
+     
+    if strcmp(options.chans,'persubject');
+        persubject=1;
+        
+        % GUI channel picker not written yet
+        [cancel_hit chanfile]=chanpick_topo(condfiles_subs, pathtofiles, numconds);
+        
+        if cancel_hit
+            STATS=[]; % to exit cleanly
+            return
+        end
+        
+    elseif ~isempty(strfind(options.chans{1},'.mat'))
+        
+        % load a file
+        tmp=load(options.chans{1});
+        chanfile=tmp.data.chanarray;
     end
     
-elseif ~isempty(strfind(options.chans{1},'.mat'))
-    
-    % load a file
-    tmp=load(options.chans{1});
-    chanfile=tmp.data.chanarray;
 end
 %% cases
 
@@ -451,123 +454,122 @@ switch options.measure
         xtimes=EEG.times;
         disp(' ***** finished extracting the data array for later GFA calculations *****')
         
-        % likely a temporary case option for sysc14, unless
-        % I can keep everything internally consistent without too much trouble
-%     case 'bipolar'
-%         disp(' ***** extracting the data array for bipolar ***** ')
-%         
-%         %for k=1:numconds; % always one
-%         
-%         [rowcond colcond]=size(condfiles_subs{1});
-%         
-%         miscinfo=cell(rowcond+1,10);
-%         miscinfo(1,:)={'sub', 'ind', 'chan', 'val', 'ntrials', 'sub', 'ind', 'chan', 'val', 'ntrials'};
-%         miscinfo(2:end,1)=condfiles_subs{1}(:);
-%         miscinfo(2:end,6)=condfiles_subs{2}(:);
-%         
-%         for s=1:rowcond; % scroll through subjects
-%             
-%             % load file from cond 1
-%             EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
-%             EEG = eeg_checkset(EEG);
-%             miscinfo{s+1,5}=EEG.trials;
-%             
-%             %create cond 1 chan erps
-%             erps_cond1=mean(EEG.data,3);
-%             
-%             % load file from cond 2
-%             EEG = pop_loadset('filename',condfiles_subs{2}{s},'filepath',pathtofiles{1});
-%             EEG = eeg_checkset(EEG);
-%             miscinfo{s+1,10}=EEG.trials;
-%             
-%             %create cond 2 chan erps
-%             erps_cond2=mean(EEG.data,3);
-%             
-%             % create the difference ERP waves for each channel
-%             erp_diff=erps_cond1-erps_cond2;
-%             
-%             clear erps_cond1 erps_cond2
-%             
-%             % copy EEG.data
-%             tmpEEG=EEG;
-%             tmpEEG.data=erp_diff;
-%             
-%             % set trials ==1 to trick pop_timtopo into plotting
-%             tmpEEG.trials=1;
-%             h=figure; pop_timtopo(tmpEEG, [-200  500], [NaN], 'ERP data and scalp maps of left_check');
-%             
-%             timewin=input('type in the window(ms) to calculate min and max vals\n');
-%             close(h);
-%             
-%             if isempty(timewin)
-%                 
-%                 if strcmp(condnames{1},'face')
-%                     timewin=[150 180]; % for face house
-%                     
-%                 elseif strcmp(condnames{1},'Left')
-%                     timewin=[80 120]; % for left right checker
-%                 end
-%                 
-%             end
-%             
-%             MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-%             MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
-%             
-%             % for each channel get max value within a window
-%             [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
-%             
-%             % then, get the index for the max channel
-%             [max_val_chan max_ind_chan]=max(max_val_time);
-%             
-%             % for each channel get min value within a window
-%             [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
-%             
-%             % then, get the index for the min channel
-%             [min_val_chan min_ind_chan]=min(min_val_time);
-%             
-%             clear tmpEEG
-%             
-%             % now we have max and min channel index, steal it from original
-%             % data, cond 2 is already loaded so take it from there.
-%             datamax=EEG.data(max_ind_chan,:,:);
-%             datamin=EEG.data(min_ind_chan,:,:);
-%             
-%             % create bipolar
-%             data=datamax-datamin;
-%             miscinfo{s+1,7}=max_ind_chan;
-%             miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
-%             miscinfo{s+1,9}=max_val_chan;
-%             
-%             % save it with original filename but get rid of original
-%             % extention (hence the 1:end-4)
-%             save([condfiles_subs{2}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-%             clear data datamax datamin
-%             
-%             % load cond 1 file
-%             EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
-%             EEG = eeg_checkset(EEG);
-%             miscinfo{s+1,2}=min_ind_chan;
-%             miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
-%             miscinfo{s+1,4}=min_val_chan;
-%             
-%             % now we have max and min channel index, steal it from original
-%             % data, from cond1.
-%             datamax=EEG.data(max_ind_chan,:,:);
-%             datamin=EEG.data(min_ind_chan,:,:);
-%             
-%             % create bipolar
-%             data=datamax-datamin;
-%             
-%             % save it with original filename but get rid of original
-%             % extention (hence the 1:end-4)
-%             save([condfiles_subs{1}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
-%             clear data datamax datamin
-%             
-%         end
-%         
-%         STATS.miscinfo=miscinfo;
-%         xtimes=EEG.times;
-%         disp(' ***** finished extracting the data array for bipolar analysis *****')
+        % likely a temporary case option for sysc14, unless I can keep everything internally consistent without too much trouble
+    case 'bipolar'
+        disp(' ***** extracting the data array for bipolar ***** ')
+        
+        %for k=1:numconds; % always one
+        
+        [rowcond colcond]=size(condfiles_subs{1});
+        
+        miscinfo=cell(rowcond+1,10);
+        miscinfo(1,:)={'sub', 'ind', 'chan', 'val', 'ntrials', 'sub', 'ind', 'chan', 'val', 'ntrials'};
+        miscinfo(2:end,1)=condfiles_subs{1}(:);
+        miscinfo(2:end,6)=condfiles_subs{2}(:);
+        
+        for s=1:rowcond; % scroll through subjects
+            
+            % load file from cond 1
+            EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+            EEG = eeg_checkset(EEG);
+            miscinfo{s+1,5}=EEG.trials;
+            
+            %create cond 1 chan erps
+            erps_cond1=mean(EEG.data,3);
+            
+            % load file from cond 2
+            EEG = pop_loadset('filename',condfiles_subs{2}{s},'filepath',pathtofiles{1});
+            EEG = eeg_checkset(EEG);
+            miscinfo{s+1,10}=EEG.trials;
+            
+            %create cond 2 chan erps
+            erps_cond2=mean(EEG.data,3);
+            
+            % create the difference ERP waves for each channel
+            erp_diff=erps_cond1-erps_cond2;
+            
+            clear erps_cond1 erps_cond2
+            
+            % copy EEG.data
+            tmpEEG=EEG;
+            tmpEEG.data=erp_diff;
+            
+            % set trials ==1 to trick pop_timtopo into plotting
+            tmpEEG.trials=1;
+            h=figure; pop_timtopo(tmpEEG, [-200  500], [NaN], 'ERP data and scalp maps of left_check');
+            
+            timewin=input('type in the window(ms) to calculate min and max vals\n');
+            close(h);
+            
+            if isempty(timewin)
+                
+                if strcmp(condnames{1},'face')
+                    timewin=[150 180]; % for face house
+                    
+                elseif strcmp(condnames{1},'Left')
+                    timewin=[80 120]; % for left right checker
+                end
+                
+            end
+            
+            MStoTF_min=round((timewin(1)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+            MStoTF_max=round((timewin(2)/1000-EEG.xmin)/(EEG.xmax-EEG.xmin) * (EEG.pnts-1))+1;
+            
+            % for each channel get max value within a window
+            [max_val_time max_ind_time]=max(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
+            
+            % then, get the index for the max channel
+            [max_val_chan max_ind_chan]=max(max_val_time);
+            
+            % for each channel get min value within a window
+            [min_val_time min_ind_time]=min(tmpEEG.data(:,MStoTF_min:MStoTF_max,:),[],2);
+            
+            % then, get the index for the min channel
+            [min_val_chan min_ind_chan]=min(min_val_time);
+            
+            clear tmpEEG
+            
+            % now we have max and min channel index, steal it from original
+            % data, cond 2 is already loaded so take it from there.
+            datamax=EEG.data(max_ind_chan,:,:);
+            datamin=EEG.data(min_ind_chan,:,:);
+            
+            % create bipolar
+            data=datamax-datamin;
+            miscinfo{s+1,7}=max_ind_chan;
+            miscinfo{s+1,8}=EEG.chanlocs(max_ind_chan).labels;
+            miscinfo{s+1,9}=max_val_chan;
+            
+            % save it with original filename but get rid of original
+            % extention (hence the 1:end-4)
+            save([condfiles_subs{2}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+            clear data datamax datamin
+            
+            % load cond 1 file
+            EEG = pop_loadset('filename',condfiles_subs{1}{s},'filepath',pathtofiles{1});
+            EEG = eeg_checkset(EEG);
+            miscinfo{s+1,2}=min_ind_chan;
+            miscinfo{s+1,3}=EEG.chanlocs(min_ind_chan).labels;
+            miscinfo{s+1,4}=min_val_chan;
+            
+            % now we have max and min channel index, steal it from original
+            % data, from cond1.
+            datamax=EEG.data(max_ind_chan,:,:);
+            datamin=EEG.data(min_ind_chan,:,:);
+            
+            % create bipolar
+            data=datamax-datamin;
+            
+            % save it with original filename but get rid of original
+            % extention (hence the 1:end-4)
+            save([condfiles_subs{1}{s}(1:end-4),'_',options.measure,'_extracted.mat'],'data');
+            clear data datamax datamin
+            
+        end
+        
+        STATS.miscinfo=miscinfo;
+        xtimes=EEG.times;
+        disp(' ***** finished extracting the data array for bipolar analysis *****')
         
     case 'scalpchan'
         disp('***** extracting selected channel(s). Multiple channels will be averaged together in the next step ***** ')
