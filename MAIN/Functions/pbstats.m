@@ -1,4 +1,4 @@
-function [psihat_stat, pvalgen, pcrit, conflow, confup psihat_statz] = pbstats(data, con, nboot, alpha, FWE)
+function [datcon, psihat_stat, pvalgen, pcrit, conflow, confup psihat_statz] = pbstats(data, con, nboot, alpha, FWE)
 %bla bla bla
 
 % uses con2way (which builds appropriate linear contrasts) to do percentile
@@ -124,6 +124,20 @@ switch FWE
             conflow(i,1)=temp(CIlow);
             confup(i,1)=temp(CIup);
         end
+        
+    case 'benhoch'
+        
+        % case here just pads CIs, pcrit, and stores differences
+        % actual FWE error correction is done later once all differences
+        % can be accessed at one
+        pcrit=nan;
+        
+        for i=1:connum;
+            %temp=sort(psihat(i,:));
+            conflow(i,1)=nan;
+            confup(i,1)=nan;
+        end
+          
 end
 
 

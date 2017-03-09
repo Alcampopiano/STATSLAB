@@ -117,14 +117,13 @@ switch STATS.design
                       
         end
         
-        
-        
         % update STATS structure
         %STATS.inferential_results=inferential_results;
         STATS.sample_results=sample_results;
         STATS.condwaves=condwaves;
         STATS.bootfiles=condfiles_subs;
         %STATS.condwaves_trim=condwaves_trim;
+        
         
         disp('******* finished calculating statistics *******')
         disp('******* Saving STATS structure *******')
@@ -145,7 +144,7 @@ switch STATS.design
                 STATS.levels(1), STATS.alpha, STATS.design, STATS.condnames, varargin{:});
             
         end
-        
+       
         
         % update STATS structure
         %STATS.inferential_results=inferential_results;
@@ -153,6 +152,7 @@ switch STATS.design
         STATS.condwaves=condwaves;
         STATS.bootfiles=condfiles_subs;
         %STATS.condwaves_trim=condwaves_trim;
+        
         
         disp('******* finished calculating statistics *******')
         disp('******* Saving STATS structure *******')
@@ -164,11 +164,12 @@ switch STATS.design
 end
 
 
-
-
-
-
-
+%%%%%%%%%%%%%%%%%%%%
+% post procedure for FWE across time if chosen
+if strcmp(STATS.sample_results.factor_A.FWE, 'benhoch')
+    [STATS] = FWEtime(STATS, 'group');
+end
+%%%%%%%%%%%%%%%%%%%%
 
 
 

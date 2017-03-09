@@ -19,7 +19,7 @@ end
 options.conA=conA;
 options.conB=conB;
 options.conAB=conAB;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % get field names
 optionnames = fieldnames(options);
@@ -172,7 +172,7 @@ for filecurrent=1:rowconds;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
                  
         % passing results into results structure
         results.(field_name{filecurrent}).factor_A.pval(:,timecurrent)=pvalgen;
@@ -181,13 +181,19 @@ for filecurrent=1:rowconds;
         
         
         for i=1:conAcol;
+            
+            %%%%%%%%%%%%
+            % passing full difference vectors into STATS struct
+            results.(field_name{filecurrent}).factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+            %%%%%%%%%%%%
+            
             results.(field_name{filecurrent}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_A.CI{i,1}(2,timecurrent)=confup(i);           
         end
         
         % factor B
         con=conB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_B.pval(:,timecurrent)=pvalgen;
@@ -196,13 +202,19 @@ for filecurrent=1:rowconds;
         
         
         for i=1:conBcol;
+            
+            %%%%%%%%%%%%
+            % passing full difference vectors into STATS struct
+            results.(field_name{filecurrent}).factor_B.diffs{i,1}(:,timecurrent)=psihat(:,i);
+            %%%%%%%%%%%%
+            
             results.(field_name{filecurrent}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
         end
         
         % factor AxB
         con=conAB;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_AxB.pval(:,timecurrent)=pvalgen;
@@ -210,6 +222,12 @@ for filecurrent=1:rowconds;
         results.(field_name{filecurrent}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;    
         
         for i=1:conABcol;
+            
+            %%%%%%%%%%%%
+            % passing full difference vectors into STATS struct
+            results.(field_name{filecurrent}).factor_AxB.diffs{i,1}(:,timecurrent)=psihat(:,i);
+            %%%%%%%%%%%%
+            
             results.(field_name{filecurrent}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
         end

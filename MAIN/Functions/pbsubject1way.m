@@ -17,7 +17,7 @@ end
 % set default plot options
 %options.conB=[]; % here as a place holder for bw designs (which are done as seperate 1-ways)
 options.conA=conA;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % for bw designs
 options.jlabels={};
@@ -101,9 +101,16 @@ else
     
 end
 
-
-%preallocate sizes
-[rowconds colconds]=size(condfiles);
+% determine if condfiles was in the group type of arrangement
+% if so, get the row number from inside the first nested cell (number of subjects)
+if iscell(condfiles{1})
+    rowconds=size(condfiles{1},1);
+    colconds=size(condfiles,2);
+else
+    
+    %preallocate sizes
+    [rowconds colconds]=size(condfiles);
+end
 datacell=cell(1,colconds);
 
 for i=1:rowconds;
@@ -133,10 +140,24 @@ set(childh2, 'Position',[5 10 538 15]);
 
 for filecurrent=1:rowconds;
     
-    for condcurrent=1:colconds;
-        conds=load(condfiles{filecurrent,condcurrent});
-        %conds=load(condfiles{1,condcurrent}{filecurrent});
-        datacell{1,condcurrent}=conds.data;
+    % this try block handles the differences that occur when condilfes are in
+    % the subject or group arrangment
+    try
+        
+        for condcurrent=1:colconds;
+            conds=load(condfiles{filecurrent,condcurrent});
+            %conds=load(condfiles{1,condcurrent}{filecurrent});
+            datacell{1,condcurrent}=conds.data;
+        end
+        
+    catch
+        
+        for condcurrent=1:colconds;
+            %conds=load(condfiles{filecurrent,condcurrent});
+            conds=load(condfiles{1,condcurrent}{filecurrent});
+            datacell{1,condcurrent}=conds.data;
+        end
+        
     end
     
     %arrange the data for the calculations
@@ -156,7 +177,7 @@ for filecurrent=1:rowconds;
         
         % factor A
         con=conA;
-        [psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat psihat_stat pvalgen pcrit conflow confup]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(field_name{filecurrent}).factor_A.pval(:,timecurrent)=pvalgen;
@@ -165,6 +186,12 @@ for filecurrent=1:rowconds;
         
         
         for i=1:conAcol;
+            
+            %%%%%%%%%%%%
+            % passing full difference vectors into STATS struct
+            results.(field_name{filecurrent}).factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+            %%%%%%%%%%%%
+            
             results.(field_name{filecurrent}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
         end

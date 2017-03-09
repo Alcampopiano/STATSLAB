@@ -1,48 +1,48 @@
 function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 
 % Calculates subject-level statistics for any number of levels, and up to two-way designs.
-%  
+%
 % Inputs:
-% 
+%
 % ***condfiles***
 % Leave empty and MATLAB will bring up an interface for you to load the appropriate “bootstrapped” files.
 % ***end***
-% 
+%
 % ***alpha***
 % Statistical significance threshold. Will be adjusted if options for controlling FWE are specified.
 % ***end***
-% 
+%
 % ***varargin***
 % Options are specified in pairs (key -> val)
-% 
+%
 % FWE ->
-% 	
-% 	none  - no control for familywise error 
+%
+% 	none  - no control for familywise error
 % 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
 %   Bon - use Bonferroni method to correct for FWE
-%  
+%
 % conA ->
-%  
-% 	[numeric] - Contrast matrix for Factor A comparisons. 
-% 
-% conB -> 
-% 
-% 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
-% 
-% conAB -> 
-% 
-% 	[numeric] - Contrast matrix for the interaction, if applicable. 
-% 
-% jlables -> 
-% 
+%
+% 	[numeric] - Contrast matrix for Factor A comparisons.
+%
+% conB ->
+%
+% 	[numeric] - Contrast matrix for Factor B comparisons, if applicable.
+%
+% conAB ->
+%
+% 	[numeric] - Contrast matrix for the interaction, if applicable.
+%
+% jlables ->
+%
 % 	For between-within designs only. Name of the general within-subjects conditions separated by a space on the same line
-% 
+%
 % klabels ->
-% 
+%
 % 	For between-within designs only. Name of the general between-subjects conditions separated by a space on the same line
-% 
+%
 % For example,
-% 
+%
 % FWE
 % Rom
 % conA
@@ -51,10 +51,10 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % 1 -1 0 0; 0 0 1 -1
 % conAB
 % 1 -1 -1 1
-% 
-% 
+%
+%
 % Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 – 4]).
-% 
+%
 % FWE
 % none
 % conA
@@ -63,25 +63,25 @@ function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 % face house butterfly
 % jlabels
 % male female
-% 
-% No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics. 
-% 
+%
+% No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics.
+%
 % Using SubjectStatistics at the commandline:
-%  
+%
 % For a 1-way design with 2 conditions (like a t-test):
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'none', 'conA', [1 -1]');
-%  
+%
 % For a 2-way design with 4 conditions (2x2):
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
-% 
+%
 % For a 1-way design with 3 conditions:
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
-% 
+%
 % For a 2-way between-within design with 3 conditions for each level of Factor A:
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]', 'jlabels', {'male', 'female'}, 'klabels', {'face', 'house', 'butterfly'});
-% 
+%
 % ***end***
-% 
+%
 % Copyright (C) <2015>  <Allan Campopiano>
 %
 % This program is free software; you can redistribute it and/or modify
@@ -169,16 +169,16 @@ switch STATS.design
         
     case 'bw';
         
-    
+        
         % set default plot options
         options.jlabels={};
         options.klabels={};
         options.conA=[];
         options.FWE='Rom';
-
+        
         % get field names
         optionnames = fieldnames(options);
-            
+        
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
             inpName = pair{1};
             
@@ -236,12 +236,12 @@ switch STATS.design
                 clear condfiles
             end
             
-                % save filenames
-                condfiles=STATS.jlvlfnames;
-                save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles');
-                % redundant
-%                 condfiles=STATS.subject_bootfiles;
-
+            % save filenames
+            condfiles=STATS.jlvlfnames;
+            save(['condfiles_SubjectStatistics_',STATS.measure,'_',STATS.savestring,'.mat'],'condfiles');
+            % redundant
+            %                 condfiles=STATS.subject_bootfiles;
+            
         else
             
             % load a file name that was given that contains the filenames X condition cell array
@@ -288,9 +288,16 @@ switch STATS.design
         error('design input must be ''bw'', ''ww'', or ''w'', in order to do single-subject statistics');
 end
 
+%%%%%%%%%%%%%%%%%%%%
+% post procedure for FWE across time if chosen
+if strcmp(STATS.subject_results.subject_1.factor_A.FWE, 'benhoch')
+    [STATS] = FWEtime(STATS, 'subject');
+end
+%%%%%%%%%%%%%%%%%%%%
 
-
-
+%disp('******* finished calculating statistics *******')
+%disp('******* Saving STATS structure *******')
+save(['STATS_',STATS.savestring,'.mat'],'STATS');
 
 
 

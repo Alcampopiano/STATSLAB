@@ -32,7 +32,7 @@ end
 options.conA=conA;
 options.conB=conB;
 options.conAB=conAB;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % get field names
 optionnames = fieldnames(options);

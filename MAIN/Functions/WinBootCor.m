@@ -1,5 +1,45 @@
 function [STATS]=WinBootCor(STATS,infodisplay,nboot,tr,Ylabel,varargin)
 
+% Calculate winsorized bootstrapped pearson's r on EEG data at each timpoint with as many correlates (Y data) as you wish. Expects you to load Ydata (EEG correlate). This is a MATLAB varaible (.mat) with one column for each external correlate you wish to use (RTs, accuracy, personality measure etc.). The number of columns in the Y variable, must equal the length of Y label (see below). Rows correspond to number of subjects.
+% 
+% Inputs:
+% 
+% ***infodisplay***
+% 
+% A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names, Xlabels, and Ylabels. ***end***
+% 
+% ***nboot***
+% number of bootstrap samples to take from the paired X and Y data. ***end***
+% 
+% ***tr***
+% percentage to Winsorize from the X and Y data. ***end***
+% 
+% ***Ylabel***
+% A string, or cell array of strings to indicate your Y variable(s) that will be correlated one by one with your EEG waveform (X variable). For example, {'RTs','accuracy', 'perfectionism_scores'}. ***end***
+% 
+% ***varargin***
+% 
+% Options are specified in pairs (key -> val)
+% 
+% [string] ->
+% 
+% 	[numeric] - String and numerical pair indicating the EEG data you would like to use in the 		correlation. For example,'Condition', 3, would correlate data from condition 3 with each 		Y variable. To use difference waves as the X variable, use 'FactorA', or 'FactorB', or 		'FactorAB' and a number indicating the contrast you wish to use in the correlation. In 		addition, add a label to identify you contrasts. For example, 'FactorAB', 1, 				'Interaction_comparison', would use the first interaction waveform as the X variable in 		the correlation and name this test, 'Interaction_comparison'. For 'bw' designs, if using 		contrasts in the correlation, you must indicate 'FactorA1', FactorA2, etc, as the strings, 		as contrasts were taken seperately for each level of factor A. See examples. 
+% 
+% WinBootCor from commandline::
+% 
+%   [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,'RT','Condition',3)
+%   
+%   [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy'},'Condition',1)
+%   
+%   [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy'},'FactorAB',1,   
+%   'interaction')
+%   
+%  [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000, 20,{'RTs', 'accuracy', 'shyness_scores'},'FactorB',2,'Easy_vs_hard_SLEEPY')
+%   
+%   [STATS]=WinBootCor('STATS_someanalysis.mat',1,1000,20,'RTs','FactorA2',2,'Easy_vs_hard_SLEEPY')  % for 'bw' designs
+% 
+% ***end***
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculate winsorized bootstrapped pearson's r on EEG data at each timpoint with as many correlates (Y data) as you wish.
 % Expects you to load Ydata (EEG correlate). This is a MATLAB varaible (.mat) with one column for each external correlate

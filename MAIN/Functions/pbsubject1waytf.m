@@ -16,7 +16,7 @@ end
 % edited may1st/15
 % set default plot options
 options.conA=conA;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % for bw designs
 options.jlabels={};

@@ -134,7 +134,7 @@ for timecurrent=1:numpnts;
 
     % factor A
     con=conA;
-    [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+    [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_A.pval(:,timecurrent)=pvalgen;
@@ -142,13 +142,19 @@ for timecurrent=1:numpnts;
     results.factor_A.test_stat(:,timecurrent)=psihat_stat;
     
     for i=1:conAcol;
+        
+        %%%%%%%%%%%%
+        % passing full difference vectors into STATS struct
+        results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        %%%%%%%%%%%%
+        
         results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
     end
     
     % factor B
     con=conB;
-    [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+    [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_B.pval(:,timecurrent)=pvalgen;
@@ -156,13 +162,19 @@ for timecurrent=1:numpnts;
     results.factor_B.test_stat(:,timecurrent)=psihat_stat;
     
     for i=1:conBcol;
+        
+        %%%%%%%%%%%%
+        % passing full difference vectors into STATS struct
+        results.factor_B.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        %%%%%%%%%%%%
+        
         results.factor_B.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_B.CI{i,1}(2,timecurrent)=confup(i);
     end
     
     % factor AxB
     con=conAB;
-    [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+    [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_AxB.pval(:,timecurrent)=pvalgen;
@@ -170,6 +182,12 @@ for timecurrent=1:numpnts;
     results.factor_AxB.test_stat(:,timecurrent)=psihat_stat;
     
     for i=1:conABcol;
+        
+        %%%%%%%%%%%%
+        % passing full difference vectors into STATS struct
+        results.factor_AxB.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        %%%%%%%%%%%%
+        
         results.factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
     end

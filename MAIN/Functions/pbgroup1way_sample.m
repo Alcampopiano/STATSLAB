@@ -23,7 +23,7 @@ pairwise differecnes, but fewer contrasts of course.
 % edited may1st/15
 % set default plot options
 options.conA=conA;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % get field names
 optionnames = fieldnames(options);
@@ -70,6 +70,11 @@ else
     [datacell] = grandaverage(STATS,nboot,numpnts,condfiles_subs);
 end
 
+%%% TESTING %%%
+% save full datacell for FWE corrections across time
+save(['datacell_', STATS.savestring, '.mat'], 'datacell');
+%%%
+
 % get condition waveforms for plotting purposes
 for i=1:length(datacell);
     condwaves(i,:)=mean(datacell{i},1);
@@ -109,17 +114,26 @@ for timecurrent=1:numpnts;
     
     % factor A
     con=conA;
-    [psihat_stat, pvalgen, pcrit, conflow, confup, psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+    [psihat, psihat_stat, pvalgen, pcrit, conflow, confup, psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
     
     % passing results into results structure
     results.factor_A.pval(:,timecurrent)=pvalgen;
     results.factor_A.alpha(:,timecurrent)=pcrit;
     results.factor_A.test_stat(:,timecurrent)=psihat_stat;
     
+    %%%%%%%%%%%%%%%%
+    % testing for FWE across time 
     for i=1:conAcol;
+        
+        %%%%%%%%%%%%
+        % passing full difference vectors into STATS struct
+        results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        %%%%%%%%%%%%
+        
         results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
     end
+    %%%%%%%%%%%%%%%
 
     waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end
