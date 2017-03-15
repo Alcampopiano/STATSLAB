@@ -25,7 +25,7 @@ pairwise differecnes, but fewer contrasts of course.
 options.conA=conA;
 options.conB=conB;
 options.conAB=conAB;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % get field names
 optionnames = fieldnames(options);
@@ -118,6 +118,26 @@ h2 = waitbar(0,'1','Name','analysis using all subjects','Position',[1100 486 550
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+%%%
+% preallocating difference array
+if strcmp(options.FWE, 'benhoch')
+    results.factor_A.diffs=cell(conAcol,1);
+    results.factor_B.diffs=cell(conBcol,1);
+    results.factor_AxB.diffs=cell(conABcol,1);
+    
+    for i=1:conAcol;
+        results.factor_A.diffs{i,1}=zeros(nboot,numpnts);
+    end
+    
+    for i=1:conBcol;
+        results.factor_B.diffs{i,1}=zeros(nboot,numpnts);
+    end
+    
+    for i=1:conABcol;
+        results.factor_AxB.diffs{i,1}=zeros(nboot,numpnts);
+    end
+end
+
 %arrange the data for the calculations
 [rowcell ~]=size(datacell{1,1});
 
@@ -141,13 +161,13 @@ for timecurrent=1:numpnts;
     results.factor_A.alpha(:,timecurrent)=pcrit;
     results.factor_A.test_stat(:,timecurrent)=psihat_stat;
     
-    for i=1:conAcol;
-        
-        %%%%%%%%%%%%
-        % passing full difference vectors into STATS struct
-        results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
-        %%%%%%%%%%%%
-        
+    if strcmp(options.FWE, 'benhoch')
+        for i=1:conAcol;
+            results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        end
+    end
+    
+    for i=1:conAcol;        
         results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
     end
@@ -161,13 +181,13 @@ for timecurrent=1:numpnts;
     results.factor_B.alpha(:,timecurrent)=pcrit;
     results.factor_B.test_stat(:,timecurrent)=psihat_stat;
     
+    if strcmp(options.FWE, 'benhoch')
+        for i=1:conBcol;
+            results.factor_B.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        end
+    end
+    
     for i=1:conBcol;
-        
-        %%%%%%%%%%%%
-        % passing full difference vectors into STATS struct
-        results.factor_B.diffs{i,1}(:,timecurrent)=psihat(:,i);
-        %%%%%%%%%%%%
-        
         results.factor_B.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_B.CI{i,1}(2,timecurrent)=confup(i);
     end
@@ -181,13 +201,13 @@ for timecurrent=1:numpnts;
     results.factor_AxB.alpha(:,timecurrent)=pcrit;
     results.factor_AxB.test_stat(:,timecurrent)=psihat_stat;
     
+    if strcmp(options.FWE, 'benhoch')
+        for i=1:conABcol;
+            results.factor_AxB.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        end
+    end
+    
     for i=1:conABcol;
-        
-        %%%%%%%%%%%%
-        % passing full difference vectors into STATS struct
-        results.factor_AxB.diffs{i,1}(:,timecurrent)=psihat(:,i);
-        %%%%%%%%%%%%
-        
         results.factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
     end

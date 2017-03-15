@@ -72,7 +72,7 @@ end
 
 %%% TESTING %%%
 % save full datacell for FWE corrections across time
-save(['datacell_', STATS.savestring, '.mat'], 'datacell');
+% save(['datacell_', STATS.savestring, '.mat'], 'datacell');
 %%%
 
 % get condition waveforms for plotting purposes
@@ -101,6 +101,14 @@ set(childh2, 'Position',[5 10 538 15]);
 %arrange the data for the calculations
 [rowcell ~]=size(datacell{1,1});
 
+if strcmp(options.FWE, 'benhoch')
+    results.factor_A.diffs=cell(conAcol,1);
+    
+    for i=1:conAcol;
+        results.factor_A.diffs{i,1}=zeros(nboot,numpnts);
+    end
+end
+
 % loop for stats at each timepoint
 for timecurrent=1:numpnts;
     
@@ -121,19 +129,16 @@ for timecurrent=1:numpnts;
     results.factor_A.alpha(:,timecurrent)=pcrit;
     results.factor_A.test_stat(:,timecurrent)=psihat_stat;
     
-    %%%%%%%%%%%%%%%%
-    % testing for FWE across time 
+    if strcmp(options.FWE, 'benhoch')
+        for i=1:conAcol;
+            results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
+        end
+    end
+
     for i=1:conAcol;
-        
-        %%%%%%%%%%%%
-        % passing full difference vectors into STATS struct
-        results.factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
-        %%%%%%%%%%%%
-        
         results.factor_A.CI{i,1}(1,timecurrent)=conflow(i);
         results.factor_A.CI{i,1}(2,timecurrent)=confup(i);
     end
-    %%%%%%%%%%%%%%%
 
     waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
 end

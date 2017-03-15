@@ -290,9 +290,9 @@ end
 
 %%%%%%%%%%%%%%%%%%%%
 % post procedure for FWE across time if chosen
-if strcmp(STATS.subject_results.subject_1.factor_A.FWE, 'benhoch')
-    [STATS] = FWEtime(STATS, 'subject');
-end
+%if strcmp(STATS.subject_results.subject_1.factor_A.FWE, 'benhoch')
+%    [STATS] = FWEtime(STATS, 'subject');
+%end
 %%%%%%%%%%%%%%%%%%%%
 
 %disp('******* finished calculating statistics *******')

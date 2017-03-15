@@ -149,10 +149,23 @@ switch isfactorial
             k=1;
             m=1;
             
-            % stats
-            for q=1:STATS.freqbins;
-                pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%   
+            if strcmp(STATS.sample_results.(fields{1}).factor_A.FWE,'benhoch');
+                
+                % stats
+                for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.sig_pvals(options.FactorA(i),:)==0);
+                end
+                
+                
+            else 
+                % stats
+                for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>STATS.alpha);
+                    %pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
+                end
             end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%
             
             for j=1:length(STATS.condnames);
                 
@@ -267,12 +280,25 @@ switch isfactorial
                 k=1;
                 m=1;
                 
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%   
+            if strcmp(STATS.sample_results.(fields{1}).factor_A.FWE,'benhoch');
+                
                 % stats
                 for q=1:STATS.freqbins;
-                    % diffsA1(i,:)=STATS.sample_results.(bands{i}).factor_A.test_stat(1,:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
-                    % pvalAB(i,:)=(STATS.sample_results.(bands{i}).factor_AxB.pval(1,:)>.05);
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.sig_pvals(options.FactorA(i),:)==0);
                 end
+                
+                
+            else 
+                % stats
+                for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>STATS.alpha);
+                    %pvals(q,:)=(STATS.sample_results.(fields{q}).factor_A.pval(options.FactorA(i),:)>.05);
+                end
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%
+             
                 
                 for j=1:length(STATS.condnames);
                     
@@ -369,10 +395,23 @@ switch isfactorial
                 m=1;
                 
                 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%   
+            if strcmp(STATS.sample_results.(fields{1}).factor_B.FWE,'benhoch');
+                
                 % stats
                 for q=1:STATS.freqbins;
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.pval(options.FactorB(i),:)>.05);
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.sig_pvals(options.FactorB(i),:)==0);
                 end
+                
+                
+            else 
+                % stats
+                for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_B.pval(options.FactorB(i),:)>STATS.alpha);
+                end
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%
+                
                 
                 for j=1:length(STATS.condnames);
                     
@@ -467,11 +506,25 @@ switch isfactorial
                 k=1;
                 m=1;
                 
+             %%%%%%%%%%%%%%%%%%%%%%%%%%   
+            if strcmp(STATS.sample_results.(fields{1}).factor_AxB.FWE,'benhoch');
+                
                 % stats
                 for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_AxB.sig_pvals(options.FactorAB(i),:)==0);
                     plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(options.FactorAB(i),:);
-                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_AxB.pval(options.FactorAB(i),:)>.05);
                 end
+                
+                
+            else 
+                % stats
+                for q=1:STATS.freqbins;
+                    pvals(q,:)=(STATS.sample_results.(fields{q}).factor_AxB.pval(options.FactorAB(i),:)>STATS.alpha);
+                    plotdiff(q,:)=STATS.sample_results.(fields{q}).factor_AxB.test_stat(options.FactorAB(i),:);
+
+                end
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 for j=1:length(STATS.condnames);
                     

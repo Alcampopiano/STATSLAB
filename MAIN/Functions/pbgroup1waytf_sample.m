@@ -23,7 +23,7 @@ pairwise differecnes, but fewer contrasts of course.
 % edited may1st/15
 % set default plot options
 options.conA=conA;
-options.FWE='Rom';
+options.FWE='benhoch';
 
 % get field names
 optionnames = fieldnames(options);
@@ -55,6 +55,11 @@ end
 
 % extract from options structure
 conA=options.conA;
+
+% temp
+if strcmp(options.FWE, 'benhoch');
+    results.factor_A.FWE=options.FWE; % temporary
+end
 
 % used to create proper sizes in results structure
 [~, conAcol]=size(conA);
@@ -96,6 +101,17 @@ h2 = waitbar(0,'1','Name','statistics on frequency bands','Position',[1100 486 5
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+%%%
+% preallocating difference array
+if strcmp(options.FWE, 'benhoch')
+    results.factor_A.diffs=cell(conAcol,1);
+    for i=1:conAcol;
+       results.factor_A.diffs{i,1}=zeros(STATS.nboot,STATS.timesout,STATS.freqbins);
+    end
+end
+%%%
+
+
 %arrange the data for the calculations
 rowcell=STATS.nboot;
 
@@ -121,7 +137,7 @@ for bandind=1:STATS.freqbins;
         
         % factor A
         con=conA;
-        [psihat_stat, pvalgen, pcrit, conflow, confup, psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+        [psihat, psihat_stat, pvalgen, pcrit, conflow, confup, psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
         
         % passing results into results structure
         results.(band_fields{bandind}).factor_A.contrasts=conA;
@@ -129,7 +145,13 @@ for bandind=1:STATS.freqbins;
         results.(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
         results.(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
         
-        for i=1:conAcol;
+        if strcmp(options.FWE, 'benhoch')
+            for i=1:conAcol;
+                results.factor_A.diffs{i,1}(:,timecurrent,bandind)=psihat(:,i);
+            end
+        end
+        
+        for i=1:conAcol;            
             results.(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
             results.(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
         end
@@ -137,6 +159,8 @@ for bandind=1:STATS.freqbins;
         waitbar(timecurrent/numpnts,h1,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
     
+    % add FWE option to structure
+    results.(band_fields{bandind}).factor_A.FWE=options.FWE;
     waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
       
 end

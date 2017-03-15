@@ -235,10 +235,21 @@ switch STATS.design
             % sub loop
             for s=1:length(sub_fields);
                 
-                % stats
-                for q=1:STATS.freqbins;
-                    pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
+                %%%%%%%%%%%%%%%%%%%%%%%%%%
+                if strcmp(STATS.subject_results.(sub_fields{1}).(band_fields{1}).factor_A.FWE,'benhoch');
+                    % stats
+                    for q=1:STATS.freqbins;
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.sig_pvals(options.FactorA(i),:)==1);
+                    end
+                else
+                    
+                    % stats
+                    for q=1:STATS.freqbins;
+                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=STATS.alpha);
+                    end
+                    
                 end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 pval_gather=pval_gather+pval_tmp;
             end
@@ -354,10 +365,22 @@ switch STATS.design
                 
                 for s=1:length(sub_fields);
                     
-                    % stats
-                    for q=1:STATS.freqbins;
-                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%
+                    if strcmp(STATS.subject_results.(sub_fields{1}).(band_fields{1}).factor_A.FWE,'benhoch');
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.sig_pvals(options.FactorA(i),:)==1);
+                        end
+                    else
+                        
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=STATS.alpha);
+                        end
+                        
                     end
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%
                     
                     pval_gather=pval_gather+pval_tmp;
                 end
@@ -450,7 +473,7 @@ switch STATS.design
                 
                 % reset
                 pval_gather=zeros(length(band_fields), length(STATS.TF_times));
-
+                
             end
         end
         
@@ -464,10 +487,23 @@ switch STATS.design
                 
                 for s=1:length(sub_fields);
                     
-                    % stats
-                    for q=1:STATS.freqbins;
-                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(options.FactorB(i),:)<=.05);
+                    
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%
+                    if strcmp(STATS.subject_results.(sub_fields{1}).(band_fields{1}).factor_B.FWE,'benhoch');
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.sig_pvals(options.FactorB(i),:)==1);
+                        end
+                    else
+                        
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_B.pval(options.FactorB(i),:)<=STATS.alpha);
+                        end
+                        
                     end
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%
                     
                     pval_gather=pval_gather+pval_tmp;
                 end
@@ -573,10 +609,21 @@ switch STATS.design
                 
                 for s=1:length(sub_fields);
                     
-                    % stats
-                    for q=1:STATS.freqbins;
-                        pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.pval(options.FactorAB(i),:)<=.05);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%
+                    if strcmp(STATS.subject_results.(sub_fields{1}).(band_fields{1}).factor_AxB.FWE,'benhoch');
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.sig_pvals(options.FactorAB(i),:)==1);
+                        end
+                    else
+                        
+                        % stats
+                        for q=1:STATS.freqbins;
+                            pval_tmp(q,:)=(STATS.subject_results.(sub_fields{s}).(band_fields{q}).factor_AxB.pval(options.FactorAB(i),:)<=STATS.alpha);
+                        end
+                        
                     end
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%
                     
                     pval_gather=pval_gather+pval_tmp;
                 end
@@ -694,10 +741,21 @@ switch STATS.design
                     % sub loop
                     for s=1:length(subnames);
                         
-                        % stats
-                        for q=1:STATS.freqbins;
-                            pval_tmp(q,:)=(STATS.subject_results.(factnames{v}).(subnames{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=.05);
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%
+                        if strcmp(STATS.subject_results.(sub_fields{1}).(band_fields{1}).factor_A.FWE,'benhoch');
+                            % stats
+                            for q=1:STATS.freqbins;
+                                pval_tmp(q,:)=(STATS.subject_results.(factnames{v}).(subnames{s}).(band_fields{q}).factor_A.sig_pvals(options.FactorA(i),:)==1);
+                            end
+                        else
+                            
+                            % stats
+                            for q=1:STATS.freqbins;
+                                pval_tmp(q,:)=(STATS.subject_results.(factnames{v}).(subnames{s}).(band_fields{q}).factor_A.pval(options.FactorA(i),:)<=STATS.alpha);
+                            end
+                            
                         end
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%
                         
                         pval_gather=pval_gather+pval_tmp;
                     end
@@ -898,13 +956,13 @@ save(['STATS_',STATS.savestring,'.mat'],'STATS');
             end
             
             htit = axes('visible','off');
-            tit=title([titl, ' -> ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');  
+            tit=title([titl, ' -> ', num2str(STATS.TF_freqs(I)), ' Hz'], 'parent', htit, 'visible', 'on');
             % get rid of subscripts that occur when there are underscores
             set(tit,'Interpreter', 'none');
             axis tight
             grid on
             
-
+            
         end
     end
 

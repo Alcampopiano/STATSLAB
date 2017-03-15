@@ -147,6 +147,26 @@ h2 = waitbar(0,'1','Name','stats across time','Position',[1100 486 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+%%%
+% preallocating difference array
+if strcmp(options.FWE, 'benhoch')
+    diffsA=cell(conAcol,1);
+    diffsB=cell(conBcol,1);
+    diffsAB=cell(conABcol,1);
+    
+    for i=1:conAcol;
+        diffsA{i,1}=zeros(nboot,numpnts);
+    end
+    
+    for i=1:conBcol;
+        diffsB{i,1}=zeros(nboot,numpnts);
+    end
+    
+    for i=1:conABcol;
+        diffsAB{i,1}=zeros(nboot,numpnts);
+    end
+end
+
 for filecurrent=1:rowconds;
 
     for condcurrent=1:colconds;
@@ -179,14 +199,13 @@ for filecurrent=1:rowconds;
         results.(field_name{filecurrent}).factor_A.alpha(:,timecurrent)=pcrit;
         results.(field_name{filecurrent}).factor_A.test_stat(:,timecurrent)=psihat_stat;
         
+        if strcmp(options.FWE, 'benhoch')
+            for i=1:conAcol;
+                diffsA{i,1}(:,timecurrent)=psihat(:,i);
+            end
+        end
         
-        for i=1:conAcol;
-            
-            %%%%%%%%%%%%
-            % passing full difference vectors into STATS struct
-            results.(field_name{filecurrent}).factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
-            %%%%%%%%%%%%
-            
+        for i=1:conAcol; 
             results.(field_name{filecurrent}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_A.CI{i,1}(2,timecurrent)=confup(i);           
         end
@@ -200,14 +219,13 @@ for filecurrent=1:rowconds;
         results.(field_name{filecurrent}).factor_B.alpha(:,timecurrent)=pcrit;
         results.(field_name{filecurrent}).factor_B.test_stat(:,timecurrent)=psihat_stat;
         
+        if strcmp(options.FWE, 'benhoch')
+            for i=1:conBcol;
+                diffsB{i,1}(:,timecurrent)=psihat(:,i);
+            end
+        end
         
         for i=1:conBcol;
-            
-            %%%%%%%%%%%%
-            % passing full difference vectors into STATS struct
-            results.(field_name{filecurrent}).factor_B.diffs{i,1}(:,timecurrent)=psihat(:,i);
-            %%%%%%%%%%%%
-            
             results.(field_name{filecurrent}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
         end
@@ -221,13 +239,13 @@ for filecurrent=1:rowconds;
         results.(field_name{filecurrent}).factor_AxB.alpha(:,timecurrent)=pcrit;
         results.(field_name{filecurrent}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;    
         
-        for i=1:conABcol;
-            
-            %%%%%%%%%%%%
-            % passing full difference vectors into STATS struct
-            results.(field_name{filecurrent}).factor_AxB.diffs{i,1}(:,timecurrent)=psihat(:,i);
-            %%%%%%%%%%%%
-            
+        if strcmp(options.FWE, 'benhoch')
+            for i=1:conABcol;
+                diffsAB{i,1}(:,timecurrent)=psihat(:,i);
+            end
+        end
+        
+        for i=1:conABcol;  
             results.(field_name{filecurrent}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
         end
@@ -235,6 +253,15 @@ for filecurrent=1:rowconds;
         waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
     
+    %%%%%%%%%%%%%%%%%%%%
+    % post procedure for FWE across time if chosen
+    if strcmp(options.FWE, 'benhoch');
+        [sub_results] = FWEtime(results.(field_name{filecurrent}),STATS.alpha,STATS.nboot,'subject',diffsA,diffsB,diffsAB);
+        results.(field_name{filecurrent})=sub_results;
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%
+  
 waitbar(filecurrent/rowconds,h1,sprintf('%12s',[num2str(filecurrent),'/',num2str(rowconds)]))   
 end
 close(h1,h2);

@@ -138,6 +138,14 @@ h2 = waitbar(0,'1','Name','stats across time','Position',[1100 486 550 40]);
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+% preallocating difference array
+if strcmp(options.FWE, 'benhoch')
+    diffs=cell(conAcol,1);
+    for i=1:conAcol;
+        diffs{i,1}=zeros(nboot,numpnts);
+    end
+end
+
 for filecurrent=1:rowconds;
     
     % this try block handles the differences that occur when condilfes are in
@@ -185,19 +193,28 @@ for filecurrent=1:rowconds;
         results.(field_name{filecurrent}).factor_A.test_stat(:,timecurrent)=psihat_stat;
         
         
+        if strcmp(options.FWE, 'benhoch')
+            for i=1:conAcol;
+                diffs{i,1}(:,timecurrent)=psihat(:,i);
+            end
+        end
+        
+        
         for i=1:conAcol;
-            
-            %%%%%%%%%%%%
-            % passing full difference vectors into STATS struct
-            results.(field_name{filecurrent}).factor_A.diffs{i,1}(:,timecurrent)=psihat(:,i);
-            %%%%%%%%%%%%
-            
             results.(field_name{filecurrent}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
             results.(field_name{filecurrent}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
         end
         
         waitbar(timecurrent/numpnts,h2,sprintf('%12s',[num2str(timecurrent),'/',num2str(numpnts)]))
     end
+    
+    %%%%%%%%%%%%%%%%%%%%
+    % post procedure for FWE across time if chosen
+    if strcmp(options.FWE, 'benhoch');
+       [sub_results] = FWEtime(results.(field_name{filecurrent}),STATS.alpha,STATS.nboot,'subject',diffs);
+       results.(field_name{filecurrent})=sub_results;
+    end
+    %%%%%%%%%%%%%%%%%%%%
     
     waitbar(filecurrent/rowconds,h1,sprintf('%12s',[num2str(filecurrent),'/',num2str(rowconds)]))
 end

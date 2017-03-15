@@ -153,6 +153,26 @@ h2 = waitbar(0,'1','Name','statistics on frequency bin','Position',[1100 486 550
 childh2 = get(h2, 'Children');
 set(childh2, 'Position',[5 10 538 15]);
 
+%%%
+% preallocating difference array
+if strcmp(options.FWE, 'benhoch')
+    diffsA=cell(conAcol,1);
+    diffsB=cell(conBcol,1);
+    diffsAB=cell(conABcol,1);
+    
+    for i=1:conAcol;
+        diffsA{i,1}=zeros(STATS.nboot,STATS.timesout,STATS.freqbins);
+    end
+    
+    for i=1:conBcol;
+        diffsB{i,1}=zeros(STATS.nboot,STATS.timesout,STATS.freqbins);
+    end
+    
+    for i=1:conABcol;
+        diffsAB{i,1}=zeros(STATS.nboot,STATS.timesout,STATS.freqbins);
+    end
+end
+
 for filecurrent=1:rowconds;
     
     for condcurrent=1:colconds;
@@ -220,7 +240,7 @@ for filecurrent=1:rowconds;
             
             % factor A
             con=conA;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.contrasts=conA;
@@ -228,15 +248,20 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.alpha(:,timecurrent)=pcrit;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.test_stat(:,timecurrent)=psihat_stat;
             
+            if strcmp(options.FWE, 'benhoch')
+                for i=1:conAcol;
+                    diffsA{i,1}(:,timecurrent,bandind)=psihat(:,i);
+                end
+            end     
             
-            for i=1:conAcol;
+            for i=1:conAcol;                
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.CI{i,1}(2,timecurrent)=confup(i);
             end
             
             % factor B
             con=conB;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.contrasts=conB;
@@ -245,14 +270,20 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.test_stat(:,timecurrent)=psihat_stat;
             
             
-            for i=1:conBcol;
+            if strcmp(options.FWE, 'benhoch')
+                for i=1:conBcol;
+                    diffsB{i,1}(:,timecurrent,bandind)=psihat(:,i);
+                end
+            end
+            
+            for i=1:conBcol; 
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.CI{i,1}(2,timecurrent)=confup(i);
             end
             
             % factor AxB
             con=conAB;
-            [psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
+            [psihat psihat_stat pvalgen pcrit conflow confup psihat_statz]=pbstats(data, con, nboot, alpha, options.FWE);
             
             % passing results into results structure
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.contrasts=conAB;
@@ -260,15 +291,35 @@ for filecurrent=1:rowconds;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.alpha(:,timecurrent)=pcrit;
             results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.test_stat(:,timecurrent)=psihat_stat;
             
-            for i=1:conABcol;
+            if strcmp(options.FWE, 'benhoch')
+                for i=1:conABcol;
+                    diffsAB{i,1}(:,timecurrent,bandind)=psihat(:,i);
+                end
+            end
+            
+            for i=1:conABcol; 
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(1,timecurrent)=conflow(i);
                 results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.CI{i,1}(2,timecurrent)=confup(i);
             end
             
-            
         end
+          
+        % add FWE option to results structure
+        results.(field_name{filecurrent}).(band_fields{bandind}).factor_A.FWE=options.FWE;
+        results.(field_name{filecurrent}).(band_fields{bandind}).factor_B.FWE=options.FWE;
+        results.(field_name{filecurrent}).(band_fields{bandind}).factor_AxB.FWE=options.FWE;
+        
         waitbar(bandind/STATS.freqbins,h2,sprintf('%12s',[num2str(bandind),'/',num2str(STATS.freqbins)]))
     end
+    
+    
+    %%%%%%%%%%%%%%%%%%%%
+    % post procedure for FWE across time if chosen
+    if strcmp(options.FWE, 'benhoch');
+        [band_results] = FWEtime(results.(field_name{filecurrent}),STATS.alpha,STATS.nboot,'subjectTF',diffsA,diffsB,diffsAB);
+        results.(field_name{filecurrent})=band_results;
+    end
+    %%%%%%%%%%%%%%%%%%%%
     
     waitbar(filecurrent/rowconds,h1,sprintf('%12s',[num2str(filecurrent),'/',num2str(rowconds)]))
 end
