@@ -177,6 +177,19 @@ for filecurrent=1:colfile;
     %datacell{1,filecurrent}=subdata.data;
     datacell{1}=subdata.data;
     
+    % temporary centering of data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % REMOVE AFTER TESTING
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % mean of 
+    %md=mean(datacell{1},3);
+    %
+    %for ii=1:size(datacell{1},3)
+    %    datacell{1}(:,:,ii)=datacell{1}(:,:,ii)-md;
+    %end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     %[jnk numpnts pageEEG]=size(datacell{filecurrent});
     [jnk numpnts pageEEG]=size(datacell{1});
     trialEEG=pageEEG;
