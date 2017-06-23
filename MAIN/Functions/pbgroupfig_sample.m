@@ -56,6 +56,7 @@ if any(strcmp(varargin,'all'));
     % add other options
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
+    options.savesvg='no';
     %options.maplim=[];
     
     % read the acceptable names
@@ -109,6 +110,7 @@ else
     % add other options
     options.timeplot=1:length(STATS.xtimes);
     options.topos='no';
+    options.savesvg='no';
     %options.maplim=[];
     
     
@@ -208,7 +210,9 @@ switch isfactorial
             axis tight
             grid on
             
-            %plot2svg([STATS.savestring, '_groupfig.svg']);
+            if strcmp(options.savesvg,'yes')
+                plot2svg([STATS.savestring, '_groupfig.svg']);
+            end
             
             
             % clear variables before next iteration
@@ -283,6 +287,10 @@ switch isfactorial
                 axis tight
                 grid on
                 
+                if strcmp(options.savesvg,'yes')
+                    plot2svg([STATS.savestring,'_groupfig_FA', str2num(i), '.svg']);
+                end
+                
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist
                 
@@ -350,6 +358,10 @@ switch isfactorial
                 axis tight
                 grid on
                 
+                if strcmp(options.savesvg,'yes')
+                    plot2svg([STATS.savestring,'_groupfig_FB', str2num(i), '.svg']);
+                end
+                
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist
                 
@@ -414,6 +426,10 @@ switch isfactorial
                 h(4)=jbfill(STATS.xtimes(options.timeplot),CIup, CIlow, [.5 .5 .5], [.5 .5 .5], 1, .6);
                 axis tight
                 grid on
+                
+                if strcmp(options.savesvg,'yes')
+                    plot2svg([STATS.savestring,'_groupfig_FAB', str2num(i), '.svg']);
+                end
                 
                 % clear variables before next iteration
                 clear plot1st plot2nd plotdiff leg1st leg2nd leg2ndlist leg1stlist

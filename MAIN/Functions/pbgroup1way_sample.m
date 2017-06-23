@@ -75,6 +75,16 @@ end
 % save(['datacell_', STATS.savestring, '.mat'], 'datacell');
 %%%
 
+%%% TESTING %%%
+%%% mean centering grandaverages %%%%
+%%% remove after testin %%%
+% get condition waveforms for plotting purposes
+for i=1:length(datacell);
+    mwave=mean(datacell{i},1);
+    datacell{i}=datacell{i}-repmat(mwave, STATS.nboot,1);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % get condition waveforms for plotting purposes
 for i=1:length(datacell);
     condwaves(i,:)=mean(datacell{i},1);
