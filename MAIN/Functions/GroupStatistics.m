@@ -165,24 +165,26 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%
-try
+%try
     % post procedure for FWE across time if chosen
     if strcmp(STATS.sample_results.factor_A.FWE, 'benhoch')
         
-        if any(strcmp({'ersp' 'itc'},STATS.measure));
-        
-            % clean tmp structure
-            [STATS.sample_results]=rmfield(STATS.sample_results,'factor_A');
-        
-        end
+%         if any(strcmp({'ersp' 'itc'},STATS.measure));
+%         
+%             % clean tmp structure
+%             try [STATS.sample_results]=rmfield(STATS.sample_results,'factor_A'); catch, end
+%             try [STATS.sample_results]=rmfield(STATS.sample_results,'factor_B'); catch, end
+%             try [STATS.sample_results]=rmfield(STATS.sample_results,'factor_AxB'); catch, end
+% 
+%         end
         
         % FWE
         [STATS] = FWEtime(STATS,STATS.alpha,STATS.nboot,'group');
         save(['STATS_',STATS.savestring,'.mat'],'STATS');
     end
-catch
-    disp('could not do fWE correction (benhoch) for some reason')
-end
+%catch
+%    disp('could not do fWE correction (benhoch) for some reason')
+%end
 %%%%%%%%%%%%%%%%%%%%
 
 
