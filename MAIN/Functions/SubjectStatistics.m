@@ -1,87 +1,87 @@
 function [STATS]=SubjectStatistics(STATS,condfiles,alpha,varargin)
 
 % Calculates subject-level statistics for any number of levels, and up to two-way designs.
-%
+%  
 % Inputs:
-%
+% 
 % ***condfiles***
 % Leave empty and MATLAB will bring up an interface for you to load the appropriate “bootstrapped” files.
 % ***end***
-%
+% 
 % ***alpha***
 % Statistical significance threshold. Will be adjusted if options for controlling FWE are specified.
 % ***end***
-%
+% 
 % ***varargin***
 % Options are specified in pairs (key -> val)
-%
+% 
 % FWE ->
-%
+% 	
+% 	benhoch - control FWE across entire time course using Benjamini-Hochberg method (Groppe, 2011; Benjamini & Hochberg, 1995). This is the default and recommended setting.
+% 
 % 	none  - no control for familywise error
-% 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
-%   Bon - use Bonferroni method to correct for FWE
-%
+%  
 % conA ->
-%
-% 	[numeric] - Contrast matrix for Factor A comparisons.
-%
-% conB ->
-%
-% 	[numeric] - Contrast matrix for Factor B comparisons, if applicable.
-%
-% conAB ->
-%
-% 	[numeric] - Contrast matrix for the interaction, if applicable.
-%
-% jlables ->
-%
-% 	For between-within designs only. Name of the general within-subjects conditions separated by a space on the same line
-%
+%  
+% 	[numeric] - Contrast matrix for Factor A comparisons. 
+% 
+% conB -> 
+% 
+% 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
+% 
+% conAB -> 
+% 
+% 	[numeric] - Contrast matrix for the interaction, if applicable. 
+% 
+% jlables -> 
+% 
+% 	For between-within designs only. Name of the general within-subjects conditions. 
+% 
 % klabels ->
-%
-% 	For between-within designs only. Name of the general between-subjects conditions separated by a space on the same line
-%
+% 
+% 	For between-within designs only. Name of the general between-subjects conditions.
+% 
 % For example,
-%
+% 
 % FWE
-% Rom
+% benhoch
 % conA
 % 1 0 -1 0; 0 1 0 -1
 % conB
 % 1 -1 0 0; 0 0 1 -1
 % conAB
 % 1 -1 -1 1
-%
-%
-% Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 – 4]).
-%
+% 
+% 
+% Controls for FWE using Benjamini-Hochberg (1995) method. For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 – 4]).
+% 
 % FWE
 % none
 % conA
 % 1 -1 0
 % klabels
-% face house butterfly
+% face, house, butterfly
 % jlabels
-% male female
-%
-% No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics.
-%
+% male, female
+% 
+% No control for FWE. In this example we have a 2x3 mixed design comparing male and females in a face processing task using three visual stimuli (face, house, butterfly). Because this is a mixed design, we can only compare the within-subjects conditions (face, house butterfly) when running single-subject statistics. 
+% 
 % Using SubjectStatistics at the commandline:
-%
+%  
 % For a 1-way design with 2 conditions (like a t-test):
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'none', 'conA', [1 -1]');
-%
+%  
 % For a 2-way design with 4 conditions (2x2):
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
-%
+% 
 % For a 1-way design with 3 conditions:
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
-%
+% 
 % For a 2-way between-within design with 3 conditions for each level of Factor A:
 % [STATS]=SubjectStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]', 'jlabels', {'male', 'female'}, 'klabels', {'face', 'house', 'butterfly'});
-%
+% 
 % ***end***
-%
+
 % Copyright (C) <2015>  <Allan Campopiano>
 %
 % This program is free software; you can redistribute it and/or modify

@@ -1,8 +1,6 @@
 function [STATS]=GroupFigure(STATS,infodisplay,varargin)
 
-% This function plots group-level data. 
-% For ERSP and ITC measures, basic plots are created where the group-level time X frequency for the specified contrast is plotted. 
-% All figures have clickable features, so click waveforms/frequencies to display more information (e.g., topographies, CIs around frequency bands).
+% This function plots group-level data. For ERSP and ITC measures, basic plots are created where the group-level time X frequency for the specified contrast is plotted. All figures have clickable features, so click waveforms/frequencies to display more information (e.g., topographies, CIs around frequency bands).
 % 
 % Inputs:
 % 
@@ -22,13 +20,15 @@ function [STATS]=GroupFigure(STATS,infodisplay,varargin)
 % 
 % 	channel location file - calculate and allow plotting of topographies (only need to do once).
 % 
-% FactorA, FactorB, FactorAB, all (use the "all" option without a key/value pair) ->
+% FactorA, FactorB, FactorAB, all ( use the “all” option without a key/value pair) ->
 % 
 % 	[numeric] - specify which contrasts you wish to plot for each factor and the interaction
 % 
-% 	all (default) - plot all contrasts that were specified when statistics were calculated. 
-%                   This option does not need to be paired with another option, just use it on its own 
-%                   (i.e., do not pair with FactorA, FactorB, or FactorAB).
+% 	all (default) - plot all contrasts that were specified when statistics were calculated. This option does not need to be paired with another option, just use it on its own (i.e., do not pair with FactorA, FactorB, or FactorAB).
+% 
+% savesvg -> 
+% 	
+% 	yes/no - save the figure in vectorized format. All elements of the figure (e.g., axes, waveforms, legends, ticks, tick labels, borders, text, etc) can be edited in Inkscape or other programs that support SVG format. Default is “no”.
 % 
 % 
 % For example,
@@ -40,14 +40,11 @@ function [STATS]=GroupFigure(STATS,infodisplay,varargin)
 % topos
 % mychanlocsfile.sfp
 % 
-% This set of options would plot the second Factor A comparison (otherwise just use the “all” option to plot all contrasts). 
-% The type of plot would be a standard difference wave in blue for each subject bounded by a CI. 
-% The channel locations file would be use to precompute topographies. 
-% This allows you to click on the waveforms at any latency for any subject and see the topographies for each condition.
+% This set of options would plot the second Factor A comparison (otherwise just use the “all” option to plot all contrasts). The type of plot would be a standard difference wave in blue for each subject bounded by a CI. The channel locations file would be use to precompute topographies. This allows you to click on the waveforms at any latency for any subject and see the topographies for each condition.
 % 
 % Using GroupFigure at the commandline:
 % 
-% [STATS]=GroupFigure_sample('STATS_mythesis.mat',1,'all','timeplot',[-200 600], 'topos' ,'no');
+% [STATS]=GroupFigure('STATS_mythesis.mat',1,'all','timeplot',[-200 600]);
 % ***end***
 
 

@@ -1,8 +1,5 @@
 function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
-% This function plots single-subject data in a variety of ways. Many options exist for non-spectral measures. 
-% For ERSP and ITC measures, basic plots are created where the group-level time X frequency for the specified contrast is plotted. 
-% In addition, a p-value matrix showing the proportion of subjects with statistical differences at each time and frequency is shown. 
-% All figures have clickable features, so click waveforms/frequencies to display more information.
+% This function plots single-subject data in a variety of ways. Many options exist for non-spectral measures. For ERSP and ITC measures, basic plots are created where the group-level time X frequency for the specified contrast is plotted. In addition, a p-value matrix showing the proportion of subjects with statistical differences at each time and frequency is shown. All figures have clickable features, so click waveforms/frequencies to display more information.
 % 
 % Inputs:
 % 
@@ -15,8 +12,7 @@ function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
 % 
 % plottype ->
 % 	
-% 	CI_MOE (default) - plot a figure showing the margin of error (one half of the CI) and display the difference between two conditions as a color bar. 
-%                      Black lines show statistical differences.
+% 	CI_MOE (default) - plot a figure showing the margin of error (one half of the CI) and display the difference between two conditions as a color bar. Black lines show statistical differences.
 % 
 % 	wave – plot difference as a waveform surrounded by the CI. Red lines show statistical differences.
 % 
@@ -37,6 +33,7 @@ function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
 % zaxis -> 
 % 
 % 	[numeric] - the margin of error limits (for CI_MOE option only). In the range of 0-inf. Default scales to absolute max for each subject.
+% 
 % caxis ->
 % 
 % 	 [numeric] - the color range to plot (for CI_MOE and diff options only). Default scales to absolute max for each subject.
@@ -46,15 +43,19 @@ function [STATS]=SubjectFigure(STATS,infodisplay,varargin)
 % 	[numeric] - the range of xaxis values to plot. Default scales to length of epoch.
 % 
 % topos ->
+% 
 % 	 no (default) - do not calculate topographies
-%      
-% 	 channel location file - calculate and allow plotting of topographies (only need to do once).
+% channel location file - calculate and allow plotting of topographies (only need to do once).
 % 
 % FactorA, FactorB, FactorAB, all ->
 % 
 % 	[numeric] - specify which contrasts you wish to plot for each factor and the interaction
 % 
 % 	all (default) - plot all contrasts that were specified when statistics were calculated
+% 
+% savesvg -> 
+% 	
+% 	yes/no - save the figure in vectorized format. All elements of the figure (e.g., axes, waveforms, legends, ticks, tick labels, borders, text, etc) can be edited in Inkscape or other programs that support SVG format. Default is “no”.
 % 
 % 
 % For example,

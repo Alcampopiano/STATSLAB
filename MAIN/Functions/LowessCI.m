@@ -1,35 +1,35 @@
 function [STATS]=LowessCI(STATS,infodisplay,Xlabel,Ylabel,msplot,nboot,span,nbins)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plot scatter plot and parametric regression line with CIs and prediction
-% band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
-% the color changes (fades). Play around with the colors.
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot visually weighted lowess confidence intervals.
 % 
-% Input arguments:
-%     STATS = structre you will be prompted to load this if the argument is left empty. Otherwise give
-%             the filename to your STATS stucture in the current directory.
+% Inputs:
+%  
+% ***infodisplay***
+%  A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names, Xlabels, and Ylabels. ***end***
+%  
+% ***Xlabel***
+% String that indicates the X variable (EEG data). Must be the same Xlabel used when running WinBootCor.m ***end***
+%  
+% ***Ylabel*** 
+% A string indicating your Y variable(s) (correlates) Must be the same Ylabel used when running WinBootCor.m ***end***
+%  
+% ***msplot***
+% a number indicating the ms you wish to plot ***end***
+%  
+% ***nboot*** 
+% number of bootstrap lowess samples ***end***
 % 
-%     infodisplay = A numerical flag (0 or 1). Set to 1 if you would like to see your contrasts, condition names,
-%                   Xlabels, and Ylabels.
-% 
-%     Xlabel = String that indicates the X variable (EEG data). Must be the
-%              same Xlabel used when running WinBootCor.m
-% 
-%     Ylabel = A string indicating your Y variable(s) (correlates) Must be the
-%              same Ylabel used when running WinBootCor.m.
-% 
-%     msplot = a number indicating the ms you wish to plot
-% 
-%     nboot = number of bootstrap lowess samples
-% 
-%     span = number in range 0 to 1, indicates size of sliding window (percent of data to use)
-% 
-%     nbins = number of vertical bins in which to calculate kernal density
-% 
-% Example:
-% 
-% LowessCI('STATS_B_analysis.mat',1,'awake','RT',100, 1000, .5, 1000)
+%  ***span***
+% number in range 0 to 1, indicates size of sliding window (percent of data to use). Try .2 ***end***
+%  
+% ***nbins***
+% number of vertical bins in which to calculate kernal density. Try a small number to begin with (50), as large numbers take more computing time and memory ***end***
+%  
+% LowessCI from commandline: 
+%  
+% LowessCI('STATS_B_analysis.mat',1,'awake','RT',100, 200, .2, 50)
+
+
 % 
 % 
 % Copyright (C) <2015>  <Allan Campopiano>

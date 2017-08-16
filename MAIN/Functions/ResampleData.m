@@ -10,11 +10,10 @@
 % 
 % ***nboot*** 
 % number of resamples you wish to take from the single-trials ***end***
-%
+% 
 % ***trim*** 
-% Percent of data to trim from each tail of the distribution. Single-trial data is trimmed at each time point 
-% for each subject prior to calculating channel ERPs or spectral measures. 
-% The 20% trimmed mean is a good choice in general (Wilcox, 2012) ***end***
+% Percent of data to trim from each tail of the distribution. Single-trial data is trimmed at each time point for each subject prior to calculating channel ERPs or spectral measures. Value is between 0 - 1. The 20% trimmed mean is a good choice in general (Wilcox, 2013) 
+%  ***end***
 % 
 % ***varargin***
 % Options are specified in pairs (key -> val)
@@ -25,14 +24,11 @@
 % 
 % 	none - sample a new set of trials that is equal in size to the original set 
 % 
-%   baseline ->
+% baseline ->
 % 
-% 	[min  max] – specify the baseline correction period in milliseconds to be applied to each bootstrap surrogate (in milliseconds). 
-%                   This option only applies to microvolt measures (e.g., scalpchan, icascalp) when the trimmed mean is used. 
-%                   In that case, a baseline correction will ensure that a zero-sum baseline period is maintained for each bootstrap surrogate. 
+% 	[min  max] -  specify the baseline correction period in milliseconds to be applied to each bootstrap surrogate (in milliseconds). This option only applies to microvolt measures (e.g., scalpchan, icascalp) when the trimmed mean is used. In that case, a baseline correction will 	ensure that a zero-sum baseline period is maintained for each bootstrap surrogate. 
 % 
-% 	none – do not baseline correct (default). 
-%            Note that time-frequency analyses currently perform baseline corrections using the default method in EEGLAB (see newtimef.m)
+% 	none - Do not baseline correct (default). Note that time-frequency analyses currently perform baseline corrections using the default method in EEGLAB (see newtimef.m)
 % 
 % For example,
 % 

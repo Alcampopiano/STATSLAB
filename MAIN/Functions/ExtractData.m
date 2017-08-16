@@ -57,43 +57,62 @@
 % ***varargin***
 % 
 % Options are specified in pairs (key -> val)
-%
-% measure ->
+% 
+% Measure ->
 % 		
-% 	icamax		project IC to channel with max weight
+% 	scalpitc - inter-trial coherence for selected channel
 % 		
-% 	icagfa		project IC to scalp and measure scalp GFA
+% 	scalpersp - event-related spectral perturbation for selected channel
 % 		
-% 	icaitc		project IC to selected channel and calculate inter-trial coherence
+% 	scalpgfa - global field power for scalp
 % 		
-% 	icaersp		project IC to selected channel and calculate event-related spectral perturbation
+% 	scalpchan - measure microvolts for selected scalp channel
 % 		
-% 	icascalp	project IC to selected channel and measure microvolt
+% 	icagfa - project IC to scalp and measure scalp GFA
 % 		
-% 	scalpitc	inter-trial coherence for selected channel
+% 	icaitc - project IC to selected channel and calculate inter-trial coherence
 % 		
-% 	scalpersp	event-related spectral perturbation for selected channel
+% 	icaersp - project IC to selected channel and calculate event-related spectral perturbation
 % 		
-% 	scalpgfa	global field power for scalp
+% 	icascalp - project IC to selected channel and measure microvolt
+% 
+% 	icamax - project IC to channel with max weight
 % 		
-% 	scalpchan	measure microvolts for selected scalp channel
 % 		
 % ICs ->		
-% 	persubject		bring up GUI to enter IC indexes for each subject and condition
+% 	persubject - bring up GUI to enter IC indexes for each subject and condition
 % 
-% 	your_IC_file.mat	name of file that hold IC indexes (you can make file using the “persubject” option first
+% 	your_IC_file.mat - name of file that hold IC indexes (you can make file using the “persubject” option first
 % 		
 % 		
-% chans ->		
+% Chans ->		
 % 
-% 	persubject	bring up montage GUI to select channels for each subject and condition
+% 	persubject - bring up montage GUI to select channels for each subject and condition
 % 
-% 	chanlabels 	The channel labels for electrodes you are analyzing (applied to all subjects)
+% 	chanlabels - The channel labels for electrodes you are analyzing (applied to all subjects)
+% 
+% 	
 % 
 % 		
-% tfcycles,freqs,nfreqs -> 		
-% 		
-%       To be used with the itc and ersp options. See EEGLAB's newtimef.m for information on these key & val options	
+% tfcycles -> 
+% 
+% 	[cycles] or [cycles cycles(2)]  
+% 	
+% 	indicate the number of cycles for the time-frequency decomposition. See EEGLAB's newtimef.m for more details. Default is [3 0.5].
+% 
+% 	
+% 
+% freqs -> 
+% 
+% 	[min max]
+% 	indicate the frequency limits. Default is [3 30]. See EEGLAB's newtimef.m for more details as values depend on sampling rate and epoch length.
+% 
+% 
+% nfreqs ->
+%  		
+% 	[positive integer]
+% 	indicate the number of output frequencies. Default is 27. See EEGLAB's newtimef.m for more details as values depend on sampling rate and epoch length.
+% 
 % 		
 % For example,
 % 		
@@ -102,7 +121,7 @@
 % chans		
 % Fcz Cz	
 % 
-% will extract standard scalp microvolts for Fcz and Cz (channels are averaged together)	
+% will extract microvolts at the scalp for Fcz and Cz (channels are averaged together)	
 % 		
 % For example,		
 % 		
@@ -113,12 +132,34 @@
 % chans		
 % persubject		
 % 
-% A GUI will appear to select IC indexes. Those ICs will then be projected back to the channels selected in the montage GUI. 
+% A GUI will appear to select IC indexes. Those ICs will then be projected back to the channels selected in the montage GUI. Microvolts will be used as the dependent measure.
+% 
+% For example,		
+% 		
+% measure		
+% icaersp
+% tfcycles
+% 3 0.5
+% freqs
+% 3 30
+% nfreqs
+% 27	
+% ICs		
+% persubject		
+% chans		
+% persubject	
+% 
+% A GUI will appear to select IC indexes. Those ICs will then be projected back to the channels selected in the montage GUI. ERSP will be computed as the dependent measure with the given spectral options.
 % 
 % Using ExtractData at the commandline:
 % 
 % ExtractData({'face' 'house'}, [], 2, 'w', 'my_Oz_analysis', 'measure', 'scalpchan', 'chans', 'persubject');
+% 
 % ExtractData({'old_cong' 'old_incong' 'young_cong' 'young_incong'}, [], [2 2], 'bw', 'my_Oz_ICAanalysis', 'measure', 'icascalp', 'ICs', 'my_IC_file.mat', 'chans', 'Oz');
+% 
+% ExtractData({'alert_cong' 'alert_incong' 'sleepy_cong' 'sleepy_incong'}, [], [2 2], 'ww', 'ERSP_ICA_analysis', 'measure', 'icaersp', 'ICs', 'persubject', 'chans', 'persubject',
+% 'tfcycles', [3  0.5], 'freqs', [3 30], 'nfreqs', 27);
+% 
 % 
 % ***end***
 %

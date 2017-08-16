@@ -21,48 +21,49 @@ function [STATS]=GroupStatistics(STATS,condfiles,alpha,varargin)
 % 
 % FWE ->
 % 	
-% 	none  - no control for familywise error 
-% 	Rom - control FWE using Rom's sequentially rejective method (Wilcox, 2012)
-%   Bon - use Bonferroni method to correct for FWE
+% 	benhoch - control FWE across entire time course using Benjamini-Hochberg method (Groppe, 2011; Benjamini & Hochberg, 1995). This is the default and recommended setting.
+% 
+% 	none  - no control for familywise error
 %  
-% conA ->
+% ConA ->
 %  
 % 	[numeric] - Contrast matrix for Factor A comparisons. 
 % 
-% conB -> 
+% ConB -> 
 % 
 % 	[numeric] - Contrast matrix for Factor B comparisons, if applicable. 
 % 
-% conAB -> 
+% ConAB -> 
 % 
 % 	[numeric] - Contrast matrix for the interaction, if applicable. 
 % 
 % For example,
 % 
 % FWE
-% Rom
-% conA
+% benhoch
+% ConA
 % 1 0 -1 0; 0 1 0 -1
-% conB
+% ConB
 % 1 -1 0 0; 0 0 1 -1
-% conAB
+% ConAB
 % 1 -1 -1 1
 % 
 % 
-% Controls for FWE using Rom's method (Wilcox, 2012; Rom, 1990). For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 - 4]).
+% Controls for FWE using Benjamini-Hochberg (1995) method. For factor A, two comparisons are made: condition 1 versus 3, and  2 versus 4. For factor B, two comparisons are made: condition 1 versus 2, and 3 versus 4. The interaction is also specified ([1 - 2] - [3 - 4]).
 % 
 % Using GroupStatistics at the commandline:
 %  
 % For a 1-way design with 2 conditions (like a t-test):
-% [STATS]=GroupStatistics(STATS,.05,'FWE', 'none', 'conA', [1 -1]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'none', 'conA', [1 -1]');
 %  
 % For a 2-way design with 4 conditions (2x2):
-% [STATS]=GroupStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'benhoch', 'conA', [1 0 -1 0; 0 1 0 -1]', 'conB', [1 -1 0 0; 0 0 1 -1]', 'conAB', [1 -1 -1 1]');
 % 
 % For a 1-way design with 3 conditions:
-% [STATS]=GroupStatistics(STATS,.05,'FWE', 'Rom', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
+% [STATS]=GroupStatistics(STATS,.05,1000, 'FWE', 'benhoch', 'conA', [1 0 -1; 0 1 -1; 1 -1 0]');
 % 
 % ***end***
+
 %
 % Copyright (C) <2015>  <Allan Campopiano>
 %
