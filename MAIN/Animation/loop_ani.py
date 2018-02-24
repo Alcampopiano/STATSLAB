@@ -192,7 +192,7 @@ def show_msg(msg_ind, fig, axs, wait, last=False):
           'The bootstrapping procedure just shown is repeated again for a second condition (not shown),\n\n'
           'and the differences between conditions are taken as follows',
 
-          'The final animation sorts the differences and then uses them derive confidence intervals\n',
+          'The final animation sorts the differences and then uses them to derive confidence intervals\n',
 
           'More information about robust statistics as well as Python code for this animation\n'
           'can be found at https://github.com/Alcampopiano/STATSLAB\n'

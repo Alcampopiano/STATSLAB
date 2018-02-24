@@ -1,4 +1,4 @@
-## STATSLAB: A MATLAB Toolbox for Performing the Percentile Bootstrap Test on Electroencephalographic Data
+## STATSLAB: An open-source EEG toolbox for computing single-subject effects using robust statistics
 
 Features:
 
@@ -11,12 +11,14 @@ Features:
 * Correlate ERPs with external measures and create scatterplots and LOWESS curves
 * All statistics are stored in an easy-to-navigate structure
 
-How to: 
+Resources: 
+
+* STATSLAB citation coming soon...
 
 * The newest documentation is built into the STATSLAB GUI. Simply download STATSLAB, put it on your MATLAB path (along with EEGLAB), and type statslab into the command line to see the GUI and documentation.
 
-STATSLAB wiki page:
-https://github.com/Alcampopiano/STATSLAB/wiki
-
 STATSLAB youtube tutorial:
-https://www.youtube.com/watch?v=U0lukdtVDvY
+[![Alt text](https://img.youtube.com/vi/ec9sh565IGo/0.jpg)](https://youtu.be/U0lukdtVDvY)
+
+Animation of the Percentile Bootstrap Test on a Single Subject
+[![Alt text](https://img.youtube.com/vi/ec9sh565IGo/0.jpg)](https://youtu.be/CzwSxIo711I)
