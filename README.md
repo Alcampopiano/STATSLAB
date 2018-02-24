@@ -17,8 +17,12 @@ Resources:
 
 * The newest documentation is built into the STATSLAB GUI. Simply download STATSLAB, put it on your MATLAB path (along with EEGLAB), and type statslab into the command line to see the GUI and documentation.
 
-STATSLAB youtube tutorial:
-[![Alt text](https://img.youtube.com/vi/ec9sh565IGo/0.jpg)](https://youtu.be/U0lukdtVDvY)
+* STATSLAB youtube tutorial:
 
-Animation of the Percentile Bootstrap Test on a Single Subject
-[![Alt text](https://img.youtube.com/vi/ec9sh565IGo/0.jpg)](https://youtu.be/CzwSxIo711I)
+[![Alt text](https://img.youtube.com/vi/U0lukdtVDvY/0.jpg)](https://youtu.be/U0lukdtVDvY)
+
+
+
+* Animation of the Percentile Bootstrap Test on a Single Subject
+
+[![Alt text](https://img.youtube.com/vi/CzwSxIo711I/0.jpg)](https://youtu.be/CzwSxIo711I)
