@@ -1,8 +1,10 @@
-function [STATS]=SlopeCI(STATS,infodisplay,Xlabel,Ylabel,msplot,CI_color,colorlimit)
+function [STATS]=SlopeCI(STATS,infodisplay,Xlabel,Ylabel,msplot,CI_color,colorlimit,nboot,nbins)
 
-% Plot scatter plot and parametric regression line with CIs and prediction
+% Plot scatter plot and parametric or bootstrapped regression line with CI and prediction
 % band. CI is visually weighted so that as the CI gets wider (more uncertainty in the data)
-% the color changes (fades). Play around with the colors.
+% the color changes (fades as a function of density if using kernel density or fades as a function of 
+% width if parametric CI is used) -> currently only kernel density is used,
+% see code at bottom.
 %  
 % Inputs:
 %     
@@ -19,10 +21,16 @@ function [STATS]=SlopeCI(STATS,infodisplay,Xlabel,Ylabel,msplot,CI_color,colorli
 % a number indicating the ms you wish to plot ***end***
 %  
 % ***CI_color***
-% the color of the CI and prediction band ***end***
+% the color of the CI and prediction band CURRENTLY UNUSED ***end***
 %  
 % ***colorlimit***
-% the color that the CI will fade to as it increases in width.
+% the color that the CI will fade to as it increases in width CURRENTLY UNUSED ***end***
+%
+% ***nboot***
+% the number of bootstrap regression lines to compute ***end***
+%
+% ***nbins***
+% the number of vertical bins in which to calculate the kernel density ***end***
 %  
 % SlopeCI from the commandline:
 %  
@@ -230,7 +238,7 @@ Y=Ydata;
 %CI_PB_slope(X,Y,CI_color,colorlimit,Xlabel,Ylabel);
 
 % this line uses the kernal density to estimate CIs
-linearCI_kd(X,Y,500,500) % set nboot and nbins in parent functions and GUI eventually
+linearCI_kd(X,Y,nboot,nbins) 
 
 end
 

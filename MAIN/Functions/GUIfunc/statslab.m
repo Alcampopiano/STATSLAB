@@ -174,7 +174,8 @@ if statslab_propgrid.logical_slope==1;
     
     % initiate partial function string
     funcstr=['SlopeCI([''STATS_'', statslab_propgrid.savestring, ''.mat''],statslab_propgrid.infodisplay_slope, statslab_propgrid.condition_label_slope,'...
-        'statslab_propgrid.Ylabel_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope);'];
+        'statslab_propgrid.Ylabel_slope, statslab_propgrid.msplot_slope, statslab_propgrid.CI_color_slope, statslab_propgrid.CI_limit_slope,' ...
+        'statslab_propgrid.nboot_regline, statslab_propgrid.nbins_regline);'];
     
     STATS=eval(funcstr);
     
