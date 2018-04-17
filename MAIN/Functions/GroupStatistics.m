@@ -168,7 +168,9 @@ end
 %%%%%%%%%%%%%%%%%%%%
 %try
     % post procedure for FWE across time if chosen
-    if strcmp(STATS.sample_results.factor_A.FWE, 'benhoch')
+    FWE_ind=find(strcmp('FWE',varargin))+1;
+    if strcmp(varargin{FWE_ind}, 'benhoch')
+    %if strcmp(STATS.sample_results.factor_A.FWE, 'benhoch')
         
 %         if any(strcmp({'ersp' 'itc'},STATS.measure));
 %         
