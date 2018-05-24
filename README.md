@@ -13,7 +13,7 @@ Features:
 
 Resources: 
 
-* STATSLAB citation coming soon...
+* STATSLAB publication: Campopiano, A., van Noordt, S.J.R., Segalowitz, S. (2018), Behavioural Brain Research, 347, 425-435, [https://doi.org/10.1016/j.bbr.2018.03.025](https://doi.org/10.1016/j.bbr.2018.03.025)
 
 * The newest documentation is built into the STATSLAB GUI. Simply download STATSLAB, put it on your MATLAB path (along with EEGLAB), and type statslab into the command line to see the GUI and documentation.
 
